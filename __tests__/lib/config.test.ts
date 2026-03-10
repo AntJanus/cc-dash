@@ -1,20 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("node:fs/promises");
+const { mockReadFile } = vi.hoisted(() => ({
+  mockReadFile: vi.fn(),
+}));
 
-import { readFile } from "node:fs/promises";
+vi.mock("node:fs/promises", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs/promises")>();
+  return {
+    ...actual,
+    default: { ...actual, readFile: mockReadFile },
+    readFile: mockReadFile,
+  };
+});
+
 import { loadConfig, CONFIG_PATH } from "@/lib/config";
-
-const mockedReadFile = vi.mocked(readFile);
 
 describe("loadConfig", () => {
   beforeEach(() => {
-    vi.resetAllMocks();
-    vi.unstubAllEnvs();
+    mockReadFile.mockReset();
   });
 
   it("returns defaults when config file does not exist", async () => {
-    mockedReadFile.mockRejectedValue(new Error("ENOENT"));
+    mockReadFile.mockRejectedValue(new Error("ENOENT"));
 
     const config = await loadConfig();
     expect(config.scan_dirs).toEqual([]);
@@ -32,7 +39,7 @@ describe("loadConfig", () => {
       port: 4000,
       explicit_projects: [{ path: "/home/user/myapp", name: "My App" }],
     };
-    mockedReadFile.mockResolvedValue(JSON.stringify(validConfig));
+    mockReadFile.mockResolvedValue(JSON.stringify(validConfig));
 
     const config = await loadConfig();
     expect(config.scan_dirs).toEqual(["/home/user/projects"]);
@@ -45,7 +52,7 @@ describe("loadConfig", () => {
   });
 
   it("falls back to defaults on invalid JSON", async () => {
-    mockedReadFile.mockResolvedValue("not valid json {{{");
+    mockReadFile.mockResolvedValue("not valid json {{{");
 
     const config = await loadConfig();
     expect(config.scan_dirs).toEqual([]);
@@ -54,7 +61,7 @@ describe("loadConfig", () => {
 
   it("falls back to defaults on schema validation failure", async () => {
     const invalidConfig = { scan_depth: 999 };
-    mockedReadFile.mockResolvedValue(JSON.stringify(invalidConfig));
+    mockReadFile.mockResolvedValue(JSON.stringify(invalidConfig));
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     const config = await loadConfig();
@@ -67,7 +74,7 @@ describe("loadConfig", () => {
 
   it("merges partial config with defaults", async () => {
     const partialConfig = { scan_dirs: ["/tmp/projects"] };
-    mockedReadFile.mockResolvedValue(JSON.stringify(partialConfig));
+    mockReadFile.mockResolvedValue(JSON.stringify(partialConfig));
 
     const config = await loadConfig();
     expect(config.scan_dirs).toEqual(["/tmp/projects"]);

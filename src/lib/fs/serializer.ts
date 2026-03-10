@@ -86,16 +86,17 @@ export function serializeRoadmap(
     }
   }
 
+  // Append trailing content after categories but before unknown sections,
+  // so the parser finds it in the same position (end of last category section)
+  if (data.trailingContent) {
+    body += `\n${data.trailingContent}\n`;
+  }
+
   // Append unknown sections
   if (data.unknownSections) {
     for (const section of data.unknownSections) {
       body += `\n## ${section.heading}\n${section.raw}`;
     }
-  }
-
-  // Append trailing content
-  if (data.trailingContent) {
-    body += `\n${data.trailingContent}\n`;
   }
 
   return stringifyWithFrontmatter(body, frontmatterData);

@@ -25,11 +25,20 @@ export type {
   Section,
 } from "./types";
 
+// Errors (Phase 03-01)
+export {
+  type FileError,
+  type FileErrorCode,
+  isNodeError,
+  mapFileError,
+} from "./errors";
+
+// Atomic write (Phase 03-01)
+export { atomicWriteFile } from "./atomic-write";
+
+// Write wrappers (Phase 03-01)
+export { writeRoadmapFile, writeSessionFile } from "./write-file";
+
 // Discovery (Phase 03-02)
 export { discoverProjects, type DiscoveredProject } from "./discovery";
 export { DiscoveryCache } from "./discovery-cache";
-
-// NOTE: The following exports will be added when Phase 03-01 is implemented:
-// - From ./errors: FileError, FileErrorCode, isNodeError, mapFileError
-// - From ./atomic-write: atomicWriteFile
-// - From ./write-file: writeRoadmapFile, writeSessionFile

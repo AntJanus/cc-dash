@@ -379,10 +379,17 @@ describe("validateSessionFile", () => {
 });
 
 describe("SessionStatus", () => {
-  it("exposes enum values", () => {
-    expect(SessionStatus.enum).toContain("in-progress");
-    expect(SessionStatus.enum).toContain("paused");
-    expect(SessionStatus.enum).toContain("completed");
-    expect(SessionStatus.enum).toContain("blocked");
+  it("exposes enum values via options array", () => {
+    expect(SessionStatus.options).toContain("in-progress");
+    expect(SessionStatus.options).toContain("paused");
+    expect(SessionStatus.options).toContain("completed");
+    expect(SessionStatus.options).toContain("blocked");
+  });
+
+  it("exposes enum values via enum object", () => {
+    expect(SessionStatus.enum["in-progress"]).toBe("in-progress");
+    expect(SessionStatus.enum.paused).toBe("paused");
+    expect(SessionStatus.enum.completed).toBe("completed");
+    expect(SessionStatus.enum.blocked).toBe("blocked");
   });
 });

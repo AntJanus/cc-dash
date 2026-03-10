@@ -340,10 +340,17 @@ describe("validateRoadmapFile", () => {
 });
 
 describe("RoadmapStatus", () => {
-  it("exposes enum values", () => {
-    expect(RoadmapStatus.enum).toContain("planned");
-    expect(RoadmapStatus.enum).toContain("in-progress");
-    expect(RoadmapStatus.enum).toContain("done");
-    expect(RoadmapStatus.enum).toContain("idea");
+  it("exposes enum values via options array", () => {
+    expect(RoadmapStatus.options).toContain("planned");
+    expect(RoadmapStatus.options).toContain("in-progress");
+    expect(RoadmapStatus.options).toContain("done");
+    expect(RoadmapStatus.options).toContain("idea");
+  });
+
+  it("exposes enum values via enum object", () => {
+    expect(RoadmapStatus.enum.planned).toBe("planned");
+    expect(RoadmapStatus.enum["in-progress"]).toBe("in-progress");
+    expect(RoadmapStatus.enum.done).toBe("done");
+    expect(RoadmapStatus.enum.idea).toBe("idea");
   });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { RoadmapFile } from "@/lib/schemas/roadmap";
+import type { RoadmapFile, RoadmapItem } from "@/lib/schemas/roadmap";
 import type { SessionFile } from "@/lib/schemas/session";
 
 // --- Mocks must be set up before importing the module under test ---
@@ -81,17 +81,10 @@ function makeSession(overrides: Partial<SessionFile> = {}): SessionFile {
   };
 }
 
-function makeRoadmapItem(
-  overrides: Partial<{
-    id: string;
-    status: string;
-    name: string;
-    description: string;
-  }> = {},
-) {
+function makeRoadmapItem(overrides: Partial<RoadmapItem> = {}): RoadmapItem {
   return {
     id: "r_abc12",
-    status: "planned" as const,
+    status: "planned",
     name: "Test Item",
     description: "A test item",
     ...overrides,

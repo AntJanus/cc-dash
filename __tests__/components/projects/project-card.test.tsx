@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, afterEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 
 import { ProjectCard } from "@/components/projects/project-card";
@@ -26,6 +26,10 @@ function makeProject(
 }
 
 describe("ProjectCard", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("renders the project name", () => {
     render(<ProjectCard project={makeProject({ name: "My Dashboard" })} />);
     expect(screen.getByText("My Dashboard")).toBeInTheDocument();

@@ -228,10 +228,19 @@ describe("RoadmapBoard", () => {
         itemNames={testItemNames}
       />,
     );
-    // Feature Beta depends on 1, Feature Epsilon depends on 2
-    // DependencyBadge shows the count
-    expect(screen.getByText("1")).toBeInTheDocument();
-    expect(screen.getByText("2")).toBeInTheDocument();
+    // Feature Beta depends on 1 item, Feature Epsilon depends on 2 items.
+    // DependencyBadge renders the count inside a tooltip trigger with data-slot.
+    // Column count badges also render numbers, so filter by data-slot.
+    const allTooltipTriggers = screen
+      .getAllByText(/^[0-9]+$/)
+      .filter((el) => el.getAttribute("data-slot") === "tooltip-trigger");
+    expect(allTooltipTriggers).toHaveLength(2); // Beta (1 dep) + Epsilon (2 deps)
+
+    const depCounts = allTooltipTriggers
+      .map((el) => el.textContent?.trim())
+      .sort();
+    expect(depCounts).toContain("1");
+    expect(depCounts).toContain("2");
   });
 
   // RBRD-03: cards show started/completed dates

@@ -118,11 +118,15 @@ describe("SessionView", () => {
   it("other sections collapsed by default", () => {
     renderSessionView();
 
-    // Decisions section content should NOT be visible when collapsed
-    // The section triggers should exist but the panel content should be hidden
-    // base-ui accordion hides collapsed panels
-    const decisionsPanel = screen.getByTestId("decisions-panel");
-    expect(decisionsPanel).toHaveAttribute("hidden");
+    // Collapsed panels are not rendered in the DOM by base-ui
+    // Decision content should not be visible (panel not rendered)
+    expect(
+      screen.queryByText("Use Zod v4 for validation"),
+    ).not.toBeInTheDocument();
+    // Failed attempts content should not be visible
+    expect(
+      screen.queryByText("Tried approach A but it failed"),
+    ).not.toBeInTheDocument();
   });
 
   // Expand-all / Collapse-all toggle
@@ -150,9 +154,12 @@ describe("SessionView", () => {
     });
     fireEvent.click(collapseButton);
 
-    // Tasks panel should now be collapsed
-    const tasksPanel = screen.getByTestId("tasks-panel");
-    expect(tasksPanel).toHaveAttribute("hidden");
+    // After collapsing all, task content should not be in the DOM
+    // (base-ui removes collapsed panels from DOM)
+    expect(screen.queryByText("Phase 1: Research")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Working on implementation phase"),
+    ).not.toBeInTheDocument();
   });
 
   // SessionHeader is rendered with correct props

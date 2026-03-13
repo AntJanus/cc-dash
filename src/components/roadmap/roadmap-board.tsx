@@ -51,6 +51,20 @@ interface RoadmapBoardProps {
   categories: RoadmapCategory[];
   sessionRefs: Record<string, string>;
   itemNames: Record<string, string>;
+  onUpdateItem?: (
+    itemId: string,
+    updates: {
+      name?: string;
+      description?: string;
+      status?: string;
+      categorySlug?: string;
+    },
+  ) => void;
+  onDeleteItem?: (itemId: string) => void;
+  onAddItem?: (
+    categorySlug: string,
+    input: { name: string; description: string; status: string },
+  ) => void;
 }
 
 /**
@@ -61,6 +75,9 @@ export function RoadmapBoard({
   categories,
   sessionRefs,
   itemNames,
+  onUpdateItem,
+  onDeleteItem,
+  onAddItem,
 }: RoadmapBoardProps) {
   const grouped = groupItemsByStatus(categories);
 
@@ -70,9 +87,13 @@ export function RoadmapBoard({
         <RoadmapColumn
           key={col.status}
           label={col.label}
+          status={col.status}
           items={grouped[col.status] ?? []}
           sessionRefs={sessionRefs}
           itemNames={itemNames}
+          onUpdateItem={onUpdateItem}
+          onDeleteItem={onDeleteItem}
+          onAddItem={onAddItem}
         />
       ))}
     </div>

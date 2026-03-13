@@ -17,5 +17,11 @@ export default async function RoadmapPage({ params }: PageProps) {
     );
   }
 
-  return <RoadmapView roadmap={data.roadmap} sessionRefs={data.sessionRefs} />;
+  return (
+    <RoadmapView
+      roadmap={data.roadmap}
+      sessionRefs={data.sessionRefs}
+      slug={slug}
+    />
+  );
 }

@@ -3,9 +3,24 @@ import { RoadmapCard } from "./roadmap-card";
 
 interface RoadmapColumnProps {
   label: string;
+  status: string;
   items: BoardItem[];
   sessionRefs: Record<string, string>;
   itemNames: Record<string, string>;
+  onUpdateItem?: (
+    itemId: string,
+    updates: {
+      name?: string;
+      description?: string;
+      status?: string;
+      categorySlug?: string;
+    },
+  ) => void;
+  onDeleteItem?: (itemId: string) => void;
+  onAddItem?: (
+    categorySlug: string,
+    input: { name: string; description: string; status: string },
+  ) => void;
 }
 
 /**
@@ -17,6 +32,8 @@ export function RoadmapColumn({
   items,
   sessionRefs,
   itemNames,
+  onUpdateItem,
+  onDeleteItem,
 }: RoadmapColumnProps) {
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-muted/50 p-3">
@@ -38,6 +55,8 @@ export function RoadmapColumn({
               item={item}
               sessionRefs={sessionRefs}
               itemNames={itemNames}
+              onUpdateItem={onUpdateItem}
+              onDeleteItem={onDeleteItem}
             />
           ))}
         </div>

@@ -78,7 +78,7 @@ describe("DeleteCategoryDialog", () => {
   it("shows empty category message when itemCount is 0", () => {
     render(
       <DeleteCategoryDialog
-        categoryName="Empty Category"
+        categoryName="Backlog"
         itemCount={0}
         onConfirm={vi.fn()}
       />,

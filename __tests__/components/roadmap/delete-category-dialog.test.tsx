@@ -1,12 +1,89 @@
-import { describe, it } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import "@testing-library/jest-dom/vitest";
 
-// Wave 0: Test stubs for DeleteCategoryDialog component (RCRD-07)
-// All stubs use it.todo() since production modules do not exist yet.
+import { DeleteCategoryDialog } from "@/components/roadmap/delete-category-dialog";
 
 describe("DeleteCategoryDialog", () => {
-  it.todo("renders delete category button");
-  it.todo("shows confirmation with category name and item count");
-  it.todo("calls onConfirm when confirmed");
-  it.todo("closes on cancel");
-  it.todo("warns about item deletion");
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("renders delete category button", () => {
+    render(
+      <DeleteCategoryDialog
+        categoryName="Features"
+        itemCount={3}
+        onConfirm={vi.fn()}
+      />,
+    );
+    const trigger = screen.getByRole("button", { name: /delete/i });
+    expect(trigger).toBeInTheDocument();
+  });
+
+  it("shows confirmation with category name and item count", () => {
+    render(
+      <DeleteCategoryDialog
+        categoryName="Features"
+        itemCount={5}
+        onConfirm={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    expect(screen.getByText(/Features/)).toBeInTheDocument();
+    expect(screen.getByText(/5/)).toBeInTheDocument();
+  });
+
+  it("calls onConfirm when confirmed", () => {
+    const onConfirm = vi.fn();
+    render(
+      <DeleteCategoryDialog
+        categoryName="Features"
+        itemCount={3}
+        onConfirm={onConfirm}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    const confirmBtn = screen.getByRole("button", { name: /^delete$/i });
+    fireEvent.click(confirmBtn);
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes on cancel", () => {
+    render(
+      <DeleteCategoryDialog
+        categoryName="Features"
+        itemCount={3}
+        onConfirm={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+  });
+
+  it("warns about item deletion", () => {
+    render(
+      <DeleteCategoryDialog
+        categoryName="Features"
+        itemCount={3}
+        onConfirm={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    expect(screen.getByText(/3 items/i)).toBeInTheDocument();
+  });
+
+  it("shows empty category message when itemCount is 0", () => {
+    render(
+      <DeleteCategoryDialog
+        categoryName="Empty Category"
+        itemCount={0}
+        onConfirm={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+    expect(screen.getByText(/empty category/i)).toBeInTheDocument();
+  });
 });

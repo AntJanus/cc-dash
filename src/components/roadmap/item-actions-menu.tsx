@@ -1,14 +1,19 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Link2 } from "lucide-react";
 
 interface ItemActionsMenuProps {
   onEdit: () => void;
   onDelete: () => void;
+  onSetDependencies?: () => void;
 }
 
-export function ItemActionsMenu({ onEdit, onDelete }: ItemActionsMenuProps) {
+export function ItemActionsMenu({
+  onEdit,
+  onDelete,
+  onSetDependencies,
+}: ItemActionsMenuProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -68,6 +73,20 @@ export function ItemActionsMenu({ onEdit, onDelete }: ItemActionsMenuProps) {
             <Trash2 className="h-4 w-4" />
             Delete
           </button>
+          {onSetDependencies && (
+            <button
+              role="menuitem"
+              type="button"
+              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+              onClick={() => {
+                onSetDependencies();
+                setOpen(false);
+              }}
+            >
+              <Link2 className="h-4 w-4" />
+              Dependencies
+            </button>
+          )}
         </div>
       )}
     </div>

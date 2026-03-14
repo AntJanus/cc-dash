@@ -139,6 +139,17 @@ export function RoadmapBoard({
   const grouped = groupItemsByStatus(categories);
   const [activeItem, setActiveItem] = useState<BoardItem | null>(null);
 
+  // Build flat list of all items for the dependency picker
+  const allItems = useMemo(() => {
+    const items: Array<{ id: string; name: string }> = [];
+    for (const columnItems of Object.values(grouped)) {
+      for (const item of columnItems) {
+        items.push({ id: item.id, name: item.name });
+      }
+    }
+    return items;
+  }, [grouped]);
+
   const pointerSensor = useSensor(PointerSensor, {
     activationConstraint: { distance: 5 },
   });
@@ -187,6 +198,7 @@ export function RoadmapBoard({
       items={grouped[col.status] ?? []}
       sessionRefs={sessionRefs}
       itemNames={itemNames}
+      allItems={allItems}
       onUpdateItem={onUpdateItem}
       onDeleteItem={onDeleteItem}
       onAddItem={onAddItem}

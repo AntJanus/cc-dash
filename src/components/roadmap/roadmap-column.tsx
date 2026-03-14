@@ -14,6 +14,7 @@ interface RoadmapColumnProps {
   items: BoardItem[];
   sessionRefs: Record<string, string>;
   itemNames: Record<string, string>;
+  allItems?: Array<{ id: string; name: string }>;
   onUpdateItem?: (
     itemId: string,
     updates: {
@@ -43,6 +44,7 @@ export function RoadmapColumn({
   items,
   sessionRefs,
   itemNames,
+  allItems,
   onUpdateItem,
   onDeleteItem,
   enableDnd,
@@ -63,6 +65,7 @@ export function RoadmapColumn({
             item={item}
             sessionRefs={sessionRefs}
             itemNames={itemNames}
+            allItems={allItems}
             onUpdateItem={onUpdateItem}
             onDeleteItem={onDeleteItem}
             enableDnd={enableDnd}

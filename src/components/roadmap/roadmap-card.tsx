@@ -18,12 +18,14 @@ import { ClickableRoadmapStatusBadge } from "./clickable-roadmap-status-badge";
 import { ItemActionsMenu } from "./item-actions-menu";
 import { EditableText } from "./editable-text";
 import { DeleteItemDialog } from "./delete-item-dialog";
+import { RoadmapDependencyPicker } from "./roadmap-dependency-picker";
 import type { BoardItem } from "./roadmap-board";
 
 interface RoadmapCardProps {
   item: BoardItem;
   sessionRefs: Record<string, string>;
   itemNames: Record<string, string>;
+  allItems?: Array<{ id: string; name: string }>;
   onUpdateItem?: (
     itemId: string,
     updates: {
@@ -48,6 +50,7 @@ export function RoadmapCard({
   item,
   sessionRefs,
   itemNames,
+  allItems,
   onUpdateItem,
   onDeleteItem,
   enableDnd,
@@ -55,6 +58,7 @@ export function RoadmapCard({
   const sessionUrl = sessionRefs[item.id];
   const [editing, setEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDepPicker, setShowDepPicker] = useState(false);
   const hasCrud = Boolean(onUpdateItem);
 
   const {
@@ -112,6 +116,11 @@ export function RoadmapCard({
             <ItemActionsMenu
               onEdit={() => setEditing(true)}
               onDelete={() => setShowDeleteDialog(true)}
+              onSetDependencies={
+                onUpdateItem && allItems
+                  ? () => setShowDepPicker(true)
+                  : undefined
+              }
             />
           )}
         </div>
@@ -157,6 +166,26 @@ export function RoadmapCard({
             setShowDeleteDialog(false);
           }}
         />
+      )}
+      {showDepPicker && onUpdateItem && allItems && (
+        <div className="border-t p-2">
+          <RoadmapDependencyPicker
+            currentItemId={item.id}
+            currentDeps={item.depends ?? []}
+            allItems={allItems}
+            onChange={(deps) => {
+              onUpdateItem(item.id, { depends: deps });
+              setShowDepPicker(false);
+            }}
+          />
+          <button
+            type="button"
+            className="mt-2 text-xs text-muted-foreground hover:text-foreground"
+            onClick={() => setShowDepPicker(false)}
+          >
+            Cancel
+          </button>
+        </div>
       )}
     </Card>
   );

@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import {
   DndContext,
   DragOverlay,
-  closestCorners,
+  rectIntersection,
   PointerSensor,
   KeyboardSensor,
   useSensor,
@@ -211,7 +211,7 @@ export function RoadmapBoard({
       <div data-testid="roadmap-board" data-dnd-active="true">
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCorners}
+          collisionDetection={rectIntersection}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >

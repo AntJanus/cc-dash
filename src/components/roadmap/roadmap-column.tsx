@@ -54,25 +54,30 @@ export function RoadmapColumn({
     disabled: !enableDnd,
   });
 
-  const content =
-    items.length === 0 ? (
-      <p className="py-4 text-center text-sm text-muted-foreground">No items</p>
-    ) : (
-      <div className="flex flex-col gap-2">
-        {items.map((item) => (
-          <RoadmapCard
-            key={item.id}
-            item={item}
-            sessionRefs={sessionRefs}
-            itemNames={itemNames}
-            allItems={allItems}
-            onUpdateItem={onUpdateItem}
-            onDeleteItem={onDeleteItem}
-            enableDnd={enableDnd}
-          />
-        ))}
-      </div>
-    );
+  const content = (
+    <div className={enableDnd ? "min-h-[120px]" : ""}>
+      {items.length === 0 ? (
+        <p className="py-4 text-center text-sm text-muted-foreground">
+          No items
+        </p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {items.map((item) => (
+            <RoadmapCard
+              key={item.id}
+              item={item}
+              sessionRefs={sessionRefs}
+              itemNames={itemNames}
+              allItems={allItems}
+              onUpdateItem={onUpdateItem}
+              onDeleteItem={onDeleteItem}
+              enableDnd={enableDnd}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div

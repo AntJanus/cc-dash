@@ -175,7 +175,6 @@ export function RoadmapCard({
             allItems={allItems}
             onChange={(deps) => {
               onUpdateItem(item.id, { depends: deps });
-              setShowDepPicker(false);
             }}
           />
           <button
@@ -183,7 +182,7 @@ export function RoadmapCard({
             className="mt-2 text-xs text-muted-foreground hover:text-foreground"
             onClick={() => setShowDepPicker(false)}
           >
-            Cancel
+            Done
           </button>
         </div>
       )}

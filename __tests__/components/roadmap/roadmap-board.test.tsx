@@ -6,6 +6,7 @@ import {
   RoadmapBoard,
   groupItemsByStatus,
   BOARD_COLUMNS,
+  findColumnStatusFromOverId,
 } from "@/components/roadmap/roadmap-board";
 import type { RoadmapCategory } from "@/lib/schemas/roadmap";
 
@@ -306,5 +307,23 @@ describe("RoadmapBoard", () => {
       />,
     );
     expect(screen.queryByTestId("session-link")).not.toBeInTheDocument();
+  });
+
+  // Bug fix: empty columns must have adequate drop target area
+  it("empty columns have min-h-[120px] for drop target area", () => {
+    render(
+      <RoadmapBoard
+        categories={emptyCoreOnly}
+        sessionRefs={{}}
+        itemNames={{ r_abc12: "Solo Idea" }}
+        onDragStatusChange={vi.fn()}
+      />,
+    );
+    // With only one item in "idea" column, the other 3 columns are empty.
+    // Each droppable column should have min-h-[120px] class on the content area.
+    const droppablePlanned = screen.getByTestId("droppable-column-planned");
+    const contentArea = droppablePlanned.querySelector("[class*='min-h-']");
+    expect(contentArea).not.toBeNull();
+    expect(contentArea!.className).toContain("min-h-[120px]");
   });
 });

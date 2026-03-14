@@ -3,6 +3,8 @@ import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 
 import { RoadmapDependencyPicker } from "@/components/roadmap/roadmap-dependency-picker";
+import { RoadmapCard } from "@/components/roadmap/roadmap-card";
+import type { BoardItem } from "@/components/roadmap/roadmap-board";
 
 const allItems = [
   { id: "r_aaa01", name: "Feature Alpha" },
@@ -159,6 +161,116 @@ describe("RoadmapDependencyPicker", () => {
       />,
     );
     expect(screen.getByText("No other items available")).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+  });
+});
+
+describe("RoadmapCard dependency picker stays open on toggle", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  const testItem: BoardItem = {
+    id: "r_aaa01",
+    name: "Feature Alpha",
+    description: "An alpha feature",
+    status: "planned",
+    categorySlug: "core",
+    categoryTitle: "Core Features",
+    depends: [],
+  };
+
+  it("keeps dependency picker open after checking a checkbox", () => {
+    const onUpdateItem = vi.fn();
+    render(
+      <RoadmapCard
+        item={testItem}
+        sessionRefs={{}}
+        itemNames={{ r_aaa01: "Feature Alpha", r_bbb02: "Feature Beta" }}
+        allItems={allItems}
+        onUpdateItem={onUpdateItem}
+        onDeleteItem={vi.fn()}
+      />,
+    );
+
+    // Open the actions menu
+    const menuButton = screen.getByRole("button", { name: /actions/i });
+    fireEvent.click(menuButton);
+
+    // Click "Dependencies" menu item
+    const depMenuItem = screen.getByRole("menuitem", {
+      name: /dependencies/i,
+    });
+    fireEvent.click(depMenuItem);
+
+    // Picker should be open
+    expect(screen.getAllByRole("checkbox").length).toBeGreaterThan(0);
+
+    // Check a checkbox
+    const checkboxes = screen.getAllByRole("checkbox");
+    fireEvent.click(checkboxes[0]);
+
+    // Picker should STILL be open after toggle (bug fix: not closing on each change)
+    expect(screen.getAllByRole("checkbox").length).toBeGreaterThan(0);
+  });
+
+  it("shows Done button instead of Cancel to close the picker", () => {
+    const onUpdateItem = vi.fn();
+    render(
+      <RoadmapCard
+        item={testItem}
+        sessionRefs={{}}
+        itemNames={{ r_aaa01: "Feature Alpha", r_bbb02: "Feature Beta" }}
+        allItems={allItems}
+        onUpdateItem={onUpdateItem}
+        onDeleteItem={vi.fn()}
+      />,
+    );
+
+    // Open the actions menu
+    const menuButton = screen.getByRole("button", { name: /actions/i });
+    fireEvent.click(menuButton);
+
+    // Click "Dependencies" menu item
+    const depMenuItem = screen.getByRole("menuitem", {
+      name: /dependencies/i,
+    });
+    fireEvent.click(depMenuItem);
+
+    // Should show "Done" button, not "Cancel"
+    expect(screen.getByRole("button", { name: /done/i })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^cancel$/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("closes the picker when Done button is clicked", () => {
+    const onUpdateItem = vi.fn();
+    render(
+      <RoadmapCard
+        item={testItem}
+        sessionRefs={{}}
+        itemNames={{ r_aaa01: "Feature Alpha", r_bbb02: "Feature Beta" }}
+        allItems={allItems}
+        onUpdateItem={onUpdateItem}
+        onDeleteItem={vi.fn()}
+      />,
+    );
+
+    // Open the actions menu
+    const menuButton = screen.getByRole("button", { name: /actions/i });
+    fireEvent.click(menuButton);
+
+    // Click "Dependencies" menu item
+    const depMenuItem = screen.getByRole("menuitem", {
+      name: /dependencies/i,
+    });
+    fireEvent.click(depMenuItem);
+
+    // Click Done
+    fireEvent.click(screen.getByRole("button", { name: /done/i }));
+
+    // Picker should be closed (no checkboxes visible)
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   });
 });

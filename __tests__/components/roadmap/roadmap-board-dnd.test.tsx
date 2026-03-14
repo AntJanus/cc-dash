@@ -97,11 +97,10 @@ describe("RoadmapBoard DnD", () => {
       />,
     );
     // DndContext renders a DragOverlay component
-    expect(screen.getByTestId("roadmap-board")).toBeInTheDocument();
-    // Cards should have sortable attributes when DnD is active
     const board = screen.getByTestId("roadmap-board");
-    // The board should contain elements with data-dnd-active attribute
-    expect(board.querySelector("[data-dnd-active]")).toBeTruthy();
+    expect(board).toBeInTheDocument();
+    // The board element itself should have data-dnd-active attribute
+    expect(board).toHaveAttribute("data-dnd-active", "true");
   });
 
   it("does not render DndContext when onDragStatusChange is undefined", () => {
@@ -113,9 +112,9 @@ describe("RoadmapBoard DnD", () => {
       />,
     );
     // Board should render but without DnD markers
-    expect(screen.getByTestId("roadmap-board")).toBeInTheDocument();
     const board = screen.getByTestId("roadmap-board");
-    expect(board.querySelector("[data-dnd-active]")).toBeNull();
+    expect(board).toBeInTheDocument();
+    expect(board).not.toHaveAttribute("data-dnd-active");
   });
 
   it("renders DragOverlay component", () => {

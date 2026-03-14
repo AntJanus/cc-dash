@@ -1,7 +1,8 @@
 /**
- * ID generation utilities for roadmap items and categories.
+ * ID generation utilities for roadmap items, tasks, and categories.
  *
  * - generateRoadmapId(): produces `r_` + 5 lowercase alphanumeric chars
+ * - generateTaskId(): produces `t_` + 5 lowercase alphanumeric chars
  * - generateCategorySlug(): converts a title string to a URL-safe slug
  */
 
@@ -16,6 +17,17 @@ export function generateRoadmapId(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(5));
   const chars = Array.from(bytes, (b) => CHARSET[b % CHARSET.length]);
   return `r_${chars.join("")}`;
+}
+
+/**
+ * Generate a unique session task ID.
+ * Format: t_ + 5 lowercase alphanumeric characters.
+ * Uses crypto.getRandomValues for secure randomness.
+ */
+export function generateTaskId(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(5));
+  const chars = Array.from(bytes, (b) => CHARSET[b % CHARSET.length]);
+  return `t_${chars.join("")}`;
 }
 
 /**

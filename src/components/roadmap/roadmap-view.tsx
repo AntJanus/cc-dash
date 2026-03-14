@@ -226,6 +226,14 @@ export function RoadmapView({ roadmap, sessionRefs, slug }: RoadmapViewProps) {
     [slug, categories],
   );
 
+  const handleDragStatusChange = useCallback(
+    async (itemId: string, newStatus: string) => {
+      // Delegate to existing handleUpdateItem which handles optimistic UI + server action
+      await handleUpdateItem(itemId, { status: newStatus });
+    },
+    [handleUpdateItem],
+  );
+
   const handleDeleteCategory = useCallback(
     async (categorySlug: string) => {
       if (!slug) return;
@@ -254,6 +262,7 @@ export function RoadmapView({ roadmap, sessionRefs, slug }: RoadmapViewProps) {
           categories={categories}
           sessionRefs={sessionRefs}
           itemNames={itemNames}
+          onDragStatusChange={slug ? handleDragStatusChange : undefined}
           onUpdateItem={slug ? handleUpdateItem : undefined}
           onDeleteItem={slug ? handleDeleteItem : undefined}
           onAddItem={slug ? handleAddItem : undefined}

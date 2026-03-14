@@ -97,6 +97,7 @@ export function RoadmapView({ roadmap, sessionRefs, slug }: RoadmapViewProps) {
         description?: string;
         status?: string;
         categorySlug?: string;
+        depends?: string[];
       },
     ) => {
       if (!slug) return;

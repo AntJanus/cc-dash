@@ -185,6 +185,7 @@ export async function updateRoadmapItem(
     description?: string;
     status?: string;
     categorySlug?: string;
+    depends?: string[];
   },
 ): Promise<Result<void>> {
   // Resolve roadmap
@@ -250,6 +251,11 @@ export async function updateRoadmapItem(
     }
 
     item.status = statusParsed.data;
+  }
+
+  // Update depends if provided
+  if (updates.depends !== undefined) {
+    item.depends = updates.depends.length > 0 ? updates.depends : undefined;
   }
 
   // Move item to a different category if categorySlug provided

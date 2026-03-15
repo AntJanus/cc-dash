@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
+
+import { RefreshButton } from "@/components/shared/refresh-button";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +30,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <header className="border-b">
+          <div className="container mx-auto flex items-center justify-between px-6 py-3">
+            <Link href="/" className="text-lg font-semibold">
+              cc-dash
+            </Link>
+            <RefreshButton />
+          </div>
+        </header>
         {children}
       </body>
     </html>

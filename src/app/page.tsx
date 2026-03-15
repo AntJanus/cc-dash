@@ -6,7 +6,7 @@ export default async function Home() {
 
   return (
     <main className="container mx-auto p-6">
-      <h1 className="mb-6 text-3xl font-bold">Projects</h1>
+      <h1 className="mb-6 text-2xl font-semibold">Projects</h1>
       <ProjectGrid projects={projects} />
     </main>
   );

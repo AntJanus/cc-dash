@@ -1,11 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   render,
   screen,
   fireEvent,
   waitFor,
   act,
+  cleanup,
 } from "@testing-library/react";
+import "@testing-library/jest-dom/vitest";
 import type { Config } from "@/lib/schemas/config";
 
 // Mock saveConfig server action
@@ -32,6 +34,10 @@ const defaultConfig: Config = {
 };
 
 describe("SettingsForm", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockSaveConfig.mockResolvedValue({ success: true });
@@ -101,7 +107,7 @@ describe("SettingsForm", () => {
     render(<SettingsForm initialConfig={defaultConfig} />);
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /save/i }));
+      fireEvent.click(screen.getByRole("button", { name: "Save" }));
     });
 
     await waitFor(() => {
@@ -113,7 +119,7 @@ describe("SettingsForm", () => {
     render(<SettingsForm initialConfig={defaultConfig} />);
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /save/i }));
+      fireEvent.click(screen.getByRole("button", { name: "Save" }));
     });
 
     await waitFor(() => {
@@ -130,7 +136,7 @@ describe("SettingsForm", () => {
     render(<SettingsForm initialConfig={defaultConfig} />);
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /save/i }));
+      fireEvent.click(screen.getByRole("button", { name: "Save" }));
     });
 
     await waitFor(() => {
@@ -149,23 +155,25 @@ describe("SettingsForm", () => {
 
     render(<SettingsForm initialConfig={defaultConfig} />);
 
-    const saveButton = screen.getByRole("button", { name: /save/i });
+    const saveButton = screen.getByRole("button", { name: "Save" });
 
     await act(async () => {
       fireEvent.click(saveButton);
     });
 
-    // Button should be disabled while saving
-    expect(saveButton).toBeDisabled();
+    // Button should be disabled while saving (text is now "Saving...")
+    const savingButton = screen.getByRole("button", { name: "Saving..." });
+    expect(savingButton).toBeDisabled();
 
     // Resolve the save
     await act(async () => {
       resolveSave!({ success: true });
     });
 
-    // Button should be enabled again
+    // Button should be enabled again with "Save" text
     await waitFor(() => {
-      expect(saveButton).not.toBeDisabled();
+      const btn = screen.getByRole("button", { name: "Save" });
+      expect(btn).not.toBeDisabled();
     });
   });
 });

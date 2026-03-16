@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { StaleBadge } from "@/components/shared/stale-badge";
 import { RelativeTime } from "@/components/shared/relative-time";
+import { PromptButton } from "@/components/prompt/prompt-button";
 import type { ProjectCardData } from "@/lib/projects/get-projects";
 
 interface ProjectCardProps {
@@ -40,7 +41,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
               )}
               <CardTitle>{project.name}</CardTitle>
             </div>
-            <StatusBadge status={project.status} />
+            <div className="flex items-center gap-1">
+              <PromptButton slug={project.slug} />
+              <StatusBadge status={project.status} />
+            </div>
           </div>
           <CardDescription>{project.description}</CardDescription>
         </CardHeader>

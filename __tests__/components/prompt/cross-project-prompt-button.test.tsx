@@ -1,5 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import "@testing-library/jest-dom/vitest";
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 
 // Mock the server action
 const { mockGenerateCrossProjectPrompt } = vi.hoisted(() => ({
@@ -12,6 +19,10 @@ vi.mock("@/lib/actions/prompt-actions", () => ({
 import { CrossProjectPromptButton } from "@/components/prompt/cross-project-prompt-button";
 
 describe("CrossProjectPromptButton", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockGenerateCrossProjectPrompt.mockResolvedValue({

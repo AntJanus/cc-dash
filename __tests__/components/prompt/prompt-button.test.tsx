@@ -1,5 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import "@testing-library/jest-dom/vitest";
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 
 // Mock the server action
 const { mockGenerateProjectPrompt } = vi.hoisted(() => ({
@@ -12,6 +19,10 @@ vi.mock("@/lib/actions/prompt-actions", () => ({
 import { PromptButton } from "@/components/prompt/prompt-button";
 
 describe("PromptButton", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockGenerateProjectPrompt.mockResolvedValue({

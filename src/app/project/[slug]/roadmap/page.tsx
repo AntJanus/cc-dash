@@ -1,5 +1,6 @@
 import { getRoadmapBySlug } from "@/lib/projects/get-roadmap";
 import { RoadmapView } from "@/components/roadmap/roadmap-view";
+import { PromptButton } from "@/components/prompt/prompt-button";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -18,10 +19,16 @@ export default async function RoadmapPage({ params }: PageProps) {
   }
 
   return (
-    <RoadmapView
-      roadmap={data.roadmap}
-      sessionRefs={data.sessionRefs}
-      slug={slug}
-    />
+    <div>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-xl font-semibold">{data.roadmap.project}</h1>
+        <PromptButton slug={slug} />
+      </div>
+      <RoadmapView
+        roadmap={data.roadmap}
+        sessionRefs={data.sessionRefs}
+        slug={slug}
+      />
+    </div>
   );
 }

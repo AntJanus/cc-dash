@@ -1,8 +1,12 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import "@testing-library/jest-dom/vitest";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { PromptModal } from "@/components/prompt/prompt-modal";
 
 describe("PromptModal", () => {
+  afterEach(() => {
+    cleanup();
+  });
   const defaultProps = {
     open: true,
     onClose: vi.fn(),

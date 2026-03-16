@@ -1,9 +1,65 @@
-import { describe, it } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+
+// Mock the server action
+const { mockGenerateCrossProjectPrompt } = vi.hoisted(() => ({
+  mockGenerateCrossProjectPrompt: vi.fn(),
+}));
+vi.mock("@/lib/actions/prompt-actions", () => ({
+  generateCrossProjectPrompt: mockGenerateCrossProjectPrompt,
+}));
+
+import { CrossProjectPromptButton } from "@/components/prompt/cross-project-prompt-button";
 
 describe("CrossProjectPromptButton", () => {
-  it.todo("renders cross-project prompt button");
-  it.todo("opens modal on click");
-  it.todo("calls generateCrossProjectPrompt action");
-  it.todo("shows prompt in modal after loading");
-  it.todo("shows empty state message when no work suggested");
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGenerateCrossProjectPrompt.mockResolvedValue({
+      success: true,
+      prompt: "cd /projects/best\n\nProject: Best Project",
+    });
+  });
+
+  it("renders cross-project prompt button", () => {
+    render(<CrossProjectPromptButton />);
+    expect(
+      screen.getByRole("button", { name: /suggest next work/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("opens modal on click", async () => {
+    render(<CrossProjectPromptButton />);
+    fireEvent.click(screen.getByRole("button", { name: /suggest next work/i }));
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+  });
+
+  it("calls generateCrossProjectPrompt action", async () => {
+    render(<CrossProjectPromptButton />);
+    fireEvent.click(screen.getByRole("button", { name: /suggest next work/i }));
+    await waitFor(() => {
+      expect(mockGenerateCrossProjectPrompt).toHaveBeenCalledOnce();
+    });
+  });
+
+  it("shows prompt in modal after loading", async () => {
+    render(<CrossProjectPromptButton />);
+    fireEvent.click(screen.getByRole("button", { name: /suggest next work/i }));
+    await waitFor(() => {
+      expect(screen.getByText(/cd \/projects\/best/)).toBeInTheDocument();
+    });
+  });
+
+  it("shows empty state message when no work suggested", async () => {
+    mockGenerateCrossProjectPrompt.mockResolvedValue({
+      success: false,
+      error: "All projects are up to date! No work to suggest.",
+    });
+    render(<CrossProjectPromptButton />);
+    fireEvent.click(screen.getByRole("button", { name: /suggest next work/i }));
+    await waitFor(() => {
+      expect(screen.getByText(/up to date/i)).toBeInTheDocument();
+    });
+  });
 });

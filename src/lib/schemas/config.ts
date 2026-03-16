@@ -26,6 +26,24 @@ export const ConfigSchema = z.object({
 
   /** Port for the dashboard dev server */
   port: z.number().int().default(3000),
+
+  /** Display preferences for the dashboard UI */
+  display: z
+    .object({
+      /** Default view mode for roadmap pages */
+      default_view: z.enum(["board", "list"]).default("board"),
+      /** Default sort order for project lists */
+      sort_order: z
+        .enum(["last_updated", "name", "status"])
+        .default("last_updated"),
+      /** Color theme */
+      theme: z.enum(["light", "dark", "system"]).default("light"),
+    })
+    .default({
+      default_view: "board",
+      sort_order: "last_updated",
+      theme: "light",
+    }),
 });
 
 /** Typed config object inferred from the schema. */

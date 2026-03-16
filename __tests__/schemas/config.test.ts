@@ -89,6 +89,60 @@ describe("ConfigSchema", () => {
       expect(config).toHaveProperty("explicit_projects");
       expect(config).toHaveProperty("scan_depth");
       expect(config).toHaveProperty("port");
+      expect(config).toHaveProperty("display");
+    }
+  });
+
+  it("returns display defaults for empty object", () => {
+    const result = ConfigSchema.safeParse({});
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.display.default_view).toBe("board");
+      expect(result.data.display.sort_order).toBe("last_updated");
+      expect(result.data.display.theme).toBe("light");
+    }
+  });
+
+  it("accepts custom display preferences", () => {
+    const result = ConfigSchema.safeParse({
+      display: { default_view: "list", theme: "dark" },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.display.default_view).toBe("list");
+      expect(result.data.display.theme).toBe("dark");
+      // sort_order should still default
+      expect(result.data.display.sort_order).toBe("last_updated");
+    }
+  });
+
+  it("rejects invalid display.theme value", () => {
+    const result = ConfigSchema.safeParse({
+      display: { theme: "invalid" },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid display.default_view value", () => {
+    const result = ConfigSchema.safeParse({
+      display: { default_view: "grid" },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("existing config without display field validates", () => {
+    const result = ConfigSchema.safeParse({
+      scan_dirs: ["/Users/me/projects"],
+      scan_depth: 3,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.scan_dirs).toEqual(["/Users/me/projects"]);
+      expect(result.data.scan_depth).toBe(3);
+      // display should get full defaults
+      expect(result.data.display.default_view).toBe("board");
+      expect(result.data.display.sort_order).toBe("last_updated");
+      expect(result.data.display.theme).toBe("light");
     }
   });
 });

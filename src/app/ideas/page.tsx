@@ -1,12 +1,13 @@
 import { getIdeasData } from "@/lib/projects/get-ideas";
 import { IdeasGrid } from "@/components/ideas/ideas-grid";
+import { IdeaForm } from "@/components/ideas/idea-form";
 
 export default async function IdeasPage() {
   const result = await getIdeasData();
   if (!result) {
     return (
       <main className="container mx-auto p-6">
-        <h1 className="text-2xl font-semibold mb-4">Project Ideas</h1>
+        <h1 className="mb-4 text-2xl font-semibold">Project Ideas</h1>
         <p className="text-muted-foreground">
           No ideas file configured. Add ideas_file to your cc-dash config.
         </p>
@@ -17,6 +18,7 @@ export default async function IdeasPage() {
     <main className="container mx-auto p-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Project Ideas</h1>
+        <IdeaForm />
       </div>
       <IdeasGrid ideas={result.data.ideas} />
     </main>

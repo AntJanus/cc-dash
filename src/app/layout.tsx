@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
-import { Settings } from "lucide-react";
+import { Lightbulb, Settings } from "lucide-react";
 import "./globals.css";
 
 import { RefreshButton } from "@/components/shared/refresh-button";
@@ -53,6 +53,11 @@ export default function RootLayout({
               cc-dash
             </Link>
             <div className="flex items-center gap-1">
+              <Link href="/ideas">
+                <Button variant="ghost" size="icon" aria-label="Ideas">
+                  <Lightbulb className="h-4 w-4" />
+                </Button>
+              </Link>
               <Link href="/settings">
                 <Button variant="ghost" size="icon" aria-label="Settings">
                   <Settings className="h-4 w-4" />

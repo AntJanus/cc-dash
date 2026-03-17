@@ -145,4 +145,35 @@ describe("ConfigSchema", () => {
       expect(result.data.display.theme).toBe("light");
     }
   });
+
+  it("accepts ideas_file alongside existing fields", () => {
+    const result = ConfigSchema.safeParse({
+      ideas_file: "~/projects/PROJECT_IDEAS.md",
+      scan_dirs: ["/Users/me/projects"],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.ideas_file).toBe("~/projects/PROJECT_IDEAS.md");
+      expect(result.data.scan_dirs).toEqual(["/Users/me/projects"]);
+    }
+  });
+
+  it("accepts empty object without ideas_file (field is optional)", () => {
+    const result = ConfigSchema.safeParse({});
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.ideas_file).toBeUndefined();
+    }
+  });
+
+  it("Config type includes ideas_file as optional string", () => {
+    const result = ConfigSchema.safeParse({
+      ideas_file: "/absolute/path/PROJECT_IDEAS.md",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      const config: Config = result.data;
+      expect(typeof config.ideas_file).toBe("string");
+    }
+  });
 });

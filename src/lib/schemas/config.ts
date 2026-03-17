@@ -27,6 +27,9 @@ export const ConfigSchema = z.object({
   /** Port for the dashboard dev server */
   port: z.number().int().default(3000),
 
+  /** Absolute or ~-relative path to PROJECT_IDEAS.md file */
+  ideas_file: z.string().optional(),
+
   /** Display preferences for the dashboard UI */
   display: z
     .object({

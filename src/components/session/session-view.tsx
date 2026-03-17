@@ -72,7 +72,9 @@ export function SessionView({
 
   async function handleStatusChange(newStatus: string) {
     const previousStatus = currentStatus;
-    setCurrentStatus(newStatus);
+    setCurrentStatus(
+      newStatus as "in-progress" | "completed" | "paused" | "blocked",
+    );
 
     const result = await updateSessionStatus(slug, newStatus);
     if (!result.success) {

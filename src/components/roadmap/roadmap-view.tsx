@@ -4,7 +4,11 @@ import { useState, useMemo, useCallback } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RoadmapBoard } from "./roadmap-board";
 import { RoadmapList } from "./roadmap-list";
-import type { RoadmapFile, RoadmapCategory } from "@/lib/schemas/roadmap";
+import type {
+  RoadmapFile,
+  RoadmapCategory,
+  RoadmapItem,
+} from "@/lib/schemas/roadmap";
 import {
   addRoadmapItem,
   updateRoadmapItem,
@@ -63,7 +67,11 @@ export function RoadmapView({ roadmap, sessionRefs, slug }: RoadmapViewProps) {
                     id: tempId,
                     name: input.name,
                     description: input.description,
-                    status: input.status,
+                    status: input.status as
+                      | "planned"
+                      | "in-progress"
+                      | "done"
+                      | "idea",
                   },
                 ],
               }
@@ -109,7 +117,9 @@ export function RoadmapView({ roadmap, sessionRefs, slug }: RoadmapViewProps) {
         let newCats = cats.map((cat) => ({
           ...cat,
           items: cat.items.map((item) =>
-            item.id === itemId ? { ...item, ...updates } : item,
+            item.id === itemId
+              ? ({ ...item, ...updates } as RoadmapItem)
+              : item,
           ),
         }));
 

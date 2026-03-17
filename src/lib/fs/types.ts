@@ -47,3 +47,14 @@ export interface SessionParseResult {
   /** Content after the last section */
   trailingContent: string;
 }
+
+/**
+ * Preserved content from a PROJECT_IDEAS.md parse.
+ * Attached alongside the validated IdeasFile data for serializer use.
+ */
+export interface IdeasParseResult {
+  /** Content before ## Project ideas (# heading + ## preamble sections) */
+  preamble: string;
+  /** Content after the last idea within ## Project ideas */
+  trailingContent: string;
+}

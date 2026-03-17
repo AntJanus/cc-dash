@@ -1,5 +1,5 @@
 /**
- * Markdown serializer for ROADMAP.md and SESSION_PROGRESS.md files.
+ * Markdown serializer for ROADMAP.md, SESSION_PROGRESS.md, and PROJECT_IDEAS.md files.
  *
  * Converts structured TypeScript data back into valid v2 markdown.
  * Preserves unrecognized content (custom sections, preamble, trailing content)
@@ -10,7 +10,12 @@ import matter from "gray-matter";
 import yaml from "js-yaml";
 import type { RoadmapFile, RoadmapItem } from "@/lib/schemas/roadmap";
 import type { SessionFile } from "@/lib/schemas/session";
-import type { RoadmapParseResult, SessionParseResult } from "./types";
+import type { IdeasFile, IdeaItem } from "@/lib/schemas/ideas";
+import type {
+  RoadmapParseResult,
+  SessionParseResult,
+  IdeasParseResult,
+} from "./types";
 
 // --- Shared helpers ---
 
@@ -172,6 +177,61 @@ export function serializeSession(
   // Append trailing content
   if (data.trailingContent) {
     body += `\n${data.trailingContent}\n`;
+  }
+
+  return stringifyWithFrontmatter(body, frontmatterData);
+}
+
+// --- Ideas serialization ---
+
+/**
+ * Serialize a single idea item into a markdown ### heading with body.
+ * Metadata fields are written in canonical order: id, status, path (if present), stack (always last, if present).
+ */
+function serializeIdeaItem(item: IdeaItem): string {
+  // Build metadata comment parts in canonical order
+  const parts: string[] = [`id:${item.id}`, `status:${item.status}`];
+  if (item.path) parts.push(`path:${item.path}`);
+  if (item.stack?.length) parts.push(`stack:${item.stack.join(",")}`);
+  const meta = parts.join(" ");
+
+  let result = `### <!-- ${meta} --> ${item.title}\n`;
+  if (item.body) {
+    result += `\n${item.body}\n`;
+  }
+  return result;
+}
+
+/**
+ * Serialize structured ideas data back to valid cc-dash/ideas@1 markdown.
+ *
+ * @param data - IdeasFile data with optional preserved content from parsing
+ * @returns Complete markdown string with YAML frontmatter
+ */
+export function serializeIdeas(
+  data: IdeasFile & Partial<IdeasParseResult>,
+): string {
+  // Build frontmatter object (exclude ideas, filePath, preserved content)
+  const frontmatterData: Record<string, unknown> = {
+    schema: data.schema,
+    last_updated: data.last_updated,
+  };
+
+  // Build body content
+  let body = data.preamble ?? "\n# Project Ideas\n";
+
+  // Write the "Project ideas" section heading
+  body += "\n## Project ideas\n\n";
+
+  // Serialize each idea
+  for (const idea of data.ideas) {
+    body += serializeIdeaItem(idea);
+    body += "\n";
+  }
+
+  // Append trailing content
+  if (data.trailingContent) {
+    body += `${data.trailingContent}\n`;
   }
 
   return stringifyWithFrontmatter(body, frontmatterData);

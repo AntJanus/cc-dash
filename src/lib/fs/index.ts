@@ -5,22 +5,29 @@
  * Consumers import from `@/lib/fs` instead of individual files.
  */
 
-// Parser (Phase 02-01)
+// Parser (Phase 02-01, Phase 13-01)
 export {
   parseRoadmap,
   parseSession,
+  parseIdeas,
   type ParseResult,
   type RoadmapResult,
   type SessionResult,
+  type IdeasResult,
 } from "./parser";
 
-// Serializer (Phase 02-02)
-export { serializeRoadmap, serializeSession } from "./serializer";
+// Serializer (Phase 02-02, Phase 13-01)
+export {
+  serializeRoadmap,
+  serializeSession,
+  serializeIdeas,
+} from "./serializer";
 
-// Types (Phase 02-01)
+// Types (Phase 02-01, Phase 13-01)
 export type {
   RoadmapParseResult,
   SessionParseResult,
+  IdeasParseResult,
   UnknownSection,
   Section,
 } from "./types";
@@ -36,8 +43,12 @@ export {
 // Atomic write (Phase 03-01)
 export { atomicWriteFile } from "./atomic-write";
 
-// Write wrappers (Phase 03-01)
-export { writeRoadmapFile, writeSessionFile } from "./write-file";
+// Write wrappers (Phase 03-01, Phase 13-01)
+export {
+  writeRoadmapFile,
+  writeSessionFile,
+  writeIdeasFile,
+} from "./write-file";
 
 // Discovery (Phase 03-02)
 export { discoverProjects, type DiscoveredProject } from "./discovery";

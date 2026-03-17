@@ -1,8 +1,8 @@
 /**
- * Markdown parser for ROADMAP.md and SESSION_PROGRESS.md files.
+ * Markdown parser for ROADMAP.md, SESSION_PROGRESS.md, and PROJECT_IDEAS.md files.
  *
  * Uses gray-matter for YAML frontmatter extraction and regex for HTML comment
- * metadata embedded in list items. Validates extracted data against Zod schemas.
+ * metadata embedded in list items / headings. Validates extracted data against Zod schemas.
  *
  * Returns Result<T> with additional preserved content for round-trip serialization.
  */
@@ -24,11 +24,18 @@ import {
   type FailedAttempt,
   type CompletionEntry,
 } from "@/lib/schemas/session";
+import {
+  validateIdeasFrontmatter,
+  validateIdeasFile,
+  type IdeasFile,
+  type IdeaItem,
+} from "@/lib/schemas/ideas";
 import type {
   Section,
   UnknownSection,
   RoadmapParseResult,
   SessionParseResult,
+  IdeasParseResult,
 } from "./types";
 
 // --- Return types ---
@@ -43,6 +50,7 @@ export type ParseResult<T, P> =
 
 export type RoadmapResult = ParseResult<RoadmapFile, RoadmapParseResult>;
 export type SessionResult = ParseResult<SessionFile, SessionParseResult>;
+export type IdeasResult = ParseResult<IdeasFile, IdeasParseResult>;
 
 // --- Regex patterns ---
 
@@ -492,6 +500,159 @@ export function parseSession(raw: string, filePath: string): SessionResult {
     preserved: {
       preamble,
       unknownSections,
+      trailingContent,
+    },
+  };
+}
+
+// --- Ideas parsing ---
+
+/**
+ * Regex for idea heading with inline HTML comment metadata.
+ * Format: ### <!-- id:i_a8k2m status:started path:gamma-engine/ stack:TypeScript/Node.js --> Title text
+ *
+ * Captures:
+ *   [1] Full metadata string inside <!-- ... -->
+ *   [2] Title text after -->
+ */
+const IDEA_HEADING_RE = /^###\s+<!--\s+(.*?)\s*-->\s*(.+)$/;
+
+/**
+ * Parse idea metadata from the HTML comment interior.
+ * Standard key:value pairs are extracted with META_PAIRS_RE.
+ * The `stack` field is special: it is always the last field and its value
+ * may contain spaces (e.g., "Godot 4,GDScript,Pixel Art"), so we capture
+ * everything after "stack:" greedily.
+ */
+function parseIdeaMetadata(metaStr: string): Record<string, string | string[]> {
+  const meta: Record<string, string | string[]> = {};
+
+  // Check if stack field is present (always last)
+  const stackIdx = metaStr.indexOf("stack:");
+  let standardPart = metaStr;
+  if (stackIdx >= 0) {
+    standardPart = metaStr.slice(0, stackIdx).trim();
+    const stackValue = metaStr.slice(stackIdx + "stack:".length).trim();
+    meta.stack = stackValue.split(",").map((s) => s.trim());
+  }
+
+  // Parse standard key:value pairs from the part before stack
+  for (const m of standardPart.matchAll(META_PAIRS_RE)) {
+    meta[m[1]] = m[2];
+  }
+
+  return meta;
+}
+
+/**
+ * Parse a PROJECT_IDEAS.md file from raw markdown text.
+ *
+ * Extracts YAML frontmatter via gray-matter, validates against Zod schema,
+ * splits body into ## sections, identifies the "Project ideas" section,
+ * parses ### headings with HTML comment metadata for individual ideas,
+ * and preserves preamble content (sections before "Project ideas").
+ *
+ * @param raw - Raw markdown text of the PROJECT_IDEAS.md file
+ * @param filePath - Path to the source file (stored in parsed data)
+ * @returns IdeasResult with validated data and preserved content on success, or errors on failure
+ */
+export function parseIdeas(raw: string, filePath: string): IdeasResult {
+  // Normalize line endings
+  const normalized = raw.replace(/\r\n/g, "\n");
+
+  // Phase 1: Extract frontmatter
+  const { data, content } = matter(normalized);
+  const processed = postProcessFrontmatter(data as Record<string, unknown>);
+
+  // Validate frontmatter
+  const fmResult = validateIdeasFrontmatter(processed);
+  if (!fmResult.success) return fmResult;
+
+  // Phase 2: Parse body content
+  const { preamble: preambleLines, sections } = splitSections(content);
+
+  // Find the "Project ideas" section
+  let ideasSection: Section | null = null;
+  const preambleSections: Section[] = [];
+
+  for (const section of sections) {
+    if (section.heading.toLowerCase() === "project ideas" && !ideasSection) {
+      ideasSection = section;
+    } else if (!ideasSection) {
+      // Sections before "Project ideas" are preamble
+      preambleSections.push(section);
+    }
+    // Sections after "Project ideas" are ignored (would be trailing in a more complex format)
+  }
+
+  // Build preamble string: content before first ## + preamble ## sections
+  let preamble = preambleLines.join("\n");
+  for (const section of preambleSections) {
+    preamble += `\n## ${section.heading}\n${section.lines.join("\n")}`;
+  }
+
+  // Phase 3: Parse ideas from the "Project ideas" section
+  const ideas: IdeaItem[] = [];
+  const trailingContent = "";
+
+  if (ideasSection) {
+    const lines = ideasSection.lines;
+
+    // Split at ### headings to find individual ideas
+    const ideaBlocks: { heading: string; bodyLines: string[] }[] = [];
+    let currentBlock: { heading: string; bodyLines: string[] } | null = null;
+
+    for (const line of lines) {
+      if (line.startsWith("### ")) {
+        if (currentBlock) ideaBlocks.push(currentBlock);
+        currentBlock = { heading: line, bodyLines: [] };
+      } else if (currentBlock) {
+        currentBlock.bodyLines.push(line);
+      }
+      // Lines before first ### in the ideas section are skipped (typically blank)
+    }
+    if (currentBlock) ideaBlocks.push(currentBlock);
+
+    // Parse each idea block
+    for (const block of ideaBlocks) {
+      const match = block.heading.match(IDEA_HEADING_RE);
+      if (!match) continue;
+
+      const [, metaStr, title] = match;
+      const meta = parseIdeaMetadata(metaStr);
+
+      // Build body: trim leading/trailing blank lines but preserve internal structure
+      const body = block.bodyLines.join("\n").trim();
+
+      const item: Record<string, unknown> = {
+        id: meta.id,
+        status: meta.status,
+        title: title.trim(),
+        body,
+      };
+
+      if (meta.path) item.path = meta.path;
+      if (meta.stack) item.stack = meta.stack;
+
+      ideas.push(item as unknown as IdeaItem);
+    }
+  }
+
+  // Assemble and validate full file
+  const fileData = {
+    ...fmResult.data,
+    ideas,
+    filePath,
+  };
+
+  const fileResult = validateIdeasFile(fileData);
+  if (!fileResult.success) return fileResult;
+
+  return {
+    success: true,
+    data: fileResult.data,
+    preserved: {
+      preamble,
       trailingContent,
     },
   };

@@ -1,6 +1,7 @@
 import { getIdeasData } from "@/lib/projects/get-ideas";
 import { IdeasGrid } from "@/components/ideas/ideas-grid";
 import { IdeaForm } from "@/components/ideas/idea-form";
+import { IdeaWizard } from "@/components/ideas/idea-wizard";
 
 export default async function IdeasPage() {
   const result = await getIdeasData();
@@ -18,7 +19,10 @@ export default async function IdeasPage() {
     <main className="container mx-auto p-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Project Ideas</h1>
-        <IdeaForm />
+        <div className="flex gap-2">
+          <IdeaForm />
+          <IdeaWizard />
+        </div>
       </div>
       <IdeasGrid ideas={result.data.ideas} />
     </main>

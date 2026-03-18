@@ -220,6 +220,35 @@ describe("addIdea", () => {
     const [, , preservedArg] = mockWriteIdeasFile.mock.calls[0];
     expect(preservedArg).toEqual(preserved);
   });
+
+  it("stores body when provided", async () => {
+    setupMocks();
+
+    await addIdea({
+      title: "New Idea",
+      status: "not-started",
+      stack: [],
+      body: "This is the idea body content.",
+    });
+
+    const [, writtenData] = mockWriteIdeasFile.mock.calls[0];
+    const newIdea = writtenData.ideas[writtenData.ideas.length - 1];
+    expect(newIdea.body).toBe("This is the idea body content.");
+  });
+
+  it("defaults body to empty string when not provided", async () => {
+    setupMocks();
+
+    await addIdea({
+      title: "New Idea",
+      status: "not-started",
+      stack: [],
+    });
+
+    const [, writtenData] = mockWriteIdeasFile.mock.calls[0];
+    const newIdea = writtenData.ideas[writtenData.ideas.length - 1];
+    expect(newIdea.body).toBe("");
+  });
 });
 
 describe("updateIdeaMetadata", () => {

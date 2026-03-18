@@ -89,6 +89,7 @@ export async function addIdea(input: {
   title: string;
   status: string;
   stack: string[];
+  body?: string;
 }): Promise<Result<{ id: string }>> {
   // Validate status
   const statusParsed = IdeaStatus.safeParse(input.status);
@@ -117,7 +118,7 @@ export async function addIdea(input: {
     id,
     status: statusParsed.data,
     title: input.title.trim(),
-    body: "",
+    body: input.body ?? "",
   };
 
   // Only set stack if non-empty

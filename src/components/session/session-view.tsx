@@ -220,7 +220,7 @@ export function SessionView({
         <button
           type="button"
           onClick={handleToggleAll}
-          className="text-sm text-primary hover:underline"
+          className="rounded-md border px-3 py-1 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           {allExpanded ? "Collapse All" : "Expand All"}
         </button>

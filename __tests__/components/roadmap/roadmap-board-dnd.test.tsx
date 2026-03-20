@@ -7,7 +7,6 @@ import {
   groupItemsByStatus,
   findColumnStatusFromOverId,
 } from "@/components/roadmap/roadmap-board";
-import type { BoardItem } from "@/components/roadmap/roadmap-board";
 import type { RoadmapCategory } from "@/lib/schemas/roadmap";
 
 // --- Test fixtures ---

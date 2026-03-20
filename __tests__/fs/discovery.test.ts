@@ -9,8 +9,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
-import { tmpdir, homedir } from "node:os";
-import { discoverProjects, type DiscoveredProject } from "@/lib/fs/discovery";
+import { tmpdir } from "node:os";
+import { discoverProjects } from "@/lib/fs/discovery";
 import type { Config } from "@/lib/schemas/config";
 
 /** Fixture ROADMAP.md with valid cc-dash/roadmap@1 schema */

@@ -86,6 +86,7 @@ export function RoadmapCard({
       size="sm"
       ref={setNodeRef}
       style={style}
+      className="transition-all duration-200 hover:ring-2 hover:ring-primary/20"
       {...(enableDnd ? attributes : {})}
     >
       <CardHeader>
@@ -109,7 +110,7 @@ export function RoadmapCard({
                 }}
               />
             ) : (
-              <CardTitle>{item.name}</CardTitle>
+              <CardTitle className="font-semibold">{item.name}</CardTitle>
             )}
           </div>
           {hasCrud && (
@@ -124,7 +125,7 @@ export function RoadmapCard({
             />
           )}
         </div>
-        <CardDescription className="line-clamp-2">
+        <CardDescription className="line-clamp-2 leading-relaxed">
           {item.description}
         </CardDescription>
       </CardHeader>

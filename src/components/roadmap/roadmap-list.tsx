@@ -47,7 +47,7 @@ export interface RoadmapListProps {
 
 export function RoadmapList({
   categories,
-  sessionRefs,
+  sessionRefs: _sessionRefs,
   itemNames,
   onAddItem,
   onUpdateItem,

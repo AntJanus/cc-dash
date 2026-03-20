@@ -25,11 +25,6 @@ const sessionFull = fs.readFileSync(
   path.join(fixturesDir, "session-full.md"),
   "utf-8",
 );
-const sessionExtraContent = fs.readFileSync(
-  path.join(fixturesDir, "session-extra-content.md"),
-  "utf-8",
-);
-
 describe("parseRoadmap", () => {
   it("parses basic roadmap into structured data", () => {
     const result = parseRoadmap(roadmapBasic, "/test/ROADMAP.md");

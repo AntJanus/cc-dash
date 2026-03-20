@@ -10,6 +10,14 @@ interface StatusBadgeProps {
   className?: string;
 }
 
+/** Left-border accent colors by project status, reusable by card components */
+export const STATUS_ACCENT_COLORS: Record<ProjectStatus, string> = {
+  active: "border-l-green-500",
+  stalled: "border-l-amber-500",
+  complete: "border-l-blue-500",
+  inactive: "border-l-gray-300 dark:border-l-gray-600",
+};
+
 const statusConfig: Record<
   ProjectStatus,
   {

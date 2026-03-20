@@ -5,7 +5,6 @@ import "@testing-library/jest-dom/vitest";
 import { ClickableRoadmapStatusBadge } from "@/components/roadmap/clickable-roadmap-status-badge";
 import { ReorderButtons } from "@/components/roadmap/reorder-buttons";
 import { MoveCategorySelect } from "@/components/roadmap/move-category-select";
-import { ItemActionsMenu } from "@/components/roadmap/item-actions-menu";
 
 describe("ClickableRoadmapStatusBadge", () => {
   afterEach(() => {

@@ -24,9 +24,9 @@ export function SessionHeader({
   onStatusChange,
 }: SessionHeaderProps) {
   return (
-    <div className="sticky top-0 z-10 border-b bg-background pb-4 mb-4">
+    <div className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-sm pb-4 mb-4">
       <div className="flex items-center gap-3 mb-2">
-        <h1 className="text-xl font-semibold">{sessionId}</h1>
+        <h1 className="text-2xl font-semibold">{sessionId}</h1>
         <SessionStatusBadge status={status} onStatusChange={onStatusChange} />
       </div>
 

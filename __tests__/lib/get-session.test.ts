@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SessionFile } from "@/lib/schemas/session";
-import type { SessionParseResult, UnknownSection } from "@/lib/fs/types";
+import type { SessionParseResult } from "@/lib/fs/types";
 
 // --- Mocks must be set up before importing the module under test ---
 

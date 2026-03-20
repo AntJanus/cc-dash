@@ -7,8 +7,8 @@ export default async function IdeasPage() {
   const result = await getIdeasData();
   if (!result) {
     return (
-      <main className="container mx-auto p-6">
-        <h1 className="mb-4 text-2xl font-semibold">Project Ideas</h1>
+      <main className="p-6 lg:p-8">
+        <h1 className="mb-4 text-3xl font-bold">Project Ideas</h1>
         <p className="text-muted-foreground">
           No ideas file configured. Add ideas_file to your cc-dash config.
         </p>
@@ -16,9 +16,9 @@ export default async function IdeasPage() {
     );
   }
   return (
-    <main className="container mx-auto p-6">
+    <main className="p-6 lg:p-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Project Ideas</h1>
+        <h1 className="text-3xl font-bold">Project Ideas</h1>
         <div className="flex gap-2">
           <IdeaForm />
           <IdeaWizard />

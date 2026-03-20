@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
-import { Lightbulb, Settings } from "lucide-react";
 import "./globals.css";
 
-import { RefreshButton } from "@/components/shared/refresh-button";
-import { Button } from "@/components/ui/button";
+import { SidebarProvider } from "@/components/layout/sidebar-context";
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import { MobileHeader } from "@/components/layout/mobile-header";
+import { getProjectNav } from "@/lib/projects/get-project-nav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,11 +22,13 @@ export const metadata: Metadata = {
   description: "Claude Code Project Dashboard",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const projects = await getProjectNav();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -47,27 +49,15 @@ export default function RootLayout({
 `,
           }}
         />
-        <header className="border-b">
-          <div className="container mx-auto flex items-center justify-between px-6 py-3">
-            <Link href="/" className="text-lg font-semibold">
-              cc-dash
-            </Link>
-            <div className="flex items-center gap-1">
-              <Link href="/ideas">
-                <Button variant="ghost" size="icon" aria-label="Ideas">
-                  <Lightbulb className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/settings">
-                <Button variant="ghost" size="icon" aria-label="Settings">
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </Link>
-              <RefreshButton />
+        <SidebarProvider>
+          <div className="flex min-h-screen">
+            <AppSidebar projects={projects} />
+            <div className="flex-1 min-w-0">
+              <MobileHeader />
+              <main className="overflow-auto">{children}</main>
             </div>
           </div>
-        </header>
-        {children}
+        </SidebarProvider>
       </body>
     </html>
   );

@@ -10,19 +10,20 @@ Planning and implementation repo for **cc-dash** — a local Next.js web dashboa
 
 ## Key Files
 
-| File | Purpose |
-|---|---|
+| File                          | Purpose                                                               |
+| ----------------------------- | --------------------------------------------------------------------- |
 | `prd-cc-project-dashboard.md` | Full PRD with schemas, API design, component hierarchy, parsing specs |
-| `.planning/PROJECT.md` | Project definition, requirements, constraints, key decisions |
-| `.planning/ROADMAP.md` | 12-phase GSD roadmap derived from 68 requirements |
-| `.planning/REQUIREMENTS.md` | Detailed requirement specifications |
-| `.planning/STATE.md` | Current GSD workflow state and session continuity |
-| `.planning/research/` | Research artifacts for technology choices |
-| `.planning/config.json` | GSD workflow configuration |
+| `.planning/PROJECT.md`        | Project definition, requirements, constraints, key decisions          |
+| `.planning/ROADMAP.md`        | 12-phase GSD roadmap derived from 68 requirements                     |
+| `.planning/REQUIREMENTS.md`   | Detailed requirement specifications                                   |
+| `.planning/STATE.md`          | Current GSD workflow state and session continuity                     |
+| `.planning/research/`         | Research artifacts for technology choices                             |
+| `.planning/config.json`       | GSD workflow configuration                                            |
 
 ## Development Commands
 
 Once scaffolded (Phase 1):
+
 ```bash
 npm install
 npm run dev              # Next.js dev server at localhost:3000
@@ -62,6 +63,7 @@ components/
 ```
 
 **Key patterns**:
+
 - Files are the only state (no database)
 - Two custom markdown schemas: `cc-dash/roadmap@1` and `cc-dash/session@1`
 - YAML frontmatter for file-level metadata, HTML comments for item-level metadata (invisible in rendered markdown)

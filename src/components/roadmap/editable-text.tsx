@@ -13,13 +13,6 @@ export function EditableText({ value, onSave, className }: EditableTextProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
 
-  function handleSave() {
-    setEditing(false);
-    if (draft !== value) {
-      onSave(draft);
-    }
-  }
-
   function handleCancel() {
     setDraft(value);
     setEditing(false);

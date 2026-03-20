@@ -52,11 +52,11 @@ describe("ProjectCard", () => {
     expect(progress).toHaveAttribute("aria-valuenow", "70");
   });
 
-  it("renders item count as 'X / Y items'", () => {
+  it("renders item count", () => {
     render(
       <ProjectCard project={makeProject({ doneCount: 3, totalCount: 10 })} />,
     );
-    expect(screen.getByText("3 / 10 items")).toBeInTheDocument();
+    expect(screen.getByText("3/10")).toBeInTheDocument();
   });
 
   it("shows a green dot indicator when project is active", () => {
@@ -143,7 +143,7 @@ describe("ProjectCard", () => {
     );
     const progress = screen.getByRole("progressbar");
     expect(progress).toHaveAttribute("aria-valuenow", "0");
-    expect(screen.getByText("0 / 0 items")).toBeInTheDocument();
+    expect(screen.getByText("0/0")).toBeInTheDocument();
   });
 
   it("shows 'No activity' when lastUpdated is null", () => {

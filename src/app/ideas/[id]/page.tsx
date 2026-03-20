@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { getIdeasData } from "@/lib/projects/get-ideas";
 import { IdeaDetail } from "@/components/ideas/idea-detail";
 import { IdeaMetadataEditor } from "@/components/ideas/idea-metadata-editor";
@@ -16,14 +14,7 @@ export default async function IdeaDetailPage({
 
   if (!result) {
     return (
-      <main className="container mx-auto p-6">
-        <Link
-          href="/ideas"
-          className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Ideas
-        </Link>
+      <main className="p-6 lg:p-8">
         <p className="text-muted-foreground">Idea not found.</p>
       </main>
     );
@@ -33,29 +24,15 @@ export default async function IdeaDetailPage({
 
   if (!idea) {
     return (
-      <main className="container mx-auto p-6">
-        <Link
-          href="/ideas"
-          className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Ideas
-        </Link>
+      <main className="p-6 lg:p-8">
         <p className="text-muted-foreground">Idea not found.</p>
       </main>
     );
   }
 
   return (
-    <main className="container mx-auto p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <Link
-          href="/ideas"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Ideas
-        </Link>
+    <main className="p-6 lg:p-8">
+      <div className="mb-4 flex items-center justify-end">
         <DeleteIdeaDialog
           ideaId={idea.id}
           ideaTitle={idea.title}

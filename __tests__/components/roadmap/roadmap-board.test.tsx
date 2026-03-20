@@ -6,7 +6,6 @@ import {
   RoadmapBoard,
   groupItemsByStatus,
   BOARD_COLUMNS,
-  findColumnStatusFromOverId,
 } from "@/components/roadmap/roadmap-board";
 import type { RoadmapCategory } from "@/lib/schemas/roadmap";
 

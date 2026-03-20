@@ -10,7 +10,10 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { StatusBadge } from "@/components/shared/status-badge";
+import {
+  StatusBadge,
+  STATUS_ACCENT_COLORS,
+} from "@/components/shared/status-badge";
 import { StaleBadge } from "@/components/shared/stale-badge";
 import { RelativeTime } from "@/components/shared/relative-time";
 import { PromptButton } from "@/components/prompt/prompt-button";
@@ -28,7 +31,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
   return (
     <Link href={`/project/${project.slug}/roadmap`} className="block">
-      <Card className="transition-colors hover:border-foreground/30">
+      <Card
+        className={`border-l-[3px] ${STATUS_ACCENT_COLORS[project.status]} transition-all duration-200 hover:shadow-md`}
+      >
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -39,7 +44,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
                   aria-label="Active session"
                 />
               )}
-              <CardTitle>{project.name}</CardTitle>
+              <CardTitle className="text-lg font-semibold">
+                {project.name}
+              </CardTitle>
             </div>
             <div className="flex items-center gap-1">
               <PromptButton slug={project.slug} />
@@ -50,10 +57,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </CardHeader>
 
         <CardContent>
-          <Progress value={progressValue} />
-          <p className="mt-2 text-sm text-muted-foreground">
-            {project.doneCount} / {project.totalCount} items
-          </p>
+          <div className="flex items-center gap-3">
+            <Progress value={progressValue} className="flex-1" />
+            <span className="shrink-0 text-sm text-muted-foreground">
+              {project.doneCount}/{project.totalCount}
+            </span>
+          </div>
           {project.hasActiveSession && project.sessionStatusText && (
             <p className="mt-1 text-sm text-green-700 dark:text-green-400">
               {project.sessionStatusText}

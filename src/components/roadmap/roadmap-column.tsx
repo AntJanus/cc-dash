@@ -83,7 +83,7 @@ export function RoadmapColumn({
     <div
       ref={setNodeRef}
       data-testid={enableDnd ? `droppable-column-${status}` : undefined}
-      className={`flex flex-col gap-3 rounded-lg bg-muted/50 p-3 transition-shadow ${
+      className={`flex flex-col gap-3 rounded-lg bg-muted/50 p-4 transition-shadow ${
         isOver ? "ring-2 ring-primary/30" : ""
       }`}
     >

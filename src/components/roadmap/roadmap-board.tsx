@@ -215,7 +215,9 @@ export function RoadmapBoard({
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="grid grid-cols-4 gap-4">{columns}</div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {columns}
+          </div>
           <div data-testid="drag-overlay-container">
             <DragOverlay>
               {activeItem ? (
@@ -242,7 +244,10 @@ export function RoadmapBoard({
   }
 
   return (
-    <div data-testid="roadmap-board" className="grid grid-cols-4 gap-4">
+    <div
+      data-testid="roadmap-board"
+      className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
+    >
       {columns}
     </div>
   );

@@ -17,7 +17,7 @@ export function ProjectTabs({ slug }: ProjectTabsProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-4 border-b">
+    <nav className="flex gap-6 border-b">
       {TABS.map((tab) => {
         const href = `/project/${slug}/${tab.segment}`;
         const isActive = pathname === href || pathname.startsWith(href + "/");
@@ -27,10 +27,10 @@ export function ProjectTabs({ slug }: ProjectTabsProps) {
             key={tab.segment}
             href={href}
             className={cn(
-              "border-b-2 px-1 pb-2 text-sm font-medium transition-colors",
+              "border-b-2 px-1 pb-2.5 text-sm font-medium transition-colors",
               isActive
                 ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:border-foreground hover:text-foreground",
+                : "border-transparent text-muted-foreground hover:text-foreground",
             )}
           >
             {tab.label}

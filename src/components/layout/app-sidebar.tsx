@@ -14,17 +14,18 @@ import {
   PanelLeft,
   Moon,
   Sun,
+  Terminal,
 } from "lucide-react";
 import { useSidebar } from "./sidebar-context";
 import { RefreshButton } from "@/components/shared/refresh-button";
 import { cn } from "@/lib/utils";
 
 interface AppSidebarProps {
-  projects: { slug: string; name: string }[];
+  projects: { slug: string; name: string; hasActiveSession?: boolean }[];
 }
 
 const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/", label: "All Projects", icon: LayoutDashboard },
   { href: "/ideas", label: "Ideas", icon: Lightbulb },
   { href: "/activity", label: "Activity", icon: Activity },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -42,6 +43,8 @@ export function AppSidebar({ projects }: AppSidebarProps) {
     }
     return "light";
   });
+
+  const activeSessionProjects = projects.filter((p) => p.hasActiveSession);
 
   function toggleTheme() {
     const next = theme === "dark" ? "light" : "dark";
@@ -62,18 +65,51 @@ export function AppSidebar({ projects }: AppSidebarProps) {
   const sidebarContent = (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex h-14 items-center border-b border-sidebar-border px-4">
+      <div className="flex h-14 items-center px-4">
         <Link
           href="/"
-          className="text-lg font-bold text-sidebar-foreground"
+          className="text-lg font-semibold text-sidebar-foreground"
           onClick={closeMobile}
         >
           {isOpen ? "cc-dash" : "cc"}
         </Link>
       </div>
 
-      {/* Nav links */}
       <nav className="flex-1 overflow-y-auto p-2">
+        {/* Personal section */}
+        {isOpen && activeSessionProjects.length > 0 && (
+          <div className="mb-3">
+            <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-sidebar-foreground/60">
+              Personal
+            </div>
+            <ul className="mt-1 space-y-0.5">
+              {activeSessionProjects.map((p) => (
+                <li key={p.slug}>
+                  <Link
+                    href={`/project/${p.slug}/session`}
+                    onClick={closeMobile}
+                    className={cn(
+                      "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors",
+                      pathname.includes(`/project/${p.slug}`)
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                    )}
+                  >
+                    <Terminal className="h-3.5 w-3.5 shrink-0 text-[var(--status-active)]" />
+                    <span className="truncate">{p.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Navigation */}
+        {isOpen && (
+          <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-sidebar-foreground/60">
+            Navigation
+          </div>
+        )}
         <ul className="space-y-1">
           {NAV_ITEMS.map((item) => (
             <li key={item.href}>
@@ -81,9 +117,9 @@ export function AppSidebar({ projects }: AppSidebarProps) {
                 href={item.href}
                 onClick={closeMobile}
                 className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive(item.href)
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    ? "border-l-2 border-primary bg-sidebar-accent text-sidebar-accent-foreground"
                     : "text-sidebar-foreground hover:bg-sidebar-accent/50",
                 )}
                 title={!isOpen ? item.label : undefined}
@@ -101,7 +137,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
             <button
               type="button"
               onClick={() => setProjectsExpanded((p) => !p)}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/60 hover:text-sidebar-foreground"
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-sidebar-foreground/60 hover:text-sidebar-foreground"
             >
               {projectsExpanded ? (
                 <ChevronDown className="h-3 w-3" />
@@ -118,13 +154,16 @@ export function AppSidebar({ projects }: AppSidebarProps) {
                       href={`/project/${p.slug}/roadmap`}
                       onClick={closeMobile}
                       className={cn(
-                        "block truncate rounded-md px-3 py-1.5 text-sm transition-colors",
+                        "flex items-center gap-2 truncate rounded-md px-3 py-1.5 text-sm transition-colors",
                         pathname.includes(`/project/${p.slug}`)
                           ? "bg-sidebar-accent text-sidebar-accent-foreground"
                           : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
                       )}
                     >
-                      {p.name}
+                      <span className="truncate">{p.name}</span>
+                      {p.hasActiveSession && (
+                        <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--status-active)]" />
+                      )}
                     </Link>
                   </li>
                 ))}
@@ -135,7 +174,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-t border-sidebar-border p-2">
+      <div className="flex items-center justify-between border-t border-sidebar-border/50 p-3">
         <div className="flex items-center gap-1">
           <RefreshButton />
           <button
@@ -173,7 +212,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
       <aside
         data-testid="app-sidebar"
         className={cn(
-          "hidden lg:flex flex-col border-r border-sidebar-border bg-sidebar transition-[width] duration-200",
+          "hidden lg:flex flex-col bg-sidebar shadow-[1px_0_4px_-2px_oklch(0.5_0.01_240/0.06)] transition-[width] duration-200",
           isOpen ? "w-60" : "w-12",
         )}
       >

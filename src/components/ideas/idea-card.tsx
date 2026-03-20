@@ -20,22 +20,20 @@ function getTeaser(body: string): string {
 }
 
 const IDEA_ACCENT_COLORS: Record<string, string> = {
-  "not-started": "border-l-gray-300 dark:border-l-gray-600",
-  started: "border-l-blue-500",
-  complete: "border-l-green-500",
+  "not-started": "border-l-[var(--status-inactive)]",
+  started: "border-l-[var(--status-complete)]",
+  complete: "border-l-[var(--status-active)]",
 };
 
 export function IdeaCard({ idea }: IdeaCardProps) {
   return (
     <Link href={`/ideas/${idea.id}`} className="block">
       <Card
-        className={`border-l-[3px] ${IDEA_ACCENT_COLORS[idea.status] ?? ""} transition-all duration-200 hover:shadow-md`}
+        className={`border-l-[3px] rounded-l-lg ${IDEA_ACCENT_COLORS[idea.status] ?? ""} transition-all duration-200 hover:shadow-lg hover:shadow-primary/5`}
       >
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold">
-              {idea.title}
-            </CardTitle>
+            <CardTitle>{idea.title}</CardTitle>
             <IdeaStatusBadge status={idea.status} />
           </div>
         </CardHeader>
@@ -46,7 +44,7 @@ export function IdeaCard({ idea }: IdeaCardProps) {
               {idea.stack.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded bg-primary/10 px-2 py-0.5 text-xs text-primary"
+                  className="rounded-md bg-primary/8 px-2 py-0.5 text-xs text-primary"
                 >
                   {tag}
                 </span>

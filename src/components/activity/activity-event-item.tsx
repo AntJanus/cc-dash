@@ -13,10 +13,10 @@ const EVENT_ICONS: Record<ActivityEventType, typeof CheckCircle2> = {
 };
 
 const EVENT_COLORS: Record<ActivityEventType, string> = {
-  roadmap_item_completed: "text-green-600 dark:text-green-400",
-  roadmap_item_started: "text-blue-600 dark:text-blue-400",
-  session_started: "text-purple-600 dark:text-purple-400",
-  session_work_completed: "text-emerald-600 dark:text-emerald-400",
+  roadmap_item_completed: "text-[var(--status-active)]",
+  roadmap_item_started: "text-[var(--status-complete)]",
+  session_started: "text-primary",
+  session_work_completed: "text-[var(--status-active)]",
 };
 
 interface ActivityEventItemProps {
@@ -34,7 +34,7 @@ export function ActivityEventItem({
   return (
     <div
       data-testid="activity-event-item"
-      className={`flex items-start gap-3 ${compact ? "py-2" : "py-3"}`}
+      className={`flex items-start gap-3 border-l-2 border-muted pl-3 ${compact ? "py-2" : "py-3.5"}`}
     >
       <div className={`mt-0.5 shrink-0 ${colorClass}`}>
         <Icon className="h-4 w-4" />

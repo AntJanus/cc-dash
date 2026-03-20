@@ -14,7 +14,7 @@ export default async function IdeaDetailPage({
 
   if (!result) {
     return (
-      <main className="p-6 lg:p-8">
+      <main className="p-8 lg:p-10">
         <p className="text-muted-foreground">Idea not found.</p>
       </main>
     );
@@ -24,14 +24,14 @@ export default async function IdeaDetailPage({
 
   if (!idea) {
     return (
-      <main className="p-6 lg:p-8">
+      <main className="p-8 lg:p-10">
         <p className="text-muted-foreground">Idea not found.</p>
       </main>
     );
   }
 
   return (
-    <main className="p-6 lg:p-8">
+    <main className="p-8 lg:p-10">
       <div className="mb-4 flex items-center justify-end">
         <DeleteIdeaDialog
           ideaId={idea.id}

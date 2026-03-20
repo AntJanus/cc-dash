@@ -7,12 +7,24 @@ vi.mock("@/lib/config", () => ({
   loadConfig: mockLoadConfig,
 }));
 
-const { mockDiscoverProjects } = vi.hoisted(() => ({
+const { mockDiscoverProjects, mockParseSession } = vi.hoisted(() => ({
   mockDiscoverProjects: vi.fn(),
+  mockParseSession: vi.fn(),
 }));
 vi.mock("@/lib/fs", () => ({
   discoverProjects: mockDiscoverProjects,
+  parseSession: mockParseSession,
 }));
+
+const { mockReadFile } = vi.hoisted(() => ({ mockReadFile: vi.fn() }));
+vi.mock("node:fs/promises", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs/promises")>();
+  return {
+    ...actual,
+    default: { ...actual, readFile: mockReadFile },
+    readFile: mockReadFile,
+  };
+});
 
 import { getProjectNav } from "@/lib/projects/get-project-nav";
 
@@ -50,9 +62,9 @@ describe("getProjectNav", () => {
     const result = await getProjectNav();
 
     expect(result).toEqual([
-      { slug: "alpha", name: "Alpha" },
-      { slug: "mango", name: "Mango" },
-      { slug: "zeta", name: "Zeta" },
+      { slug: "alpha", name: "Alpha", hasActiveSession: false },
+      { slug: "mango", name: "Mango", hasActiveSession: false },
+      { slug: "zeta", name: "Zeta", hasActiveSession: false },
     ]);
   });
 
@@ -78,5 +90,43 @@ describe("getProjectNav", () => {
     const result = await getProjectNav();
 
     expect(result[0].slug).toBe("my-project");
+  });
+
+  it("detects active sessions", async () => {
+    mockDiscoverProjects.mockResolvedValue([
+      {
+        name: "Active",
+        path: "/projects/active",
+        roadmapPath: null,
+        sessionPath: "/projects/active/SESSION_PROGRESS.md",
+        isExplicit: false,
+      },
+    ]);
+    mockReadFile.mockResolvedValue("mock-session-content");
+    mockParseSession.mockReturnValue({
+      success: true,
+      data: { status: "in-progress" },
+    });
+
+    const result = await getProjectNav();
+
+    expect(result[0].hasActiveSession).toBe(true);
+  });
+
+  it("handles session read errors gracefully", async () => {
+    mockDiscoverProjects.mockResolvedValue([
+      {
+        name: "Broken",
+        path: "/projects/broken",
+        roadmapPath: null,
+        sessionPath: "/projects/broken/SESSION_PROGRESS.md",
+        isExplicit: false,
+      },
+    ]);
+    mockReadFile.mockRejectedValue(new Error("ENOENT"));
+
+    const result = await getProjectNav();
+
+    expect(result[0].hasActiveSession).toBe(false);
   });
 });

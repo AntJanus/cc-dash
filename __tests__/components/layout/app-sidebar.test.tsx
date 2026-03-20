@@ -40,7 +40,7 @@ describe("AppSidebar", () => {
   it("renders nav links", () => {
     render(<AppSidebar projects={MOCK_PROJECTS} />);
 
-    expect(screen.getByText("Dashboard")).toBeDefined();
+    expect(screen.getByText("All Projects")).toBeDefined();
     expect(screen.getByText("Ideas")).toBeDefined();
     expect(screen.getByText("Activity")).toBeDefined();
     expect(screen.getByText("Settings")).toBeDefined();

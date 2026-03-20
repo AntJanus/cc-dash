@@ -221,7 +221,10 @@ export function RoadmapBoard({
           <div data-testid="drag-overlay-container">
             <DragOverlay>
               {activeItem ? (
-                <Card size="sm" className="w-64 rotate-2 opacity-90 shadow-lg">
+                <Card
+                  size="sm"
+                  className="w-64 rotate-1 opacity-90 shadow-lg shadow-primary/10"
+                >
                   <CardHeader>
                     <CardTitle>{activeItem.name}</CardTitle>
                     <CardDescription className="line-clamp-2">

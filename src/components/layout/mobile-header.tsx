@@ -7,7 +7,7 @@ export function MobileHeader() {
   const { openMobile } = useSidebar();
 
   return (
-    <header className="flex h-14 items-center border-b px-4 lg:hidden">
+    <header className="flex h-16 items-center px-4 shadow-sm lg:hidden">
       <button
         type="button"
         onClick={openMobile}

@@ -20,23 +20,25 @@ const statusConfig: Record<
     label: "Idea",
     variant: "outline",
     className:
-      "border-slate-300 text-slate-600 dark:border-slate-600 dark:text-slate-400",
+      "bg-[var(--status-inactive-bg)] text-[var(--status-inactive)] border-[var(--status-inactive)]/20",
   },
   planned: {
     label: "Planned",
-    variant: "secondary",
+    variant: "outline",
     className:
-      "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+      "bg-[var(--status-complete-bg)] text-[var(--status-complete)] border-[var(--status-complete)]/20",
   },
   "in-progress": {
     label: "Active",
-    variant: "default",
-    className: "bg-amber-500 text-white",
+    variant: "outline",
+    className:
+      "bg-[var(--status-stalled-bg)] text-[var(--status-stalled)] border-[var(--status-stalled)]/20",
   },
   done: {
     label: "Done",
-    variant: "default",
-    className: "bg-green-600 text-white",
+    variant: "outline",
+    className:
+      "bg-[var(--status-active-bg)] text-[var(--status-active)] border-[var(--status-active)]/20",
   },
 };
 

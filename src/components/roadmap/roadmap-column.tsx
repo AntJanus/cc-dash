@@ -83,13 +83,13 @@ export function RoadmapColumn({
     <div
       ref={setNodeRef}
       data-testid={enableDnd ? `droppable-column-${status}` : undefined}
-      className={`flex flex-col gap-3 rounded-lg bg-muted/50 p-4 transition-shadow ${
+      className={`flex flex-col gap-3 rounded-xl bg-muted/40 p-4 transition-shadow ${
         isOver ? "ring-2 ring-primary/30" : ""
       }`}
     >
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">{label}</h3>
-        <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
           {items.length}
         </span>
       </div>

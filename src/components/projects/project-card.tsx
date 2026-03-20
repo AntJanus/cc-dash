@@ -32,7 +32,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Link href={`/project/${project.slug}/roadmap`} className="block">
       <Card
-        className={`border-l-[3px] ${STATUS_ACCENT_COLORS[project.status]} transition-all duration-200 hover:shadow-md`}
+        className={`border-l-[3px] rounded-l-lg ${STATUS_ACCENT_COLORS[project.status]} transition-all duration-200 hover:shadow-lg hover:shadow-primary/5`}
       >
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -44,9 +44,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                   aria-label="Active session"
                 />
               )}
-              <CardTitle className="text-lg font-semibold">
-                {project.name}
-              </CardTitle>
+              <CardTitle>{project.name}</CardTitle>
             </div>
             <div className="flex items-center gap-1">
               <PromptButton slug={project.slug} />

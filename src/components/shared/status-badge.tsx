@@ -12,10 +12,10 @@ interface StatusBadgeProps {
 
 /** Left-border accent colors by project status, reusable by card components */
 export const STATUS_ACCENT_COLORS: Record<ProjectStatus, string> = {
-  active: "border-l-green-500",
-  stalled: "border-l-amber-500",
-  complete: "border-l-blue-500",
-  inactive: "border-l-gray-300 dark:border-l-gray-600",
+  active: "border-l-[var(--status-active)]",
+  stalled: "border-l-[var(--status-stalled)]",
+  complete: "border-l-[var(--status-complete)]",
+  inactive: "border-l-[var(--status-inactive)]",
 };
 
 const statusConfig: Record<
@@ -28,25 +28,27 @@ const statusConfig: Record<
 > = {
   active: {
     label: "Active",
-    variant: "default",
-    className: "bg-green-600 text-white",
+    variant: "outline",
+    className:
+      "bg-[var(--status-active-bg)] text-[var(--status-active)] border-[var(--status-active)]/20",
   },
   stalled: {
     label: "Stalled",
-    variant: "secondary",
+    variant: "outline",
     className:
-      "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+      "bg-[var(--status-stalled-bg)] text-[var(--status-stalled)] border-[var(--status-stalled)]/20",
   },
   complete: {
     label: "Complete",
     variant: "outline",
     className:
-      "border-green-300 text-green-700 dark:border-green-700 dark:text-green-400",
+      "bg-[var(--status-complete-bg)] text-[var(--status-complete)] border-[var(--status-complete)]/20",
   },
   inactive: {
     label: "Inactive",
-    variant: "secondary",
-    className: "",
+    variant: "outline",
+    className:
+      "bg-[var(--status-inactive-bg)] text-[var(--status-inactive)] border-[var(--status-inactive)]/20",
   },
 };
 

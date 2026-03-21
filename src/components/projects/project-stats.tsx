@@ -24,7 +24,7 @@ export function ProjectStats({ projects }: ProjectStatsProps) {
       : 0;
 
   return (
-    <div className="mb-4 flex items-center gap-6 text-sm text-muted-foreground">
+    <div className="mb-4 flex items-center gap-6 text-base text-muted-foreground">
       <span>
         <strong className="text-foreground">{total}</strong> projects
       </span>

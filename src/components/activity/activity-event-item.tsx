@@ -40,10 +40,10 @@ export function ActivityEventItem({
         <Icon className="h-4 w-4" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm">
+        <p className="text-base">
           <span className="font-medium">{event.title}</span>
         </p>
-        <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="mt-0.5 flex items-center gap-2 text-sm text-muted-foreground">
           {event.link ? (
             <Link
               href={event.link}
@@ -58,7 +58,7 @@ export function ActivityEventItem({
           <RelativeTime iso={event.timestamp} />
         </div>
         {!compact && event.description && (
-          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
             {event.description}
           </p>
         )}

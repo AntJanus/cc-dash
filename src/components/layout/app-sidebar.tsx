@@ -180,13 +180,18 @@ export function AppSidebar({ projects }: AppSidebarProps) {
           <button
             type="button"
             onClick={toggleTheme}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
             aria-label="Toggle theme"
           >
             {theme === "dark" ? (
               <Sun className="h-4 w-4" />
             ) : (
               <Moon className="h-4 w-4" />
+            )}
+            {isOpen && (
+              <span className="text-xs">
+                {theme === "dark" ? "Light" : "Dark"}
+              </span>
             )}
           </button>
         </div>

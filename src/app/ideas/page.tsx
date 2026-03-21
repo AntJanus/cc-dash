@@ -8,9 +8,7 @@ export default async function IdeasPage() {
   if (!result) {
     return (
       <main className="p-8 lg:p-10">
-        <h1 className="mb-4 text-xl font-semibold tracking-tight">
-          Project Ideas
-        </h1>
+        <h1 className="mb-4 text-3xl font-semibold">Project Ideas</h1>
         <p className="text-muted-foreground">
           No ideas file configured. Add ideas_file to your cc-dash config.
         </p>
@@ -20,7 +18,7 @@ export default async function IdeasPage() {
   return (
     <main className="p-8 lg:p-10">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold tracking-tight">Project Ideas</h1>
+        <h1 className="text-3xl font-semibold">Project Ideas</h1>
         <div className="flex gap-2">
           <IdeaForm />
           <IdeaWizard />

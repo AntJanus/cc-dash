@@ -7,7 +7,8 @@
  * ProjectCardData suitable for Server Component -> Client Component boundary.
  */
 
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
+import matter from "gray-matter";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects, parseRoadmap, parseSession } from "@/lib/fs";
 import type { RoadmapFile } from "@/lib/schemas/roadmap";
@@ -61,9 +62,11 @@ export function deriveStatus(
   roadmap: RoadmapFile | null,
   session: SessionFile | null,
   isStale: boolean,
+  fallbackSessionActive = false,
 ): "active" | "stalled" | "complete" | "inactive" {
-  // Active session always wins
-  if (session?.status === "in-progress") return "active";
+  // Active session always wins (parsed or fallback from frontmatter)
+  if (session?.status === "in-progress" || fallbackSessionActive)
+    return "active";
 
   // Check if all roadmap items are done
   if (roadmap) {
@@ -95,6 +98,7 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
     discovered.map(async (project) => {
       let roadmap: RoadmapFile | null = null;
       let session: SessionFile | null = null;
+      let sessionRaw: string | null = null;
 
       // Read and parse roadmap file if it exists
       if (project.roadmapPath) {
@@ -110,11 +114,43 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
       // Read and parse session file if it exists
       if (project.sessionPath) {
         try {
-          const raw = await readFile(project.sessionPath, "utf-8");
-          const result = parseSession(raw, project.sessionPath);
+          sessionRaw = await readFile(project.sessionPath, "utf-8");
+          const result = parseSession(sessionRaw, project.sessionPath);
           if (result.success) session = result.data;
         } catch {
           /* file unreadable, degrade gracefully */
+        }
+      }
+
+      // Fallback: when full parse fails, extract session status from frontmatter
+      let fallbackSessionActive = false;
+      if (!session && sessionRaw) {
+        try {
+          const { data } = matter(sessionRaw);
+          if (data?.status === "in-progress") fallbackSessionActive = true;
+        } catch {
+          /* ignore */
+        }
+      }
+
+      // Collect file mtimes — always check, not just on parse failure.
+      // Frontmatter last_updated may be stale (set weeks ago) while the
+      // actual file was modified recently.
+      const fileMtimes: string[] = [];
+      if (project.roadmapPath) {
+        try {
+          const s = await stat(project.roadmapPath);
+          fileMtimes.push(s.mtime.toISOString());
+        } catch {
+          /* ignore */
+        }
+      }
+      if (project.sessionPath) {
+        try {
+          const s = await stat(project.sessionPath);
+          fileMtimes.push(s.mtime.toISOString());
+        } catch {
+          /* ignore */
         }
       }
 
@@ -123,10 +159,12 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
       const doneCount = allItems.filter((i) => i.status === "done").length;
       const totalCount = allItems.length;
 
-      // Determine most recent timestamp across both files
-      const timestamps = [roadmap?.last_updated, session?.last_updated].filter(
-        Boolean,
-      ) as string[];
+      // Determine most recent timestamp: use MAX of parsed last_updated and file mtime
+      const timestamps = [
+        roadmap?.last_updated,
+        session?.last_updated,
+        ...fileMtimes,
+      ].filter(Boolean) as string[];
       const lastUpdated =
         timestamps.length > 0 ? timestamps.sort().reverse()[0] : null;
 
@@ -135,6 +173,9 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
         ? Date.now() - new Date(lastUpdated).getTime() > STALE_THRESHOLD_MS
         : true;
 
+      const hasActiveSession =
+        session?.status === "in-progress" || fallbackSessionActive;
+
       return {
         slug: project.slug,
         name: project.name,
@@ -142,14 +183,14 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
         path: project.path,
         doneCount,
         totalCount,
-        hasActiveSession: session?.status === "in-progress",
+        hasActiveSession,
         sessionStatusText:
           session?.status === "in-progress"
             ? extractWorkingOn(session.currentStatus)
             : null,
         lastUpdated,
         isStale,
-        status: deriveStatus(roadmap, session, isStale),
+        status: deriveStatus(roadmap, session, isStale, fallbackSessionActive),
       } satisfies ProjectCardData;
     }),
   );

@@ -17,7 +17,7 @@ export default async function Home() {
       {activity.length > 0 && (
         <section className="mt-10">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Recent Activity</h2>
+            <h2 className="text-2xl font-semibold">Recent Activity</h2>
             <Link
               href="/activity"
               className="text-sm text-primary hover:underline"

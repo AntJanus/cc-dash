@@ -28,7 +28,7 @@ export function ProjectColumn({
             className="h-2.5 w-2.5 rounded-full"
             style={{ backgroundColor: color }}
           />
-          <h3 className="text-sm font-semibold">{label}</h3>
+          <h3 className="text-base font-semibold">{label}</h3>
         </div>
         <button
           type="button"

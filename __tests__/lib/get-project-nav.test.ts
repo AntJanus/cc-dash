@@ -38,6 +38,7 @@ describe("getProjectNav", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Zeta",
+        slug: "zeta",
         path: "/projects/zeta",
         roadmapPath: null,
         sessionPath: null,
@@ -45,6 +46,7 @@ describe("getProjectNav", () => {
       },
       {
         name: "Alpha",
+        slug: "alpha",
         path: "/projects/alpha",
         roadmapPath: null,
         sessionPath: null,
@@ -52,6 +54,7 @@ describe("getProjectNav", () => {
       },
       {
         name: "Mango",
+        slug: "mango",
         path: "/projects/mango",
         roadmapPath: null,
         sessionPath: null,
@@ -80,6 +83,7 @@ describe("getProjectNav", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "My Project",
+        slug: "my-project",
         path: "/deep/nested/my-project",
         roadmapPath: null,
         sessionPath: null,
@@ -96,6 +100,7 @@ describe("getProjectNav", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Active",
+        slug: "active",
         path: "/projects/active",
         roadmapPath: null,
         sessionPath: "/projects/active/SESSION_PROGRESS.md",
@@ -117,6 +122,7 @@ describe("getProjectNav", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Broken",
+        slug: "broken",
         path: "/projects/broken",
         roadmapPath: null,
         sessionPath: "/projects/broken/SESSION_PROGRESS.md",

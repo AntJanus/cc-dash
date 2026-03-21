@@ -38,6 +38,7 @@ function makeConfig(): Config {
 const SAMPLE_PROJECTS: DiscoveredProject[] = [
   {
     name: "project-a",
+    slug: "project-a",
     path: "/tmp/project-a",
     roadmapPath: "/tmp/project-a/ROADMAP.md",
     sessionPath: null,
@@ -45,6 +46,7 @@ const SAMPLE_PROJECTS: DiscoveredProject[] = [
   },
   {
     name: "project-b",
+    slug: "project-b",
     path: "/tmp/project-b",
     roadmapPath: null,
     sessionPath: "/tmp/project-b/SESSION_PROGRESS.md",

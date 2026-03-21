@@ -123,6 +123,7 @@ describe("getSessionBySlug", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Other Project",
+        slug: "other-project",
         path: "/projects/other-project",
         roadmapPath: null,
         sessionPath: "/projects/other-project/SESSION_PROGRESS.md",
@@ -138,6 +139,7 @@ describe("getSessionBySlug", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "No Session",
+        slug: "no-session",
         path: "/projects/no-session",
         roadmapPath: "/projects/no-session/ROADMAP.md",
         sessionPath: null,
@@ -153,6 +155,7 @@ describe("getSessionBySlug", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Test Project",
+        slug: "test-project",
         path: "/projects/test-project",
         roadmapPath: null,
         sessionPath: "/projects/test-project/SESSION_PROGRESS.md",
@@ -184,6 +187,7 @@ describe("getSessionBySlug", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Test Project",
+        slug: "test-project",
         path: "/projects/test-project",
         roadmapPath: null,
         sessionPath: "/projects/test-project/SESSION_PROGRESS.md",
@@ -211,35 +215,5 @@ describe("getSessionBySlug", () => {
     );
     // Should also have preserved content for write-back
     expect(result!.preserved).toEqual(preserved);
-  });
-
-  it("builds task name lookup map", async () => {
-    mockDiscoverProjects.mockResolvedValue([
-      {
-        name: "Test Project",
-        path: "/projects/test-project",
-        roadmapPath: null,
-        sessionPath: "/projects/test-project/SESSION_PROGRESS.md",
-        isExplicit: false,
-      },
-    ]);
-
-    mockReadFile.mockResolvedValue("raw-session");
-
-    const session = makeSession();
-    const preserved = makePreserved();
-    mockParseSession.mockReturnValue({
-      success: true,
-      data: session,
-      preserved,
-    });
-
-    const result = await getSessionBySlug("test-project");
-
-    expect(result).not.toBeNull();
-    expect(result!.taskNames).toEqual({
-      t_abc12: "First task",
-      t_def34: "Second task",
-    });
   });
 });

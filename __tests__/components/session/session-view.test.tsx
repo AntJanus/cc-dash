@@ -66,11 +66,6 @@ function makeSession(overrides: Partial<SessionFile> = {}): SessionFile {
   };
 }
 
-const defaultTaskNames: Record<string, string> = {
-  t_a1b2c: "Phase 1: Research",
-  t_d3e4f: "Phase 2: Implement",
-};
-
 const defaultVerificationSections: UnknownSection[] = [];
 
 function renderSessionView(overrides: Partial<SessionFile> = {}) {
@@ -79,7 +74,6 @@ function renderSessionView(overrides: Partial<SessionFile> = {}) {
       session={makeSession(overrides)}
       slug="test-project"
       verificationSections={defaultVerificationSections}
-      taskNames={defaultTaskNames}
     />,
   );
 }

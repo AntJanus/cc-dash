@@ -8,7 +8,6 @@
  */
 
 import { readFile } from "node:fs/promises";
-import { basename } from "node:path";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects, parseRoadmap, parseSession } from "@/lib/fs";
 import { getProjectCards } from "@/lib/projects/get-projects";
@@ -33,7 +32,7 @@ export async function generateProjectPrompt(
 ): Promise<PromptResult> {
   const config = await loadConfig();
   const projects = await discoverProjects(config);
-  const project = projects.find((p) => basename(p.path) === slug);
+  const project = projects.find((p) => p.slug === slug);
 
   if (!project) {
     return { success: false, error: "Project not found" };

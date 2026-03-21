@@ -106,6 +106,7 @@ function setupMocks(opts: { hasRoadmap?: boolean; hasSession?: boolean } = {}) {
   mockDiscoverProjects.mockResolvedValue([
     {
       name: "Test Project",
+      slug: "test-project",
       path: "/projects/test-project",
       roadmapPath: hasRoadmap ? "/projects/test-project/ROADMAP.md" : null,
       sessionPath: hasSession

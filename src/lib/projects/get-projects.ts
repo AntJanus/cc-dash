@@ -8,7 +8,6 @@
  */
 
 import { readFile } from "node:fs/promises";
-import { basename } from "node:path";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects, parseRoadmap, parseSession } from "@/lib/fs";
 import type { RoadmapFile } from "@/lib/schemas/roadmap";
@@ -137,7 +136,7 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
         : true;
 
       return {
-        slug: basename(project.path),
+        slug: project.slug,
         name: project.name,
         description: roadmap?.description ?? "",
         path: project.path,

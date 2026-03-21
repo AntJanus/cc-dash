@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,7 +33,6 @@ interface SessionViewProps {
   session: SessionFile;
   slug: string;
   verificationSections: UnknownSection[];
-  taskNames: Record<string, string>;
 }
 
 const ALL_SECTIONS = [
@@ -51,7 +50,6 @@ export function SessionView({
   session,
   slug,
   verificationSections,
-  taskNames,
 }: SessionViewProps) {
   const [expandedSections, setExpandedSections] =
     useState<string[]>(DEFAULT_EXPANDED);
@@ -59,6 +57,13 @@ export function SessionView({
 
   // Task state management
   const [tasks, setTasks] = useState<SessionTask[]>(session.tasks);
+
+  // Derive task names from local state so dependency badges stay fresh
+  const taskNames = useMemo(() => {
+    const names: Record<string, string> = {};
+    for (const task of tasks) names[task.id] = task.description;
+    return names;
+  }, [tasks]);
   const [currentStatusText, setCurrentStatusText] = useState(
     session.currentStatus,
   );

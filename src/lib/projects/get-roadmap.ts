@@ -7,7 +7,6 @@
  */
 
 import { readFile } from "node:fs/promises";
-import { basename } from "node:path";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects, parseRoadmap, parseSession } from "@/lib/fs";
 import type { RoadmapFile } from "@/lib/schemas/roadmap";
@@ -23,9 +22,8 @@ export interface RoadmapPageData {
 /**
  * Load roadmap data for a project identified by its URL slug.
  *
- * The slug is derived from `basename(project.path)` (the directory name),
- * NOT from the frontmatter `project` field. This matches the dashboard
- * home page's slug derivation in get-projects.ts.
+ * The slug is derived from the project name (via slugify) and set during
+ * discovery. This matches the dashboard home page's slug in get-projects.ts.
  *
  * Returns null if: slug matches no project, project has no roadmap file,
  * or roadmap file fails to parse.
@@ -35,7 +33,7 @@ export async function getRoadmapBySlug(
 ): Promise<RoadmapPageData | null> {
   const config = await loadConfig();
   const projects = await discoverProjects(config);
-  const project = projects.find((p) => basename(p.path) === slug);
+  const project = projects.find((p) => p.slug === slug);
   if (!project || !project.roadmapPath) return null;
 
   const raw = await readFile(project.roadmapPath, "utf-8");

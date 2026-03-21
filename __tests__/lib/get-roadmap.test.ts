@@ -105,6 +105,7 @@ describe("getRoadmapBySlug", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Test Project",
+        slug: "test-project",
         path: "/projects/test-project",
         roadmapPath: "/projects/test-project/ROADMAP.md",
         sessionPath: null,
@@ -133,6 +134,7 @@ describe("getRoadmapBySlug", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Other Project",
+        slug: "other-project",
         path: "/projects/other-project",
         roadmapPath: "/projects/other-project/ROADMAP.md",
         sessionPath: null,
@@ -148,6 +150,7 @@ describe("getRoadmapBySlug", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "No Roadmap",
+        slug: "no-roadmap",
         path: "/projects/no-roadmap",
         roadmapPath: null,
         sessionPath: "/projects/no-roadmap/SESSION_PROGRESS.md",
@@ -163,6 +166,7 @@ describe("getRoadmapBySlug", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "With Session",
+        slug: "with-session",
         path: "/projects/with-session",
         roadmapPath: "/projects/with-session/ROADMAP.md",
         sessionPath: "/projects/with-session/SESSION_PROGRESS.md",
@@ -205,6 +209,7 @@ describe("getRoadmapBySlug", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "No Session",
+        slug: "no-session",
         path: "/projects/no-session",
         roadmapPath: "/projects/no-session/ROADMAP.md",
         sessionPath: null,
@@ -228,11 +233,12 @@ describe("getRoadmapBySlug", () => {
     expect(result!.sessionRefs).toEqual({});
   });
 
-  it("derives slug from directory basename, not frontmatter", async () => {
+  it("derives slug from project slug field, not directory basename or frontmatter", async () => {
     // The project path ends with "my-dir-name" but frontmatter says "Different Name"
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Different Name",
+        slug: "different-name",
         path: "/projects/my-dir-name",
         roadmapPath: "/projects/my-dir-name/ROADMAP.md",
         sessionPath: null,
@@ -251,13 +257,13 @@ describe("getRoadmapBySlug", () => {
       preserved: {},
     });
 
-    // Look up by directory basename, not by frontmatter project name
-    const result = await getRoadmapBySlug("my-dir-name");
+    // Look up by slug field, not by directory basename or frontmatter project name
+    const result = await getRoadmapBySlug("different-name");
     expect(result).not.toBeNull();
     expect(result!.projectName).toBe("Different Name");
 
-    // Looking up by frontmatter name should NOT work
-    const resultByName = await getRoadmapBySlug("Different Name");
-    expect(resultByName).toBeNull();
+    // Looking up by directory basename should NOT work
+    const resultByDir = await getRoadmapBySlug("my-dir-name");
+    expect(resultByDir).toBeNull();
   });
 });

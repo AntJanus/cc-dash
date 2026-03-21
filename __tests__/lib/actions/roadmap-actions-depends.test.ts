@@ -127,6 +127,7 @@ function setupMocks(roadmap?: RoadmapFile, preserved?: RoadmapParseResult) {
   mockDiscoverProjects.mockResolvedValue([
     {
       name: "Test Project",
+      slug: "test-project",
       path: "/projects/test-project",
       roadmapPath: "/projects/test-project/ROADMAP.md",
       sessionPath: null,

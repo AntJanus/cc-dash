@@ -36,6 +36,13 @@ vi.mock("node:fs/promises", async (importOriginal) => {
   };
 });
 
+const { mockRevalidatePath } = vi.hoisted(() => ({
+  mockRevalidatePath: vi.fn(),
+}));
+vi.mock("next/cache", () => ({
+  revalidatePath: mockRevalidatePath,
+}));
+
 // Import AFTER mocks
 import { updateSessionStatus } from "@/lib/actions/update-session-status";
 
@@ -90,6 +97,7 @@ describe("updateSessionStatus", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Test Project",
+        slug: "test-project",
         path: "/projects/test-project",
         roadmapPath: null,
         sessionPath: "/projects/test-project/SESSION_PROGRESS.md",
@@ -109,6 +117,7 @@ describe("updateSessionStatus", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Test Project",
+        slug: "test-project",
         path: "/projects/test-project",
         roadmapPath: null,
         sessionPath: "/projects/test-project/SESSION_PROGRESS.md",
@@ -142,6 +151,13 @@ describe("updateSessionStatus", () => {
     expect(filePath).toBe("/projects/test-project/SESSION_PROGRESS.md");
     expect(updatedData.status).toBe("completed");
     expect(preservedArg).toEqual(preserved);
+
+    // Verify revalidation of aggregate paths
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/activity");
+    expect(mockRevalidatePath).toHaveBeenCalledWith(
+      "/project/test-project/session",
+    );
   });
 
   it("writes back atomically with preserved content", async () => {
@@ -157,6 +173,7 @@ describe("updateSessionStatus", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Test Project",
+        slug: "test-project",
         path: "/projects/test-project",
         roadmapPath: null,
         sessionPath: "/projects/test-project/SESSION_PROGRESS.md",
@@ -190,6 +207,7 @@ describe("updateSessionStatus", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Test Project",
+        slug: "test-project",
         path: "/projects/test-project",
         roadmapPath: null,
         sessionPath: "/projects/test-project/SESSION_PROGRESS.md",
@@ -209,6 +227,7 @@ describe("updateSessionStatus", () => {
       mockDiscoverProjects.mockResolvedValue([
         {
           name: "Test Project",
+          slug: "test-project",
           path: "/projects/test-project",
           roadmapPath: null,
           sessionPath: "/projects/test-project/SESSION_PROGRESS.md",
@@ -236,6 +255,7 @@ describe("updateSessionStatus", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "Test Project",
+        slug: "test-project",
         path: "/projects/test-project",
         roadmapPath: null,
         sessionPath: "/projects/test-project/SESSION_PROGRESS.md",

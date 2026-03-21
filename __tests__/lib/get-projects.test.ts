@@ -247,6 +247,7 @@ describe("sorting", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "older-project",
+        slug: "older-project",
         path: "/projects/older-project",
         roadmapPath: "/projects/older-project/ROADMAP.md",
         sessionPath: null,
@@ -254,6 +255,7 @@ describe("sorting", () => {
       },
       {
         name: "newer-project",
+        slug: "newer-project",
         path: "/projects/newer-project",
         roadmapPath: "/projects/newer-project/ROADMAP.md",
         sessionPath: null,
@@ -316,6 +318,7 @@ describe("sorting", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "no-timestamp",
+        slug: "no-timestamp",
         path: "/projects/no-timestamp",
         roadmapPath: null,
         sessionPath: null,
@@ -323,6 +326,7 @@ describe("sorting", () => {
       },
       {
         name: "has-timestamp",
+        slug: "has-timestamp",
         path: "/projects/has-timestamp",
         roadmapPath: "/projects/has-timestamp/ROADMAP.md",
         sessionPath: null,
@@ -373,6 +377,7 @@ describe("getProjectCards aggregation", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "good-project",
+        slug: "good-project",
         path: "/projects/good-project",
         roadmapPath: "/projects/good-project/ROADMAP.md",
         sessionPath: null,
@@ -380,6 +385,7 @@ describe("getProjectCards aggregation", () => {
       },
       {
         name: "bad-project",
+        slug: "bad-project",
         path: "/projects/bad-project",
         roadmapPath: "/projects/bad-project/ROADMAP.md",
         sessionPath: null,
@@ -457,6 +463,7 @@ describe("getProjectCards aggregation", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "my-project",
+        slug: "my-project",
         path: "/projects/my-project",
         roadmapPath: "/projects/my-project/ROADMAP.md",
         sessionPath: null,
@@ -517,6 +524,7 @@ describe("getProjectCards aggregation", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "empty-project",
+        slug: "empty-project",
         path: "/projects/empty-project",
         roadmapPath: null,
         sessionPath: null,
@@ -548,6 +556,7 @@ describe("getProjectCards aggregation", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "stale-project",
+        slug: "stale-project",
         path: "/projects/stale-project",
         roadmapPath: "/projects/stale-project/ROADMAP.md",
         sessionPath: null,
@@ -555,6 +564,7 @@ describe("getProjectCards aggregation", () => {
       },
       {
         name: "fresh-project",
+        slug: "fresh-project",
         path: "/projects/fresh-project",
         roadmapPath: "/projects/fresh-project/ROADMAP.md",
         sessionPath: null,
@@ -632,6 +642,7 @@ describe("getProjectCards aggregation", () => {
     mockDiscoverProjects.mockResolvedValue([
       {
         name: "active-project",
+        slug: "active-project",
         path: "/projects/active-project",
         roadmapPath: "/projects/active-project/ROADMAP.md",
         sessionPath: "/projects/active-project/SESSION_PROGRESS.md",

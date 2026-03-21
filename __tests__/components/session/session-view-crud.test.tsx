@@ -86,12 +86,6 @@ function makeSession(overrides: Partial<SessionFile> = {}): SessionFile {
   };
 }
 
-const defaultTaskNames: Record<string, string> = {
-  t_a1b2c: "Task Alpha",
-  t_d3e4f: "Task Beta",
-  t_g5h6i: "Task Gamma",
-};
-
 const defaultVerificationSections: UnknownSection[] = [];
 
 function renderCrudView(overrides: Partial<SessionFile> = {}) {
@@ -100,7 +94,6 @@ function renderCrudView(overrides: Partial<SessionFile> = {}) {
       session={makeSession(overrides)}
       slug="test-project"
       verificationSections={defaultVerificationSections}
-      taskNames={defaultTaskNames}
     />,
   );
 }

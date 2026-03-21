@@ -22,7 +22,6 @@ export default async function SessionPage({ params }: PageProps) {
       session={data.session}
       slug={slug}
       verificationSections={data.verificationSections}
-      taskNames={data.taskNames}
     />
   );
 }

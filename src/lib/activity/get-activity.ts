@@ -1,5 +1,4 @@
 import { readFile } from "node:fs/promises";
-import { basename } from "node:path";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects, parseRoadmap, parseSession } from "@/lib/fs";
 import type { ActivityEvent } from "./types";
@@ -16,7 +15,7 @@ export async function getRecentActivity(limit = 50): Promise<ActivityEvent[]> {
 
   await Promise.allSettled(
     discovered.map(async (project) => {
-      const slug = basename(project.path);
+      const slug = project.slug;
       const name = project.name;
 
       // Extract roadmap events

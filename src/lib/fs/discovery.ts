@@ -7,6 +7,7 @@
  * of DiscoveredProject records for downstream consumption.
  */
 
+import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, join, resolve } from "node:path";
@@ -17,6 +18,8 @@ import type { Config } from "@/lib/schemas/config";
 export interface DiscoveredProject {
   /** From frontmatter `project` field or directory name */
   name: string;
+  /** URL-safe slug derived from name, unique across all discovered projects */
+  slug: string;
   /** Absolute path to project directory */
   path: string;
   /** Absolute path to ROADMAP.md if found with valid schema */
@@ -25,6 +28,18 @@ export interface DiscoveredProject {
   sessionPath: string | null;
   /** Whether from explicit_projects config */
   isExplicit: boolean;
+}
+
+/**
+ * Convert a string to a URL-safe slug.
+ * Lowercases, replaces non-alphanumeric characters with hyphens,
+ * collapses consecutive hyphens, and trims leading/trailing hyphens.
+ */
+export function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 /** Valid cc-dash schema identifiers */
@@ -165,6 +180,7 @@ export async function discoverProjects(
 
       projects.set(candidateDir, {
         name,
+        slug: slugify(name),
         path: candidateDir,
         roadmapPath: roadmapInfo ? roadmapFile : null,
         sessionPath: sessionInfo ? sessionFile : null,
@@ -193,11 +209,38 @@ export async function discoverProjects(
 
     projects.set(resolvedPath, {
       name: explicit.name,
+      slug: slugify(explicit.name),
       path: resolvedPath,
       roadmapPath: roadmapInfo ? roadmapFile : null,
       sessionPath: sessionInfo ? sessionFile : null,
       isExplicit: true,
     });
+  }
+
+  // Phase 3: Resolve slug collisions
+  const slugCounts = new Map<string, DiscoveredProject[]>();
+  for (const project of projects.values()) {
+    const existing = slugCounts.get(project.slug);
+    if (existing) {
+      existing.push(project);
+    } else {
+      slugCounts.set(project.slug, [project]);
+    }
+  }
+
+  for (const [slug, group] of slugCounts) {
+    if (group.length <= 1) continue;
+    // First project keeps the original slug, subsequent ones get a hash suffix
+    for (let i = 1; i < group.length; i++) {
+      const hash = createHash("md5")
+        .update(group[i].path)
+        .digest("hex")
+        .slice(0, 4);
+      group[i].slug = `${slug}-${hash}`;
+      console.warn(
+        `cc-dash: slug collision for "${slug}" — "${group[i].name}" at ${group[i].path} renamed to "${group[i].slug}"`,
+      );
+    }
   }
 
   return Array.from(projects.values());

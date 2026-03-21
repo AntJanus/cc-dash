@@ -6,11 +6,11 @@
  * then verifies discoverProjects finds/skips them correctly.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { discoverProjects } from "@/lib/fs/discovery";
+import { discoverProjects, slugify } from "@/lib/fs/discovery";
 import type { Config } from "@/lib/schemas/config";
 
 /** Fixture ROADMAP.md with valid cc-dash/roadmap@1 schema */
@@ -345,5 +345,101 @@ last_updated: "2026-01-01T00:00:00Z"
       expect(results[0].roadmapPath).toBeNull();
       expect(results[0].sessionPath).toBeNull();
     });
+  });
+
+  // ---- DISC-04: Slug generation and collision detection ----
+
+  describe("slug", () => {
+    it("derives slug from project name", async () => {
+      const projectDir = join(tempDir, "my-project");
+      await mkdir(projectDir, { recursive: true });
+      await writeFile(join(projectDir, "ROADMAP.md"), VALID_ROADMAP);
+
+      const config = makeConfig({ scan_dirs: [tempDir] });
+      const results = await discoverProjects(config);
+      expect(results).toHaveLength(1);
+      // name is "test-project" from frontmatter, slug matches
+      expect(results[0].slug).toBe("test-project");
+    });
+
+    it("generates slug from directory name when no frontmatter project field", async () => {
+      const projectDir = join(tempDir, "My Cool Project");
+      await mkdir(projectDir, { recursive: true });
+      await writeFile(
+        join(projectDir, "ROADMAP.md"),
+        `---
+schema: cc-dash/roadmap@1
+description: No project field
+last_updated: "2026-01-01T00:00:00Z"
+---
+`,
+      );
+
+      const config = makeConfig({ scan_dirs: [tempDir] });
+      const results = await discoverProjects(config);
+      expect(results).toHaveLength(1);
+      expect(results[0].slug).toBe("my-cool-project");
+    });
+
+    it("resolves slug collisions by appending hash suffix to subsequent projects", async () => {
+      // Create two scan roots, each with a project that produces the same slug
+      const root1 = join(tempDir, "root1");
+      const root2 = join(tempDir, "root2");
+      const project1 = join(root1, "project-a");
+      const project2 = join(root2, "project-b");
+      await mkdir(project1, { recursive: true });
+      await mkdir(project2, { recursive: true });
+
+      // Both have the same frontmatter project name → same slug
+      await writeFile(join(project1, "ROADMAP.md"), VALID_ROADMAP);
+      await writeFile(join(project2, "ROADMAP.md"), VALID_ROADMAP);
+
+      const config = makeConfig({ scan_dirs: [root1, root2] });
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      const results = await discoverProjects(config);
+      expect(results).toHaveLength(2);
+
+      const slugs = results.map((r) => r.slug);
+      // All slugs must be unique
+      expect(new Set(slugs).size).toBe(2);
+      // First one keeps original slug
+      expect(slugs[0]).toBe("test-project");
+      // Second one gets hash suffix
+      expect(slugs[1]).toMatch(/^test-project-[a-f0-9]{4}$/);
+      // Warning was logged
+      expect(warnSpy).toHaveBeenCalledOnce();
+
+      warnSpy.mockRestore();
+    });
+
+    it("assigns slug to explicit projects based on their name", async () => {
+      const explicitDir = join(tempDir, "some-dir");
+      await mkdir(explicitDir, { recursive: true });
+
+      const config = makeConfig({
+        explicit_projects: [{ path: explicitDir, name: "My Awesome Project" }],
+      });
+      const results = await discoverProjects(config);
+      expect(results).toHaveLength(1);
+      expect(results[0].slug).toBe("my-awesome-project");
+    });
+  });
+});
+
+// ---- slugify unit tests ----
+
+describe("slugify", () => {
+  it.each([
+    ["test-project", "test-project"],
+    ["My Project", "my-project"],
+    ["Hello World 123", "hello-world-123"],
+    ["  leading-trailing  ", "leading-trailing"],
+    ["UPPERCASE", "uppercase"],
+    ["special!@#chars", "special-chars"],
+    ["multiple---hyphens", "multiple-hyphens"],
+    ["a/b/c", "a-b-c"],
+  ])("slugify(%j) → %j", (input, expected) => {
+    expect(slugify(input)).toBe(expected);
   });
 });

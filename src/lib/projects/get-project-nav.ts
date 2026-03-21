@@ -1,4 +1,3 @@
-import { basename } from "node:path";
 import { readFile } from "node:fs/promises";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects, parseSession } from "@/lib/fs";
@@ -32,7 +31,7 @@ export async function getProjectNav(): Promise<ProjectNavItem[]> {
         }
       }
       return {
-        slug: basename(p.path),
+        slug: p.slug,
         name: p.name,
         hasActiveSession,
       };

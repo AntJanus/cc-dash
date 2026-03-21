@@ -124,6 +124,7 @@ function setupMocks(session?: SessionFile, preserved?: SessionParseResult) {
   mockDiscoverProjects.mockResolvedValue([
     {
       name: "Test Project",
+      slug: "test-project",
       path: "/projects/test-project",
       roadmapPath: "/projects/test-project/ROADMAP.md",
       sessionPath: "/projects/test-project/SESSION_PROGRESS.md",

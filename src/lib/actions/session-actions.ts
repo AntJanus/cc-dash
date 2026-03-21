@@ -13,14 +13,13 @@
  */
 
 import { readFile } from "node:fs/promises";
-import { basename } from "node:path";
-import { revalidatePath } from "next/cache";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects, parseSession, writeSessionFile } from "@/lib/fs";
 import type { SessionFile } from "@/lib/schemas/session";
 import type { Result } from "@/lib/schemas/shared";
 import type { SessionParseResult } from "@/lib/fs/types";
 import { generateTaskId } from "@/lib/utils/generate-id";
+import { revalidateProjectPaths } from "@/lib/actions/revalidate-helpers";
 
 // --- Shared helper ---
 
@@ -36,7 +35,7 @@ async function resolveSession(
 > {
   const config = await loadConfig();
   const projects = await discoverProjects(config);
-  const project = projects.find((p) => basename(p.path) === slug);
+  const project = projects.find((p) => p.slug === slug);
   if (!project || !project.sessionPath) {
     return {
       success: false,
@@ -119,7 +118,7 @@ export async function toggleTaskCheckbox(
   const writeResult = await writeSessionFile(filePath, data, preserved);
   if (!writeResult.success) return writeResult;
 
-  revalidatePath(`/project/${slug}/session`);
+  revalidateProjectPaths(slug, "session");
 
   return { success: true, data: undefined };
 }
@@ -188,7 +187,7 @@ export async function addSessionTask(
   const writeResult = await writeSessionFile(filePath, data, preserved);
   if (!writeResult.success) return writeResult;
 
-  revalidatePath(`/project/${slug}/session`);
+  revalidateProjectPaths(slug, "session");
 
   return { success: true, data: { id } };
 }
@@ -256,7 +255,7 @@ export async function updateSessionTask(
   const writeResult = await writeSessionFile(filePath, data, preserved);
   if (!writeResult.success) return writeResult;
 
-  revalidatePath(`/project/${slug}/session`);
+  revalidateProjectPaths(slug, "session");
 
   return { success: true, data: undefined };
 }
@@ -322,7 +321,7 @@ export async function deleteSessionTask(
   const writeResult = await writeSessionFile(filePath, data, preserved);
   if (!writeResult.success) return writeResult;
 
-  revalidatePath(`/project/${slug}/session`);
+  revalidateProjectPaths(slug, "session");
 
   return { success: true, data: undefined };
 }
@@ -382,7 +381,7 @@ export async function reorderSessionTasks(
   const writeResult = await writeSessionFile(filePath, data, preserved);
   if (!writeResult.success) return writeResult;
 
-  revalidatePath(`/project/${slug}/session`);
+  revalidateProjectPaths(slug, "session");
 
   return { success: true, data: undefined };
 }
@@ -411,7 +410,7 @@ export async function updateCurrentStatus(
   const writeResult = await writeSessionFile(filePath, data, preserved);
   if (!writeResult.success) return writeResult;
 
-  revalidatePath(`/project/${slug}/session`);
+  revalidateProjectPaths(slug, "session");
 
   return { success: true, data: undefined };
 }

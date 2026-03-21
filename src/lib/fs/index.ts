@@ -51,5 +51,5 @@ export {
 } from "./write-file";
 
 // Discovery (Phase 03-02)
-export { discoverProjects, type DiscoveredProject } from "./discovery";
+export { discoverProjects, slugify, type DiscoveredProject } from "./discovery";
 export { DiscoveryCache } from "./discovery-cache";

@@ -47,6 +47,7 @@ function makeProject(
 ) {
   return {
     name: overrides.name ?? "TestProject",
+    slug: "test-project",
     path: overrides.path ?? "/projects/test-project",
     roadmapPath: overrides.roadmapPath ?? null,
     sessionPath: overrides.sessionPath ?? null,

@@ -13,8 +13,6 @@
  */
 
 import { readFile } from "node:fs/promises";
-import { basename } from "node:path";
-import { revalidatePath } from "next/cache";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects, parseRoadmap, writeRoadmapFile } from "@/lib/fs";
 import type { RoadmapFile, RoadmapCategory } from "@/lib/schemas/roadmap";
@@ -25,6 +23,7 @@ import {
   generateRoadmapId,
   generateCategorySlug,
 } from "@/lib/utils/generate-id";
+import { revalidateProjectPaths } from "@/lib/actions/revalidate-helpers";
 
 // --- Shared helper ---
 
@@ -40,7 +39,7 @@ async function resolveRoadmap(
 > {
   const config = await loadConfig();
   const projects = await discoverProjects(config);
-  const project = projects.find((p) => basename(p.path) === slug);
+  const project = projects.find((p) => p.slug === slug);
   if (!project || !project.roadmapPath) {
     return {
       success: false,
@@ -164,7 +163,7 @@ export async function addRoadmapItem(
   const writeResult = await writeRoadmapFile(filePath, data, preserved);
   if (!writeResult.success) return writeResult;
 
-  revalidatePath(`/project/${slug}/roadmap`);
+  revalidateProjectPaths(slug, "roadmap");
 
   return { success: true, data: { id } };
 }
@@ -288,7 +287,7 @@ export async function updateRoadmapItem(
   const writeResult = await writeRoadmapFile(filePath, data, preserved);
   if (!writeResult.success) return writeResult;
 
-  revalidatePath(`/project/${slug}/roadmap`);
+  revalidateProjectPaths(slug, "roadmap");
 
   return { success: true, data: undefined };
 }
@@ -352,7 +351,7 @@ export async function deleteRoadmapItem(
   const writeResult = await writeRoadmapFile(filePath, data, preserved);
   if (!writeResult.success) return writeResult;
 
-  revalidatePath(`/project/${slug}/roadmap`);
+  revalidateProjectPaths(slug, "roadmap");
 
   return { success: true, data: undefined };
 }
@@ -429,7 +428,7 @@ export async function reorderRoadmapItems(
   const writeResult = await writeRoadmapFile(filePath, data, preserved);
   if (!writeResult.success) return writeResult;
 
-  revalidatePath(`/project/${slug}/roadmap`);
+  revalidateProjectPaths(slug, "roadmap");
 
   return { success: true, data: undefined };
 }
@@ -493,7 +492,7 @@ export async function addRoadmapCategory(
   const writeResult = await writeRoadmapFile(filePath, data, preserved);
   if (!writeResult.success) return writeResult;
 
-  revalidatePath(`/project/${slug}/roadmap`);
+  revalidateProjectPaths(slug, "roadmap");
 
   return { success: true, data: { slug: categorySlug } };
 }
@@ -537,7 +536,7 @@ export async function deleteRoadmapCategory(
   const writeResult = await writeRoadmapFile(filePath, data, preserved);
   if (!writeResult.success) return writeResult;
 
-  revalidatePath(`/project/${slug}/roadmap`);
+  revalidateProjectPaths(slug, "roadmap");
 
   return { success: true, data: undefined };
 }

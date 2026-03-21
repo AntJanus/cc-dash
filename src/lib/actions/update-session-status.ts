@@ -11,11 +11,11 @@
  */
 
 import { readFile } from "node:fs/promises";
-import { basename } from "node:path";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects, parseSession, writeSessionFile } from "@/lib/fs";
 import { SessionStatus } from "@/lib/schemas/session";
 import type { Result } from "@/lib/schemas/shared";
+import { revalidateProjectPaths } from "@/lib/actions/revalidate-helpers";
 
 /**
  * Update the status of a project's session file.
@@ -42,7 +42,7 @@ export async function updateSessionStatus(
   // Resolve session file path through discovery (safe path resolution)
   const config = await loadConfig();
   const projects = await discoverProjects(config);
-  const project = projects.find((p) => basename(p.path) === slug);
+  const project = projects.find((p) => p.slug === slug);
   if (!project || !project.sessionPath) {
     return {
       success: false,
@@ -65,5 +65,13 @@ export async function updateSessionStatus(
   const updated = { ...result.data, status: parsed.data };
 
   // Write atomically with preserved content
-  return writeSessionFile(project.sessionPath, updated, result.preserved);
+  const writeResult = await writeSessionFile(
+    project.sessionPath,
+    updated,
+    result.preserved,
+  );
+  if (writeResult.success) {
+    revalidateProjectPaths(slug, "session");
+  }
+  return writeResult;
 }

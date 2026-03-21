@@ -7,7 +7,6 @@
  */
 
 import { readFile } from "node:fs/promises";
-import { basename } from "node:path";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects, parseSession } from "@/lib/fs";
 import type { SessionFile } from "@/lib/schemas/session";
@@ -20,8 +19,6 @@ export interface SessionPageData {
   verificationSections: UnknownSection[];
   /** Preserved parse result for write-back (status toggle) */
   preserved: SessionParseResult;
-  /** Maps task ID -> task description for reference resolution */
-  taskNames: Record<string, string>;
   /** Display name of the project */
   projectName: string;
   /** Absolute path to the session file (for server action use) */
@@ -31,9 +28,8 @@ export interface SessionPageData {
 /**
  * Load session data for a project identified by its URL slug.
  *
- * The slug is derived from `basename(project.path)` (the directory name),
- * NOT from the frontmatter `project` field. This matches the dashboard
- * home page's slug derivation in get-projects.ts.
+ * The slug is derived from the project name (via slugify) and set during
+ * discovery. This matches the dashboard home page's slug in get-projects.ts.
  *
  * Returns null if: slug matches no project, project has no session file,
  * or session file fails to parse.
@@ -43,18 +39,12 @@ export async function getSessionBySlug(
 ): Promise<SessionPageData | null> {
   const config = await loadConfig();
   const projects = await discoverProjects(config);
-  const project = projects.find((p) => basename(p.path) === slug);
+  const project = projects.find((p) => p.slug === slug);
   if (!project || !project.sessionPath) return null;
 
   const raw = await readFile(project.sessionPath, "utf-8");
   const result = parseSession(raw, project.sessionPath);
   if (!result.success) return null;
-
-  // Build task name lookup for dependency/ref resolution
-  const taskNames: Record<string, string> = {};
-  for (const task of result.data.tasks) {
-    taskNames[task.id] = task.description;
-  }
 
   // Extract verification sections from unknown sections
   const verificationSections = result.preserved.unknownSections.filter(
@@ -65,7 +55,6 @@ export async function getSessionBySlug(
     session: result.data,
     verificationSections,
     preserved: result.preserved,
-    taskNames,
     projectName: project.name,
     sessionFilePath: project.sessionPath,
   };

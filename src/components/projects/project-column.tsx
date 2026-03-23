@@ -33,7 +33,7 @@ export function ProjectColumn({
         <button
           type="button"
           onClick={() => setCollapsed((c) => !c)}
-          className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+          className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-sm font-medium text-muted-foreground hover:text-foreground"
         >
           {items.length}
           {collapsed ? (
@@ -47,7 +47,7 @@ export function ProjectColumn({
       {!collapsed && (
         <div className="flex max-h-[calc(100vh-280px)] flex-col gap-2 overflow-y-auto">
           {items.length === 0 ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">
+            <p className="py-4 text-center text-base text-muted-foreground">
               No projects
             </p>
           ) : (

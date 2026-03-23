@@ -57,7 +57,7 @@ export function RoadmapColumn({
   const content = (
     <div className={enableDnd ? "min-h-[120px]" : ""}>
       {items.length === 0 ? (
-        <p className="py-4 text-center text-sm text-muted-foreground">
+        <p className="py-4 text-center text-base text-muted-foreground">
           No items
         </p>
       ) : (
@@ -88,8 +88,8 @@ export function RoadmapColumn({
       }`}
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">{label}</h3>
-        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+        <h3 className="text-base font-semibold">{label}</h3>
+        <span className="rounded-full bg-muted px-2 py-0.5 text-sm font-medium text-muted-foreground">
           {items.length}
         </span>
       </div>

@@ -44,7 +44,7 @@ export function IdeaCard({ idea }: IdeaCardProps) {
               {idea.stack.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-md bg-primary/8 px-2 py-0.5 text-xs text-primary"
+                  className="rounded-md bg-primary/8 px-2 py-0.5 text-sm text-primary"
                 >
                   {tag}
                 </span>
@@ -53,13 +53,13 @@ export function IdeaCard({ idea }: IdeaCardProps) {
           )}
 
           {getTeaser(idea.body) && (
-            <p className="line-clamp-3 text-sm text-muted-foreground">
+            <p className="line-clamp-3 text-base text-muted-foreground">
               {getTeaser(idea.body)}
             </p>
           )}
 
           {idea.path && (
-            <p className="text-xs text-muted-foreground">{idea.path}</p>
+            <p className="text-sm text-muted-foreground">{idea.path}</p>
           )}
         </CardContent>
       </Card>

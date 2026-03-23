@@ -64,7 +64,7 @@ function renderContent(content: string) {
 
     if (isList) {
       return (
-        <ul key={blockIdx} className="list-disc space-y-1 pl-5 text-sm">
+        <ul key={blockIdx} className="list-disc space-y-1 pl-5 text-base">
           {nonEmptyLines.map((line, lineIdx) => (
             <li key={lineIdx}>{line.replace(/^\s*- /, "")}</li>
           ))}
@@ -73,7 +73,7 @@ function renderContent(content: string) {
     }
 
     return (
-      <p key={blockIdx} className="text-sm">
+      <p key={blockIdx} className="text-base">
         {block.trim()}
       </p>
     );
@@ -95,7 +95,7 @@ export function IdeaDetail({ idea }: IdeaDetailProps) {
               {idea.stack.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded bg-muted px-2 py-0.5 text-xs"
+                  className="rounded bg-muted px-2 py-0.5 text-sm"
                 >
                   {tag}
                 </span>
@@ -104,7 +104,7 @@ export function IdeaDetail({ idea }: IdeaDetailProps) {
           )}
         </div>
         {idea.path && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             Project:{" "}
             <Link href={`/project/${idea.path}`} className="underline">
               {idea.path}

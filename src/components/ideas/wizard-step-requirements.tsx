@@ -20,7 +20,7 @@ export function WizardStepRequirements({
 }: WizardStepRequirementsProps) {
   return (
     <div className="space-y-4">
-      <p className="text-xs text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         List the key requirements or features this project must have.
       </p>
       <WizardListInput

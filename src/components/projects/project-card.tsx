@@ -57,12 +57,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <CardContent>
           <div className="flex items-center gap-3">
             <Progress value={progressValue} className="flex-1" />
-            <span className="shrink-0 text-sm text-muted-foreground">
+            <span className="shrink-0 text-base text-muted-foreground">
               {project.doneCount}/{project.totalCount}
             </span>
           </div>
           {project.hasActiveSession && project.sessionStatusText && (
-            <p className="mt-1 text-sm text-green-700 dark:text-green-400">
+            <p className="mt-1 text-base text-green-700 dark:text-green-400">
               {project.sessionStatusText}
             </p>
           )}
@@ -70,7 +70,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
         <CardFooter>
           <div className="flex w-full items-center justify-between">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-base text-muted-foreground">
               {project.lastUpdated ? (
                 <RelativeTime iso={project.lastUpdated} />
               ) : (

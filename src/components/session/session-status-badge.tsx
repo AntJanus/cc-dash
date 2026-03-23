@@ -71,7 +71,7 @@ export function SessionStatusBadge({
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
-          "inline-flex h-5 items-center justify-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap",
+          "inline-flex h-5 items-center justify-center gap-1 rounded-full px-2 py-0.5 text-sm font-medium whitespace-nowrap",
           config.className,
         )}
       >

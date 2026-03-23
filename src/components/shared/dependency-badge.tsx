@@ -22,7 +22,7 @@ export function DependencyBadge({ depends, itemNames }: DependencyBadgeProps) {
       <Tooltip>
         <TooltipTrigger
           render={
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground" />
+            <span className="inline-flex items-center gap-1 text-sm text-muted-foreground" />
           }
         >
           <Link2 className="h-3 w-3" />

@@ -28,7 +28,7 @@ export function CompletedWorkSection({
           className="flex items-start gap-3 border-l-2 border-l-green-500 pl-3"
         >
           <div className="flex-1">
-            <div className="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="mb-1 flex items-center gap-2 text-sm text-muted-foreground">
               <RelativeTime iso={entry.timestamp} />
               <span className="font-medium">
                 {taskNames[entry.taskRef] ?? entry.taskRef}

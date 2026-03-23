@@ -79,7 +79,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
         {/* Personal section */}
         {isOpen && activeSessionProjects.length > 0 && (
           <div className="mb-3">
-            <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-sidebar-foreground/60">
+            <div className="px-3 py-1.5 text-sm font-semibold uppercase tracking-widest text-sidebar-foreground/60">
               Personal
             </div>
             <ul className="mt-1 space-y-0.5">
@@ -106,7 +106,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
 
         {/* Navigation */}
         {isOpen && (
-          <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-sidebar-foreground/60">
+          <div className="px-3 py-1.5 text-sm font-semibold uppercase tracking-widest text-sidebar-foreground/60">
             Navigation
           </div>
         )}
@@ -137,7 +137,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
             <button
               type="button"
               onClick={() => setProjectsExpanded((p) => !p)}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-sidebar-foreground/60 hover:text-sidebar-foreground"
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-sm font-semibold uppercase tracking-widest text-sidebar-foreground/60 hover:text-sidebar-foreground"
             >
               {projectsExpanded ? (
                 <ChevronDown className="h-3 w-3" />
@@ -189,7 +189,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
               <Moon className="h-4 w-4" />
             )}
             {isOpen && (
-              <span className="text-xs">
+              <span className="text-sm">
                 {theme === "dark" ? "Light" : "Dark"}
               </span>
             )}

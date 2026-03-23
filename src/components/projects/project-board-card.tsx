@@ -48,20 +48,20 @@ export function ProjectBoardCard({ project }: ProjectBoardCardProps) {
 
         <CardContent className="space-y-2">
           {project.description && (
-            <p className="line-clamp-1 text-sm text-muted-foreground">
+            <p className="line-clamp-1 text-base text-muted-foreground">
               {project.description}
             </p>
           )}
 
           <div className="flex items-center gap-2">
             <Progress value={progressValue} className="flex-1" />
-            <span className="shrink-0 text-sm text-muted-foreground">
+            <span className="shrink-0 text-base text-muted-foreground">
               {project.doneCount}/{project.totalCount}
             </span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-base text-muted-foreground">
               {project.lastUpdated ? (
                 <>
                   Updated <RelativeTime iso={project.lastUpdated} />

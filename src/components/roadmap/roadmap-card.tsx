@@ -143,7 +143,7 @@ export function RoadmapCard({
           )}
         </div>
         {(item.started || item.completed) && (
-          <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+          <div className="flex flex-col gap-0.5 text-sm text-muted-foreground">
             {item.started && <span>Started: {item.started}</span>}
             {item.completed && <span>Completed: {item.completed}</span>}
           </div>
@@ -152,7 +152,7 @@ export function RoadmapCard({
           <Link
             href={sessionUrl}
             data-testid="session-link"
-            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
           >
             View session
             <ExternalLink className="h-3 w-3" />
@@ -180,7 +180,7 @@ export function RoadmapCard({
           />
           <button
             type="button"
-            className="mt-2 text-xs text-muted-foreground hover:text-foreground"
+            className="mt-2 text-sm text-muted-foreground hover:text-foreground"
             onClick={() => setShowDepPicker(false)}
           >
             Done

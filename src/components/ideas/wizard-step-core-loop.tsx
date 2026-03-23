@@ -27,7 +27,7 @@ export function WizardStepCoreLoop({
         >
           Core Gameplay Loop
         </label>
-        <p className="mb-2 text-xs text-muted-foreground">
+        <p className="mb-2 text-sm text-muted-foreground">
           Describe the primary gameplay loop — what the player does repeatedly
           and why it stays engaging.
         </p>

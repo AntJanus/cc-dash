@@ -37,11 +37,11 @@ export function WizardStepReview({ data }: WizardStepReviewProps) {
           <span className="font-semibold">{data.title}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium">
+          <span className="rounded bg-muted px-2 py-0.5 text-sm font-medium">
             {data.projectType}
           </span>
           {data.stack.map((tech) => (
-            <span key={tech} className="rounded bg-muted px-2 py-0.5 text-xs">
+            <span key={tech} className="rounded bg-muted px-2 py-0.5 text-sm">
               {tech}
             </span>
           ))}

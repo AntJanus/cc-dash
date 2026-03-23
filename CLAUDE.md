@@ -89,6 +89,10 @@ Dashboard config lives at `~/.config/cc-dash/config.json`:
 }
 ```
 
+## Learnings
+
+- **No text-xs in dashboard UI** — `text-xs` (12px) must never be used for any content. Minimum is `text-sm` (14px). Card titles need `text-base` (16px)+. Page headings need `text-3xl` (30px)+. When user says "bigger", go 2 steps up, not 1. _(captured 2026-03-21)_
+
 ## Do Not
 
 - Do not use a database — files are the only state, this is a core architectural constraint

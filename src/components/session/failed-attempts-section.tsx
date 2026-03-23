@@ -22,7 +22,7 @@ export function FailedAttemptsSection({
           key={attempt.id}
           className="rounded-md border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/30"
         >
-          <div className="mb-1 text-xs font-medium text-muted-foreground">
+          <div className="mb-1 text-sm font-medium text-muted-foreground">
             {taskNames[attempt.taskRef] ?? attempt.taskRef}
           </div>
           <p className="text-sm">{attempt.description}</p>

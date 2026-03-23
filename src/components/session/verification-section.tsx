@@ -115,7 +115,7 @@ export function VerificationSection({
           )}
         >
           <h4 className="mb-1 text-sm font-medium">{block.heading}</h4>
-          <pre className="whitespace-pre-wrap text-xs text-muted-foreground">
+          <pre className="whitespace-pre-wrap text-sm text-muted-foreground">
             {block.content}
           </pre>
         </div>

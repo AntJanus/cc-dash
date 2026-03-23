@@ -61,7 +61,7 @@ export function IdeaMetadataEditor({
       <div>
         <label
           htmlFor="meta-status"
-          className="mb-1 block text-xs text-muted-foreground"
+          className="mb-1 block text-sm text-muted-foreground"
         >
           Status
         </label>
@@ -80,7 +80,7 @@ export function IdeaMetadataEditor({
       <div>
         <label
           htmlFor="meta-path"
-          className="mb-1 block text-xs text-muted-foreground"
+          className="mb-1 block text-sm text-muted-foreground"
         >
           Path
         </label>
@@ -95,7 +95,7 @@ export function IdeaMetadataEditor({
       <div>
         <label
           htmlFor="meta-stack"
-          className="mb-1 block text-xs text-muted-foreground"
+          className="mb-1 block text-sm text-muted-foreground"
         >
           Stack (comma-separated)
         </label>

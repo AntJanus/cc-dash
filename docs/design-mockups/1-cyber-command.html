@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cc-dash - Cyber Command Theme</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0a0e14;
+      --bg-secondary: #0d1117;
+      --bg-card: #131920;
+      --bg-card-hover: #1a2129;
+      --border-glow: #00d4ff;
+      --border-dim: #1a3040;
+      --text-primary: #e6f1ff;
+      --text-secondary: #7a8b9a;
+      --text-muted: #4a5568;
+      --accent-cyan: #00d4ff;
+      --accent-cyan-dim: rgba(0, 212, 255, 0.15);
+      --accent-orange: #ff6b35;
+      --accent-orange-dim: rgba(255, 107, 53, 0.15);
+      --accent-green: #00ff88;
+      --accent-green-dim: rgba(0, 255, 136, 0.15);
+      --accent-purple: #a855f7;
+      --gradient-glow: linear-gradient(135deg, rgba(0, 212, 255, 0.1), transparent);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-dim);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .sidebar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--accent-cyan) 0%, transparent 30%, transparent 70%, var(--accent-cyan) 100%);
+      opacity: 0.5;
+    }
+
+    .logo {
+      padding: 20px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 2px;
+      text-shadow: 0 0 20px var(--accent-cyan);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .logo span {
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .nav-section {
+      padding: 16px 12px;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      padding: 8px 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: var(--accent-cyan-dim);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--accent-cyan-dim);
+      color: var(--accent-cyan);
+      border-left: 2px solid var(--accent-cyan);
+      box-shadow: 0 0 15px var(--accent-cyan-dim);
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      opacity: 0.8;
+    }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-dim);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-secondary);
+    }
+
+    .header-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--text-secondary);
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 24px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 10px var(--accent-cyan-dim);
+    }
+
+    .stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    /* Content area */
+    .content {
+      flex: 1;
+      padding: 24px;
+      overflow: auto;
+      background: var(--gradient-glow);
+    }
+
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent-cyan);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 4px;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 8px var(--accent-cyan);
+    }
+
+    /* Project Grid */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    /* Cyber Card */
+    .cyber-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dim);
+      position: relative;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+
+    /* Angular corner clips */
+    .cyber-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      border-top: 2px solid var(--accent-cyan);
+      border-left: 2px solid var(--accent-cyan);
+    }
+
+    .cyber-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 12px;
+      height: 12px;
+      border-bottom: 2px solid var(--accent-cyan);
+      border-right: 2px solid var(--accent-cyan);
+    }
+
+    .cyber-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 30px var(--accent-cyan-dim), inset 0 0 30px var(--accent-cyan-dim);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Status badges */
+    .badge {
+      font-size: 10px;
+      padding: 4px 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: 1px solid;
+    }
+
+    .badge-active {
+      color: var(--accent-green);
+      border-color: var(--accent-green);
+      background: var(--accent-green-dim);
+      box-shadow: 0 0 10px var(--accent-green-dim);
+    }
+
+    .badge-stalled {
+      color: var(--accent-orange);
+      border-color: var(--accent-orange);
+      background: var(--accent-orange-dim);
+      box-shadow: 0 0 10px var(--accent-orange-dim);
+    }
+
+    .badge-complete {
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      background: var(--accent-cyan-dim);
+    }
+
+    /* Progress bar */
+    .progress-container {
+      margin-bottom: 12px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--border-dim);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+      box-shadow: 0 0 10px var(--accent-cyan);
+      transition: width 0.5s;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .session-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent-green);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--accent-green); }
+      50% { opacity: 0.5; box-shadow: 0 0 0 8px transparent; }
+    }
+
+    /* Activity panel */
+    .activity-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dim);
+      padding: 20px;
+      position: relative;
+    }
+
+    .activity-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      border-top: 2px solid var(--accent-orange);
+      border-left: 2px solid var(--accent-orange);
+    }
+
+    .activity-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      min-width: 80px;
+    }
+
+    .activity-content {
+      flex: 1;
+    }
+
+    .activity-project {
+      color: var(--accent-cyan);
+      font-weight: 500;
+    }
+
+    .activity-action {
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    /* Footer bar */
+    .footer-bar {
+      padding: 12px 24px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-dim);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .system-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--accent-green);
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">CC<span>-DASH</span></div>
+    <nav class="nav-section">
+      <div class="nav-label">Command</div>
+      <a href="#" class="nav-item active">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+        </svg>
+        All Projects
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+        Ideas
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+        Activity
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        Settings
+      </a>
+
+      <div class="nav-label" style="margin-top: 24px;">Active Missions</div>
+      <a href="#" class="nav-item">
+        <span class="pulse-dot"></span>
+        project-beta
+      </a>
+      <a href="#" class="nav-item">
+        <span class="pulse-dot"></span>
+        alpha-app
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-title">Project Command Center</div>
+      <div class="header-stats">
+        <div class="stat">
+          <div class="stat-value">23</div>
+          <div class="stat-label">Projects</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">7</div>
+          <div class="stat-label">Active</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">142</div>
+          <div class="stat-label">Tasks</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">68%</div>
+          <div class="stat-label">Complete</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="section-title">Active Projects</div>
+      <div class="project-grid">
+        <div class="cyber-card">
+          <div class="card-header">
+            <div class="card-title">project-beta</div>
+            <span class="badge badge-active">Active</span>
+          </div>
+          <div class="card-desc">Claude Code skill library and prompt templates for enhanced AI workflows</div>
+          <div class="progress-container">
+            <div class="progress-label">
+              <span>Progress</span>
+              <span>12/15</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 80%"></div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Updated 2h ago</span>
+            <span class="session-indicator">
+              <span class="pulse-dot"></span>
+              Session active
+            </span>
+          </div>
+        </div>
+
+        <div class="cyber-card">
+          <div class="card-header">
+            <div class="card-title">alpha-app</div>
+            <span class="badge badge-stalled">Stalled</span>
+          </div>
+          <div class="card-desc">Train puzzle game with React and PixiJS rendering engine</div>
+          <div class="progress-container">
+            <div class="progress-label">
+              <span>Progress</span>
+              <span>8/20</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 40%"></div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Updated 3d ago</span>
+            <span class="session-indicator">
+              <span class="pulse-dot"></span>
+              Session active
+            </span>
+          </div>
+        </div>
+
+        <div class="cyber-card">
+          <div class="card-header">
+            <div class="card-title">project-alpha</div>
+            <span class="badge badge-active">Active</span>
+          </div>
+          <div class="card-desc">Go TUI for tmux session management with fuzzy search</div>
+          <div class="progress-container">
+            <div class="progress-label">
+              <span>Progress</span>
+              <span>18/22</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 82%"></div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Updated 5h ago</span>
+          </div>
+        </div>
+
+        <div class="cyber-card">
+          <div class="card-header">
+            <div class="card-title">beta-tracker</div>
+            <span class="badge badge-complete">Complete</span>
+          </div>
+          <div class="card-desc">FastAPI backend for personal finance tracking with React frontend</div>
+          <div class="progress-container">
+            <div class="progress-label">
+              <span>Progress</span>
+              <span>25/25</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 100%"></div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Updated 1w ago</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Recent Activity</div>
+      <div class="activity-panel">
+        <div class="activity-item">
+          <div class="activity-time">14:32</div>
+          <div class="activity-content">
+            <span class="activity-project">project-beta</span>
+            <span class="activity-action"> - Completed "Add prompt caching"</span>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-time">11:15</div>
+          <div class="activity-content">
+            <span class="activity-project">alpha-app</span>
+            <span class="activity-action"> - Started session "Fix save migration"</span>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-time">Yesterday</div>
+          <div class="activity-content">
+            <span class="activity-project">project-alpha</span>
+            <span class="activity-action"> - Completed milestone "v1.2 Release"</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer-bar">
+      <div class="system-status">
+        <span class="status-dot"></span>
+        System operational
+      </div>
+      <div>Last sync: 2 min ago</div>
+    </footer>
+  </main>
+</body>
+</html>

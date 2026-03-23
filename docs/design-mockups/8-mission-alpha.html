@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cc-dash - Mission Alpha Theme</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-deep: #0a0d12;
+      --bg-panel: #0e1219;
+      --bg-card: #131921;
+      --bg-elevated: #1a212c;
+      --bg-hover: #1e2633;
+      --border: #1e2836;
+      --border-light: #2a3545;
+      --text-primary: #e8edf5;
+      --text-secondary: #8b9bb4;
+      --text-muted: #5a6a82;
+
+      /* Accent colors */
+      --accent-teal: #14b8a6;
+      --accent-teal-dim: rgba(20, 184, 166, 0.12);
+      --accent-teal-glow: rgba(20, 184, 166, 0.3);
+      --accent-blue: #3b82f6;
+      --accent-blue-dim: rgba(59, 130, 246, 0.12);
+      --accent-emerald: #10b981;
+      --accent-emerald-dim: rgba(16, 185, 129, 0.12);
+      --accent-amber: #f59e0b;
+      --accent-amber-dim: rgba(245, 158, 11, 0.12);
+      --accent-red: #ef4444;
+      --accent-red-dim: rgba(239, 68, 68, 0.12);
+      --accent-violet: #8b5cf6;
+      --accent-violet-dim: rgba(139, 92, 246, 0.12);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top navigation */
+    .top-nav {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      height: 48px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      height: 100%;
+    }
+
+    .nav-tab {
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-secondary);
+    }
+
+    .nav-tab.active {
+      color: var(--accent-teal);
+      border-bottom-color: var(--accent-teal);
+    }
+
+    .nav-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--accent-teal), var(--accent-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+    }
+
+    /* Main layout */
+    .main-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 200px 1fr 300px;
+      min-height: 0;
+    }
+
+    /* Left sidebar */
+    .sidebar {
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      padding: 16px 8px;
+      overflow-y: auto;
+    }
+
+    .sidebar-section {
+      margin-bottom: 24px;
+    }
+
+    .sidebar-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      padding: 8px 12px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+
+    .sidebar-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .sidebar-item.active {
+      background: var(--accent-teal-dim);
+      color: var(--accent-teal);
+    }
+
+    .sidebar-icon {
+      width: 16px;
+      height: 16px;
+      opacity: 0.7;
+    }
+
+    .sidebar-item.active .sidebar-icon {
+      opacity: 1;
+    }
+
+    .sidebar-badge {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--accent-emerald-dim);
+      color: var(--accent-emerald);
+      font-weight: 600;
+    }
+
+    /* Center content */
+    .center-content {
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-icon.teal { background: var(--accent-teal-dim); color: var(--accent-teal); }
+    .stat-icon.blue { background: var(--accent-blue-dim); color: var(--accent-blue); }
+    .stat-icon.emerald { background: var(--accent-emerald-dim); color: var(--accent-emerald); }
+    .stat-icon.violet { background: var(--accent-violet-dim); color: var(--accent-violet); }
+
+    .stat-content {
+      flex: 1;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Content grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .content-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .content-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .card-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .card-badge.teal {
+      background: var(--accent-teal-dim);
+      color: var(--accent-teal);
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    /* Progress tracker with line graph */
+    .progress-tracker {
+      height: 160px;
+      position: relative;
+    }
+
+    .progress-value {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--accent-teal);
+    }
+
+    .progress-value span {
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    .graph-container {
+      height: 120px;
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      padding-top: 20px;
+    }
+
+    .graph-line {
+      position: relative;
+      width: 100%;
+      height: 100px;
+    }
+
+    .graph-line svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .graph-line path.line {
+      fill: none;
+      stroke: var(--accent-teal);
+      stroke-width: 2;
+    }
+
+    .graph-line path.area {
+      fill: url(#tealGradient);
+    }
+
+    .graph-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Task activity list */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .activity-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .activity-text {
+      font-size: 13px;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .activity-text strong {
+      color: var(--accent-teal);
+    }
+
+    .activity-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .activity-status {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .activity-status.complete {
+      background: var(--accent-emerald-dim);
+      color: var(--accent-emerald);
+    }
+
+    .activity-status.progress {
+      background: var(--accent-blue-dim);
+      color: var(--accent-blue);
+    }
+
+    /* Right sidebar */
+    .right-panel {
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .panel-section {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--accent-teal);
+    }
+
+    /* Upcoming events */
+    .event-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .event-item:last-child {
+      border-bottom: none;
+    }
+
+    .event-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      min-width: 50px;
+    }
+
+    .event-content {
+      flex: 1;
+    }
+
+    .event-title {
+      font-size: 13px;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .event-project {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .event-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .event-dot.teal { background: var(--accent-teal); }
+    .event-dot.blue { background: var(--accent-blue); }
+    .event-dot.violet { background: var(--accent-violet); }
+
+    /* Urgent tasks */
+    .urgent-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: var(--bg-card);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--accent-amber);
+    }
+
+    .urgent-item.critical {
+      border-left-color: var(--accent-red);
+    }
+
+    .urgent-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--accent-amber);
+    }
+
+    .urgent-item.critical .urgent-icon {
+      color: var(--accent-red);
+    }
+
+    .urgent-text {
+      flex: 1;
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+
+    .urgent-project {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Warning banner */
+    .warning-banner {
+      background: var(--accent-red-dim);
+      border: 1px solid var(--accent-red);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .warning-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--accent-red);
+      flex-shrink: 0;
+    }
+
+    .warning-content {
+      flex: 1;
+    }
+
+    .warning-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-red);
+      margin-bottom: 2px;
+    }
+
+    .warning-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* Files section */
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .file-item:last-child {
+      border-bottom: none;
+    }
+
+    .file-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+
+    .file-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .file-name {
+      font-size: 12px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="nav-tabs">
+      <a href="#" class="nav-tab active">Projects</a>
+      <a href="#" class="nav-tab">Tasks</a>
+      <a href="#" class="nav-tab">Teams</a>
+      <a href="#" class="nav-tab">Files</a>
+      <a href="#" class="nav-tab">Reports</a>
+    </div>
+    <div class="nav-right">
+      <div class="user-info">
+        <div class="user-avatar">A</div>
+        <span>Antonin</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">Project Navigation</div>
+        <a href="#" class="sidebar-item active">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="#" class="sidebar-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+          Deep Scan Reports
+        </a>
+        <a href="#" class="sidebar-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          Active Projects
+          <span class="sidebar-badge">7</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+          </svg>
+          Archived Projects
+        </a>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">Communication</div>
+        <a href="#" class="sidebar-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+          </svg>
+          Messages
+        </a>
+        <a href="#" class="sidebar-item">
+          <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          Secure Comms
+        </a>
+      </div>
+    </aside>
+
+    <main class="center-content">
+      <div class="page-header">
+        <h1 class="page-title">Mission Alpha Dashboard</h1>
+        <p class="page-subtitle">Project portfolio overview and task tracking</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon teal">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">42</div>
+            <div class="stat-label">Total Tasks</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">12</div>
+            <div class="stat-label">In Progress</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon emerald">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">6</div>
+            <div class="stat-label">Completed</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon violet">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">5</div>
+            <div class="stat-label">Team Members</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="content-card">
+          <div class="card-header">
+            <span class="card-title">Progress Tracker</span>
+            <span class="card-badge teal">This Week</span>
+          </div>
+          <div class="card-body">
+            <div class="progress-tracker">
+              <div class="progress-value">76<span>%</span></div>
+              <div class="graph-line">
+                <svg viewBox="0 0 300 100" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="tealGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" style="stop-color: rgba(20, 184, 166, 0.3)"/>
+                      <stop offset="100%" style="stop-color: rgba(20, 184, 166, 0)"/>
+                    </linearGradient>
+                  </defs>
+                  <path class="area" d="M0,80 L50,70 L100,60 L150,45 L200,35 L250,28 L300,24 L300,100 L0,100 Z"/>
+                  <path class="line" d="M0,80 L50,70 L100,60 L150,45 L200,35 L250,28 L300,24"/>
+                </svg>
+              </div>
+              <div class="graph-labels">
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+                <span>Sun</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <div class="card-header">
+            <span class="card-title">Task Activity</span>
+          </div>
+          <div class="card-body">
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-avatar">JR</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>Jake Reynolds</strong> - Preparing the user model for authentication</div>
+                  <div class="activity-meta">project-beta · 15 min ago</div>
+                </div>
+                <span class="activity-status progress">In Progress</span>
+              </div>
+              <div class="activity-item">
+                <div class="activity-avatar">SD</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>Dr. Sage</strong> - Completed data sync for analytics</div>
+                  <div class="activity-meta">beta-tracker · 1 hour ago</div>
+                </div>
+                <span class="activity-status complete">Complete</span>
+              </div>
+              <div class="activity-item">
+                <div class="activity-avatar">PH</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>P. Harrison</strong> - Started migration review</div>
+                  <div class="activity-meta">alpha-app · 2 hours ago</div>
+                </div>
+                <span class="activity-status progress">In Progress</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="right-panel">
+      <div class="panel-section">
+        <div class="panel-title">
+          <svg class="panel-title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          Upcoming Events
+        </div>
+        <div class="event-item">
+          <span class="event-time">9:00</span>
+          <span class="event-dot teal"></span>
+          <div class="event-content">
+            <div class="event-title">Tech Briefing</div>
+            <div class="event-project">project-beta</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <span class="event-time">11:30</span>
+          <span class="event-dot blue"></span>
+          <div class="event-content">
+            <div class="event-title">Sprint Planning</div>
+            <div class="event-project">alpha-app</div>
+          </div>
+        </div>
+        <div class="event-item">
+          <span class="event-time">14:00</span>
+          <span class="event-dot violet"></span>
+          <div class="event-content">
+            <div class="event-title">Code Review</div>
+            <div class="event-project">project-alpha</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-title">
+          <svg class="panel-title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          Urgent Tasks
+        </div>
+        <div class="urgent-item">
+          <svg class="urgent-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="urgent-content">
+            <div class="urgent-text">Calibrate Navigation Array</div>
+            <div class="urgent-project">project-alpha</div>
+          </div>
+        </div>
+        <div class="urgent-item critical">
+          <svg class="urgent-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div class="urgent-content">
+            <div class="urgent-text">Fix save migration blocker</div>
+            <div class="urgent-project">alpha-app</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="warning-banner">
+          <svg class="warning-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div class="warning-content">
+            <div class="warning-title">WARNING</div>
+            <div class="warning-desc">alpha-app has been stalled for 3 days. Immediate attention required.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-title">
+          <svg class="panel-title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
+          </svg>
+          Current Files
+        </div>
+        <div class="file-item">
+          <div class="file-icon">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <div class="file-info">
+            <div class="file-name">mission_brief.md</div>
+            <div class="file-meta">Updated 2h ago</div>
+          </div>
+        </div>
+        <div class="file-item">
+          <div class="file-icon">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <div class="file-info">
+            <div class="file-name">schema_diagram.png</div>
+            <div class="file-meta">Updated 5h ago</div>
+          </div>
+        </div>
+        <div class="file-item">
+          <div class="file-icon">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+            </svg>
+          </div>
+          <div class="file-info">
+            <div class="file-name">config.json</div>
+            <div class="file-meta">Updated 1d ago</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>

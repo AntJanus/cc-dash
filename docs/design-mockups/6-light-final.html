@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cc-dash - Light Theme (Final)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-canvas: #f7f8fa;
+      --bg-panel: #ffffff;
+      --bg-card: #ffffff;
+      --bg-hover: #f8f9fb;
+      --bg-accent: #f1f3f9;
+      --border: #e4e7ed;
+      --border-light: #eef1f6;
+      --text-primary: #1a1d24;
+      --text-secondary: #5a6070;
+      --text-muted: #8891a4;
+
+      /* Colorful accent palette */
+      --accent-teal: #0d9488;
+      --accent-teal-light: #ccfbf1;
+      --accent-teal-bg: #f0fdfa;
+      --accent-violet: #7c3aed;
+      --accent-violet-light: #ede9fe;
+      --accent-violet-bg: #f5f3ff;
+      --accent-amber: #d97706;
+      --accent-amber-light: #fef3c7;
+      --accent-amber-bg: #fffbeb;
+      --accent-rose: #e11d48;
+      --accent-rose-light: #ffe4e6;
+      --accent-rose-bg: #fff1f2;
+      --accent-blue: #2563eb;
+      --accent-blue-light: #dbeafe;
+      --accent-blue-bg: #eff6ff;
+      --accent-emerald: #059669;
+      --accent-emerald-light: #d1fae5;
+      --accent-emerald-bg: #ecfdf5;
+
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top bar */
+    .top-bar {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent-teal), var(--accent-violet));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .status-pills {
+      display: flex;
+      gap: 16px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg-accent);
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .status-pill .value {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .status-pill .label {
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .status-dot.green { background: var(--accent-emerald); }
+    .status-dot.blue { background: var(--accent-blue); }
+    .status-dot.teal { background: var(--accent-teal); }
+
+    /* Main layout */
+    .main-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 240px 1fr 340px;
+      min-height: 0;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .nav-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      margin-top: 8px;
+    }
+
+    .nav-label:first-child {
+      margin-top: 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--accent-teal-bg);
+      color: var(--accent-teal);
+    }
+
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+    }
+
+    .nav-icon.teal { background: var(--accent-teal-light); color: var(--accent-teal); }
+    .nav-icon.violet { background: var(--accent-violet-light); color: var(--accent-violet); }
+    .nav-icon.blue { background: var(--accent-blue-light); color: var(--accent-blue); }
+    .nav-icon.amber { background: var(--accent-amber-light); color: var(--accent-amber); }
+
+    .session-dot {
+      margin-left: auto;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-emerald);
+      border-radius: 50%;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .theme-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px;
+      background: var(--bg-accent);
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .theme-btn:hover {
+      background: var(--border);
+    }
+
+    /* Center content */
+    .center-content {
+      padding: 24px;
+      overflow-y: auto;
+      background: var(--bg-canvas);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .view-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-panel);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .view-tab {
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .view-tab:hover {
+      color: var(--text-secondary);
+    }
+
+    .view-tab.active {
+      background: var(--accent-teal);
+      color: white;
+    }
+
+    /* Project Grid */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    /* Project Card */
+    .project-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .project-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+      border-color: var(--accent-teal);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .card-icon.teal { background: var(--accent-teal-light); }
+    .card-icon.violet { background: var(--accent-violet-light); }
+    .card-icon.blue { background: var(--accent-blue-light); }
+    .card-icon.amber { background: var(--accent-amber-light); }
+    .card-icon.emerald { background: var(--accent-emerald-light); }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    /* Status badges */
+    .badge {
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-active {
+      background: var(--accent-emerald-light);
+      color: var(--accent-emerald);
+    }
+
+    .badge-stalled {
+      background: var(--accent-amber-light);
+      color: var(--accent-amber);
+    }
+
+    .badge-complete {
+      background: var(--accent-blue-light);
+      color: var(--accent-blue);
+    }
+
+    /* Progress section with ring */
+    .progress-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .progress-ring {
+      width: 52px;
+      height: 52px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .progress-ring svg {
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring circle {
+      fill: none;
+      stroke-width: 5;
+    }
+
+    .progress-ring .bg {
+      stroke: var(--bg-accent);
+    }
+
+    .progress-ring .fg {
+      stroke: var(--accent-teal);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease;
+    }
+
+    .progress-ring .value {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .progress-details {
+      flex: 1;
+    }
+
+    .progress-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .progress-stats {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-light);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .session-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent-emerald);
+      font-weight: 500;
+    }
+
+    /* Right panel */
+    .right-panel {
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .panel-section {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Resource cards */
+    .resource-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .resource-card {
+      background: var(--bg-accent);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .resource-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px;
+    }
+
+    .resource-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .resource-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 36px;
+      bottom: -12px;
+      width: 2px;
+      background: var(--border-light);
+    }
+
+    .timeline-item:last-child::before {
+      display: none;
+    }
+
+    .timeline-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .timeline-icon.complete {
+      background: var(--accent-emerald-light);
+      color: var(--accent-emerald);
+    }
+
+    .timeline-icon.start {
+      background: var(--accent-blue-light);
+      color: var(--accent-blue);
+    }
+
+    .timeline-icon.milestone {
+      background: var(--accent-violet-light);
+      color: var(--accent-violet);
+    }
+
+    .timeline-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .timeline-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .timeline-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Alerts */
+    .alerts-section {
+      flex: 1;
+    }
+
+    .alert-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .alert-item.warning {
+      background: var(--accent-amber-bg);
+    }
+
+    .alert-item.info {
+      background: var(--accent-blue-bg);
+    }
+
+    .alert-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .alert-icon.warning { color: var(--accent-amber); }
+    .alert-icon.info { color: var(--accent-blue); }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .alert-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <header class="top-bar">
+    <div class="logo-section">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        cc-dash
+      </div>
+    </div>
+    <div class="status-pills">
+      <div class="status-pill">
+        <span class="status-dot teal"></span>
+        <span class="value">23</span>
+        <span class="label">Projects</span>
+      </div>
+      <div class="status-pill">
+        <span class="status-dot green"></span>
+        <span class="value">2</span>
+        <span class="label">Active Sessions</span>
+      </div>
+      <div class="status-pill">
+        <span class="status-dot blue"></span>
+        <span class="value">68%</span>
+        <span class="label">Complete</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <aside class="sidebar">
+      <div class="nav-label">Navigation</div>
+      <a href="#" class="nav-item active">
+        <span class="nav-icon teal">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+          </svg>
+        </span>
+        All Projects
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon violet">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+        </span>
+        Ideas
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon blue">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </span>
+        Activity
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon amber">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </span>
+        Settings
+      </a>
+
+      <div class="nav-label">Active Sessions</div>
+      <a href="#" class="nav-item">
+        <span class="nav-icon emerald" style="background: var(--accent-emerald-light); color: var(--accent-emerald);">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </span>
+        project-beta
+        <span class="session-dot"></span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon emerald" style="background: var(--accent-emerald-light); color: var(--accent-emerald);">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </span>
+        alpha-app
+        <span class="session-dot"></span>
+      </a>
+
+      <div class="sidebar-footer">
+        <button class="theme-btn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+          Dark Mode
+        </button>
+      </div>
+    </aside>
+
+    <main class="center-content">
+      <div class="section-header">
+        <h1 class="section-title">Projects</h1>
+        <div class="view-tabs">
+          <button class="view-tab active">Grid</button>
+          <button class="view-tab">List</button>
+          <button class="view-tab">Board</button>
+        </div>
+      </div>
+
+      <div class="project-grid">
+        <div class="project-card">
+          <div class="card-header">
+            <div>
+              <div class="card-icon teal">🚀</div>
+              <div class="card-title">project-beta</div>
+            </div>
+            <span class="badge badge-active">Active</span>
+          </div>
+          <div class="card-desc">Claude Code skill library and prompt templates for enhanced AI workflows</div>
+          <div class="progress-section">
+            <div class="progress-ring">
+              <svg width="52" height="52" viewBox="0 0 52 52">
+                <circle class="bg" cx="26" cy="26" r="22"/>
+                <circle class="fg" cx="26" cy="26" r="22" stroke-dasharray="138" stroke-dashoffset="28"/>
+              </svg>
+              <span class="value">80%</span>
+            </div>
+            <div class="progress-details">
+              <div class="progress-label">Completion</div>
+              <div class="progress-stats">12 / 15 tasks</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Updated 2h ago</span>
+            <span class="session-badge">
+              <span class="session-dot"></span>
+              Session active
+            </span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="card-header">
+            <div>
+              <div class="card-icon amber">🚂</div>
+              <div class="card-title">alpha-app</div>
+            </div>
+            <span class="badge badge-stalled">Stalled</span>
+          </div>
+          <div class="card-desc">Train puzzle game with React and PixiJS rendering engine</div>
+          <div class="progress-section">
+            <div class="progress-ring">
+              <svg width="52" height="52" viewBox="0 0 52 52">
+                <circle class="bg" cx="26" cy="26" r="22"/>
+                <circle class="fg" cx="26" cy="26" r="22" stroke-dasharray="138" stroke-dashoffset="83" style="stroke: var(--accent-amber)"/>
+              </svg>
+              <span class="value">40%</span>
+            </div>
+            <div class="progress-details">
+              <div class="progress-label">Completion</div>
+              <div class="progress-stats">8 / 20 tasks</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Updated 3d ago</span>
+            <span class="session-badge">
+              <span class="session-dot"></span>
+              Session active
+            </span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="card-header">
+            <div>
+              <div class="card-icon violet">⌨️</div>
+              <div class="card-title">project-alpha</div>
+            </div>
+            <span class="badge badge-active">Active</span>
+          </div>
+          <div class="card-desc">Go TUI for tmux session management with fuzzy search</div>
+          <div class="progress-section">
+            <div class="progress-ring">
+              <svg width="52" height="52" viewBox="0 0 52 52">
+                <circle class="bg" cx="26" cy="26" r="22"/>
+                <circle class="fg" cx="26" cy="26" r="22" stroke-dasharray="138" stroke-dashoffset="25" style="stroke: var(--accent-violet)"/>
+              </svg>
+              <span class="value">82%</span>
+            </div>
+            <div class="progress-details">
+              <div class="progress-label">Completion</div>
+              <div class="progress-stats">18 / 22 tasks</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Updated 5h ago</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="card-header">
+            <div>
+              <div class="card-icon blue">💰</div>
+              <div class="card-title">beta-tracker</div>
+            </div>
+            <span class="badge badge-complete">Complete</span>
+          </div>
+          <div class="card-desc">FastAPI backend for personal finance tracking with React frontend</div>
+          <div class="progress-section">
+            <div class="progress-ring">
+              <svg width="52" height="52" viewBox="0 0 52 52">
+                <circle class="bg" cx="26" cy="26" r="22"/>
+                <circle class="fg" cx="26" cy="26" r="22" stroke-dasharray="138" stroke-dashoffset="0" style="stroke: var(--accent-blue)"/>
+              </svg>
+              <span class="value">100%</span>
+            </div>
+            <div class="progress-details">
+              <div class="progress-label">Completion</div>
+              <div class="progress-stats">25 / 25 tasks</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Updated 1w ago</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="right-panel">
+      <div class="panel-section">
+        <div class="panel-title">
+          <span class="panel-title-icon" style="background: var(--accent-teal-light); color: var(--accent-teal);">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </span>
+          Overview
+        </div>
+        <div class="resource-grid">
+          <div class="resource-card">
+            <div class="resource-icon" style="background: var(--accent-emerald-light); color: var(--accent-emerald);">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <div class="resource-value">7</div>
+            <div class="resource-label">Active</div>
+          </div>
+          <div class="resource-card">
+            <div class="resource-icon" style="background: var(--accent-amber-light); color: var(--accent-amber);">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="resource-value">3</div>
+            <div class="resource-label">Stalled</div>
+          </div>
+          <div class="resource-card">
+            <div class="resource-icon" style="background: var(--accent-blue-light); color: var(--accent-blue);">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="resource-value">12</div>
+            <div class="resource-label">Complete</div>
+          </div>
+          <div class="resource-card">
+            <div class="resource-icon" style="background: var(--accent-violet-light); color: var(--accent-violet);">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+            </div>
+            <div class="resource-value">142</div>
+            <div class="resource-label">Tasks</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-title">
+          <span class="panel-title-icon" style="background: var(--accent-blue-light); color: var(--accent-blue);">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </span>
+          Recent Activity
+        </div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-icon complete">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title">Completed "Add prompt caching"</div>
+              <div class="timeline-meta">project-beta · 2h ago</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-icon start">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+              </svg>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title">Started "Fix save migration"</div>
+              <div class="timeline-meta">alpha-app · 5h ago</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-icon milestone">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+              </svg>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title">Milestone "v1.2 Release"</div>
+              <div class="timeline-meta">project-alpha · Yesterday</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section alerts-section">
+        <div class="panel-title">
+          <span class="panel-title-icon" style="background: var(--accent-amber-light); color: var(--accent-amber);">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+          </span>
+          Alerts
+        </div>
+        <div class="alert-item warning">
+          <svg class="alert-icon warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div class="alert-content">
+            <div class="alert-title">alpha-app stalled for 3 days</div>
+            <div class="alert-desc">No progress on save migration</div>
+          </div>
+        </div>
+        <div class="alert-item info">
+          <svg class="alert-icon info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="alert-content">
+            <div class="alert-title">2 projects near completion</div>
+            <div class="alert-desc">project-beta, project-alpha > 80%</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>

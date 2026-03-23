@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cc-dash Design Exploration</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+      padding: 48px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #64748b;
+      margin-bottom: 48px;
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #334155;
+    }
+
+    .analysis-box {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .analysis-box h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .analysis-box p {
+      color: #475569;
+      margin-bottom: 12px;
+    }
+
+    .analysis-box ul {
+      margin-left: 20px;
+      color: #475569;
+    }
+
+    .analysis-box li {
+      margin-bottom: 6px;
+    }
+
+    .design-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
+    }
+
+    .design-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .design-card:hover {
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      transform: translateY(-4px);
+    }
+
+    .design-preview {
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .design-preview.cyber {
+      background: linear-gradient(135deg, #0a0e14, #131920);
+      color: #00d4ff;
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+
+    .design-preview.calm {
+      background: linear-gradient(135deg, #fafbfc, #f5f7f9);
+      color: #3b82f6;
+    }
+
+    .design-preview.modern {
+      background: linear-gradient(135deg, #0f0f12, #1c1c21);
+      color: #7f5af0;
+      text-shadow: 0 0 10px rgba(127, 90, 240, 0.5);
+    }
+
+    .design-preview.mission {
+      background: linear-gradient(135deg, #0c1222, #1a2332);
+      color: #3b82f6;
+    }
+
+    .design-preview.earth {
+      background: linear-gradient(135deg, #f8f6f3, #f3efe9);
+      color: #4a7c59;
+    }
+
+    .design-content {
+      padding: 20px;
+    }
+
+    .design-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .design-desc {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 16px;
+    }
+
+    .design-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tag {
+      font-size: 12px;
+      padding: 4px 10px;
+      background: #f1f5f9;
+      border-radius: 20px;
+      color: #475569;
+    }
+
+    .tag.pro {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .tag.con {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .design-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .design-link:hover {
+      text-decoration: underline;
+    }
+
+    .recommendation {
+      background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+      border: 1px solid #93c5fd;
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 32px;
+    }
+
+    .recommendation h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #1e40af;
+    }
+
+    .recommendation p {
+      color: #1e3a8a;
+    }
+
+    .ux-section {
+      background: #fefce8;
+      border: 1px solid #fef08a;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .ux-section h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #854d0e;
+    }
+
+    .ux-section ul {
+      margin-left: 20px;
+      color: #713f12;
+    }
+
+    .ux-section li {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>cc-dash Design Exploration</h1>
+    <p class="subtitle">8 design directions based on your reference images and 2026 PM design trends</p>
+
+    <section class="section">
+      <h2>Reference Analysis</h2>
+      <div class="analysis-box">
+        <h3>Your Design Inspirations (10 images analyzed)</h3>
+        <p>Your references show a strong preference for <strong>sci-fi command center aesthetics</strong> with:</p>
+        <ul>
+          <li>Dark backgrounds with luminous accent colors (cyan/teal dominant)</li>
+          <li>Angular, tech-style decorative borders and frames</li>
+          <li>Dense information displays with multiple data panels</li>
+          <li>Orange/red as secondary warning/alert colors</li>
+          <li>Progress indicators, status badges, and resource allocation views</li>
+          <li>Mission control / space command metaphors</li>
+        </ul>
+        <p style="margin-top: 16px;">One reference (ui-idea-8) showed a <strong>cleaner modern dark UI</strong> with purple gradients - a more refined direction.</p>
+      </div>
+
+      <div class="ux-section">
+        <h3>UX Improvements to Consider (All Themes)</h3>
+        <ul>
+          <li><strong>Progressive disclosure</strong> - Hide power features until needed, default to clean views</li>
+          <li><strong>Active session prominence</strong> - Make ongoing work immediately visible and accessible</li>
+          <li><strong>Quick actions</strong> - Surface common tasks (new project, resume session) without drilling down</li>
+          <li><strong>Status at a glance</strong> - Use color coding consistently; problems should jump out</li>
+          <li><strong>Activity timeline</strong> - Show recent completions to build momentum</li>
+          <li><strong>Keyboard navigation</strong> - Power users need shortcuts (cmd+K, vim keys)</li>
+          <li><strong>Staleness alerts</strong> - Proactively surface projects that need attention</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Design Directions</h2>
+      <div class="design-grid">
+        <div class="design-card">
+          <div class="design-preview cyber">CYBER COMMAND</div>
+          <div class="design-content">
+            <div class="design-title">1. Cyber Command</div>
+            <div class="design-desc">Full sci-fi aesthetic inspired by your space command references. Glowing cyan accents, angular borders, dark theme with shimmer effects.</div>
+            <div class="design-tags">
+              <span class="tag pro">Matches your vision</span>
+              <span class="tag pro">Distinctive</span>
+              <span class="tag con">High visual density</span>
+              <span class="tag con">May fatigue over time</span>
+            </div>
+            <a href="1-cyber-command.html" class="design-link">
+              View mockup
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="design-card">
+          <div class="design-preview calm">CALM MINIMAL</div>
+          <div class="design-content">
+            <div class="design-title">2. Calm & Minimal</div>
+            <div class="design-desc">2026's strategic minimalism trend - generous whitespace, soft colors, every element earns its place. Focus on current workflow.</div>
+            <div class="design-tags">
+              <span class="tag pro">Low cognitive load</span>
+              <span class="tag pro">Industry trend</span>
+              <span class="tag con">May feel generic</span>
+              <span class="tag con">Less "fun"</span>
+            </div>
+            <a href="2-calm-minimal.html" class="design-link">
+              View mockup
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="design-card">
+          <div class="design-preview modern">MODERN DARK</div>
+          <div class="design-content">
+            <div class="design-title">3. Modern Dark</div>
+            <div class="design-desc">Sleek dark mode with purple/green gradient accents. Inspired by Linear, Vercel - clean but with personality.</div>
+            <div class="design-tags">
+              <span class="tag pro">Professional yet stylish</span>
+              <span class="tag pro">Great dark mode</span>
+              <span class="tag pro">Balanced density</span>
+              <span class="tag con">Common among dev tools</span>
+            </div>
+            <a href="3-modern-dark.html" class="design-link">
+              View mockup
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="design-card">
+          <div class="design-preview mission">MISSION CONTROL</div>
+          <div class="design-content">
+            <div class="design-title">4. Mission Control</div>
+            <div class="design-desc">Balanced sci-fi - clean command center aesthetic without the heavy decorative elements. Information-dense but organized.</div>
+            <div class="design-tags">
+              <span class="tag pro">Best of both worlds</span>
+              <span class="tag pro">Dense but readable</span>
+              <span class="tag pro">Alert system</span>
+              <span class="tag con">Complex layout</span>
+            </div>
+            <a href="4-mission-control.html" class="design-link">
+              View mockup
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="design-card">
+          <div class="design-preview earth">EARTH & ORGANIC</div>
+          <div class="design-content">
+            <div class="design-title">5. Earth & Organic</div>
+            <div class="design-desc">Warm, natural palette with garden metaphors (growing, harvesting). Calm and grounded - a different emotional tone.</div>
+            <div class="design-tags">
+              <span class="tag pro">Unique personality</span>
+              <span class="tag pro">Calming</span>
+              <span class="tag con">Departs from references</span>
+              <span class="tag con">Metaphor may not fit</span>
+            </div>
+            <a href="5-earth-organic.html" class="design-link">
+              View mockup
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="design-card">
+          <div class="design-preview light-final" style="background: linear-gradient(135deg, #f7f8fa, #e8f4f7); color: #14b8a6;">LIGHT FINAL</div>
+          <div class="design-content">
+            <div class="design-title">6. Light Theme (Final)</div>
+            <div class="design-desc">Polished light theme combining Earth's colorful icons with Mission Control's 3-column layout, progress rings, and alert panels.</div>
+            <div class="design-tags">
+              <span class="tag pro">Colorful yet professional</span>
+              <span class="tag pro">Great organization</span>
+              <span class="tag pro">Production-ready</span>
+            </div>
+            <a href="6-light-final.html" class="design-link">
+              View mockup
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="design-card">
+          <div class="design-preview dark-final" style="background: linear-gradient(135deg, #0a0c10, #151a22); color: #00d4ff; text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);">DARK FINAL</div>
+          <div class="design-content">
+            <div class="design-title">7. Dark Theme (Final)</div>
+            <div class="design-desc">Combines Cyber Command's glow effects, Modern Dark's polish, and Mission Control's layout. Cyan/violet gradients with alert system.</div>
+            <div class="design-tags">
+              <span class="tag pro">Sci-fi without excess</span>
+              <span class="tag pro">Glowing accents</span>
+              <span class="tag pro">Production-ready</span>
+            </div>
+            <a href="7-dark-final.html" class="design-link">
+              View mockup
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="design-card">
+          <div class="design-preview mission-alpha" style="background: linear-gradient(135deg, #0a0d12, #131921); color: #14b8a6;">MISSION ALPHA</div>
+          <div class="design-content">
+            <div class="design-title">8. Mission Alpha</div>
+            <div class="design-desc">Clean command center with line graph progress tracker, upcoming events, urgent tasks panel, and warning banners. Inspired by ui-idea-11.</div>
+            <div class="design-tags">
+              <span class="tag pro">Line graph visualization</span>
+              <span class="tag pro">Events integration</span>
+              <span class="tag pro">Clean hierarchy</span>
+            </div>
+            <a href="8-mission-alpha.html" class="design-link">
+              View mockup
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="recommendation">
+      <h3>Final Designs</h3>
+      <p>
+        <strong>#6 (Light Final)</strong> and <strong>#7 (Dark Final)</strong> are production-ready themes combining your favorites:
+        colorful icons from Earth, glowing accents from Cyber Command, clean layouts from Modern Dark, and the 3-column organization from Mission Control.
+      </p>
+      <p style="margin-top: 12px;">
+        <strong>#8 (Mission Alpha)</strong> offers an alternative with line graph progress tracking, calendar events integration, and a cleaner sidebar - based on your latest reference image.
+      </p>
+      <p style="margin-top: 12px;">
+        Key elements across all finals: <strong>circular progress rings</strong>, <strong>alert panels</strong>, <strong>activity timelines</strong>,
+        <strong>resource allocation grids</strong>, and <strong>prominent session indicators</strong>.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

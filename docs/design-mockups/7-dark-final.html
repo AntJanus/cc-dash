@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cc-dash - Dark Theme (Final)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-space: #0a0c10;
+      --bg-panel: #0f1218;
+      --bg-card: #151a22;
+      --bg-elevated: #1a2030;
+      --bg-hover: #1e2536;
+      --border: #252d3a;
+      --border-light: #2a3444;
+      --border-glow: rgba(0, 212, 255, 0.3);
+      --text-primary: #f0f4f8;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      /* Glowing accent colors */
+      --accent-cyan: #00d4ff;
+      --accent-cyan-dim: rgba(0, 212, 255, 0.15);
+      --accent-cyan-glow: rgba(0, 212, 255, 0.4);
+      --accent-violet: #a855f7;
+      --accent-violet-dim: rgba(168, 85, 247, 0.15);
+      --accent-violet-glow: rgba(168, 85, 247, 0.4);
+      --accent-emerald: #10b981;
+      --accent-emerald-dim: rgba(16, 185, 129, 0.15);
+      --accent-emerald-glow: rgba(16, 185, 129, 0.4);
+      --accent-amber: #f59e0b;
+      --accent-amber-dim: rgba(245, 158, 11, 0.15);
+      --accent-rose: #f43f5e;
+      --accent-rose-dim: rgba(244, 63, 94, 0.15);
+
+      --gradient-main: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+      --gradient-bg: linear-gradient(135deg, rgba(0, 212, 255, 0.03), rgba(168, 85, 247, 0.03));
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-space);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top command bar */
+    .command-bar {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .command-bar::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan-glow), transparent);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--gradient-main);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 0 20px var(--accent-cyan-dim);
+    }
+
+    .logo-text {
+      background: var(--gradient-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .system-time {
+      font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    .status-indicators {
+      display: flex;
+      gap: 20px;
+    }
+
+    .indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    .indicator-dot.cyan { color: var(--accent-cyan); background: var(--accent-cyan); }
+    .indicator-dot.emerald { color: var(--accent-emerald); background: var(--accent-emerald); }
+    .indicator-dot.violet { color: var(--accent-violet); background: var(--accent-violet); }
+
+    .indicator-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .indicator-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    /* Main layout */
+    .main-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 240px 1fr 360px;
+      min-height: 0;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .sidebar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--accent-cyan-glow) 0%, transparent 30%, transparent 70%, var(--accent-violet-glow) 100%);
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      padding: 12px 12px 8px;
+      margin-top: 8px;
+    }
+
+    .nav-label:first-child {
+      margin-top: 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      margin-bottom: 2px;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--accent-cyan-dim);
+      color: var(--accent-cyan);
+      border-left: 2px solid var(--accent-cyan);
+      box-shadow: 0 0 20px var(--accent-cyan-dim);
+    }
+
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+    }
+
+    .nav-icon.cyan { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
+    .nav-icon.violet { background: var(--accent-violet-dim); color: var(--accent-violet); }
+    .nav-icon.emerald { background: var(--accent-emerald-dim); color: var(--accent-emerald); }
+    .nav-icon.amber { background: var(--accent-amber-dim); color: var(--accent-amber); }
+
+    .session-badge {
+      margin-left: auto;
+      font-size: 9px;
+      padding: 3px 6px;
+      background: var(--accent-emerald-dim);
+      color: var(--accent-emerald);
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .theme-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .theme-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    /* Center content */
+    .center-content {
+      padding: 24px;
+      overflow-y: auto;
+      background: var(--gradient-bg);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 4px;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 8px var(--accent-cyan);
+    }
+
+    .view-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-card);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .view-tab {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .view-tab:hover {
+      color: var(--text-secondary);
+    }
+
+    .view-tab.active {
+      background: var(--accent-cyan);
+      color: var(--bg-space);
+      box-shadow: 0 0 15px var(--accent-cyan-dim);
+    }
+
+    /* Project Grid */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    /* Project Card - Cyber style */
+    .project-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-main);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .project-card:hover {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 30px var(--accent-cyan-dim), inset 0 0 30px var(--accent-cyan-dim);
+      transform: translateY(-2px);
+    }
+
+    .project-card:hover::before {
+      opacity: 1;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .card-icon.cyan { background: var(--accent-cyan-dim); box-shadow: 0 0 15px var(--accent-cyan-dim); }
+    .card-icon.violet { background: var(--accent-violet-dim); box-shadow: 0 0 15px var(--accent-violet-dim); }
+    .card-icon.emerald { background: var(--accent-emerald-dim); box-shadow: 0 0 15px var(--accent-emerald-dim); }
+    .card-icon.amber { background: var(--accent-amber-dim); box-shadow: 0 0 15px var(--accent-amber-dim); }
+
+    .card-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    /* Status badges - glowing */
+    .badge {
+      font-size: 10px;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid;
+    }
+
+    .badge-active {
+      background: var(--accent-emerald-dim);
+      color: var(--accent-emerald);
+      border-color: var(--accent-emerald);
+      box-shadow: 0 0 10px var(--accent-emerald-dim);
+    }
+
+    .badge-stalled {
+      background: var(--accent-amber-dim);
+      color: var(--accent-amber);
+      border-color: var(--accent-amber);
+      box-shadow: 0 0 10px var(--accent-amber-dim);
+    }
+
+    .badge-complete {
+      background: var(--accent-cyan-dim);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan-dim);
+    }
+
+    /* Progress section with ring */
+    .progress-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .progress-ring {
+      width: 56px;
+      height: 56px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .progress-ring svg {
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring circle {
+      fill: none;
+      stroke-width: 5;
+    }
+
+    .progress-ring .bg {
+      stroke: var(--bg-elevated);
+    }
+
+    .progress-ring .fg {
+      stroke: var(--accent-cyan);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease;
+      filter: drop-shadow(0 0 6px var(--accent-cyan-glow));
+    }
+
+    .progress-ring .value {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .progress-details {
+      flex: 1;
+    }
+
+    .progress-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .progress-stats {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .session-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent-emerald);
+      font-weight: 500;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-emerald);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 8px var(--accent-emerald);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Right panel */
+    .right-panel {
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-y: auto;
+    }
+
+    .right-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--accent-cyan-glow) 0%, transparent 30%, transparent 70%, var(--accent-violet-glow) 100%);
+    }
+
+    .panel-section {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-cyan);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title::before {
+      content: '';
+      width: 3px;
+      height: 3px;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 6px var(--accent-cyan);
+    }
+
+    /* Resource cards */
+    .resource-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .resource-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .resource-card:hover {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px var(--accent-cyan-dim);
+    }
+
+    .resource-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px;
+    }
+
+    .resource-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .resource-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 36px;
+      bottom: -12px;
+      width: 1px;
+      background: var(--border);
+    }
+
+    .timeline-item:last-child::before {
+      display: none;
+    }
+
+    .timeline-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      z-index: 1;
+      border: 1px solid;
+    }
+
+    .timeline-icon.complete {
+      background: var(--accent-emerald-dim);
+      color: var(--accent-emerald);
+      border-color: var(--accent-emerald);
+    }
+
+    .timeline-icon.start {
+      background: var(--accent-cyan-dim);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+    }
+
+    .timeline-icon.milestone {
+      background: var(--accent-violet-dim);
+      color: var(--accent-violet);
+      border-color: var(--accent-violet);
+    }
+
+    .timeline-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .timeline-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .timeline-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Alerts */
+    .alerts-section {
+      flex: 1;
+    }
+
+    .alert-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+
+    .alert-item.warning {
+      background: var(--accent-amber-dim);
+    }
+
+    .alert-item.info {
+      background: var(--accent-cyan-dim);
+    }
+
+    .alert-item.critical {
+      background: var(--accent-rose-dim);
+    }
+
+    .alert-item:hover {
+      box-shadow: 0 0 15px var(--accent-cyan-dim);
+    }
+
+    .alert-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .alert-icon.warning { color: var(--accent-amber); }
+    .alert-icon.info { color: var(--accent-cyan); }
+    .alert-icon.critical { color: var(--accent-rose); }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .alert-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Footer bar */
+    .footer-bar {
+      padding: 10px 24px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .system-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot-sm {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--accent-emerald);
+    }
+  </style>
+</head>
+<body>
+  <header class="command-bar">
+    <div class="logo-section">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <span class="logo-text">CC-DASH</span>
+      </div>
+      <div class="system-time">2026-03-23 14:32:17 MDT</div>
+    </div>
+    <div class="status-indicators">
+      <div class="indicator">
+        <span class="indicator-dot cyan"></span>
+        <span class="indicator-value">23</span>
+        <span class="indicator-label">Projects</span>
+      </div>
+      <div class="indicator">
+        <span class="indicator-dot emerald"></span>
+        <span class="indicator-value">2</span>
+        <span class="indicator-label">Sessions</span>
+      </div>
+      <div class="indicator">
+        <span class="indicator-dot violet"></span>
+        <span class="indicator-value">68%</span>
+        <span class="indicator-label">Complete</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <aside class="sidebar">
+      <div class="nav-label">Command</div>
+      <a href="#" class="nav-item active">
+        <span class="nav-icon cyan">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+          </svg>
+        </span>
+        All Projects
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon violet">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+        </span>
+        Ideas
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon emerald">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </span>
+        Activity
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon amber">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </span>
+        Settings
+      </a>
+
+      <div class="nav-label">Active Missions</div>
+      <a href="#" class="nav-item">
+        <span class="nav-icon emerald">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </span>
+        project-beta
+        <span class="session-badge">LIVE</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon emerald">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </span>
+        alpha-app
+        <span class="session-badge">LIVE</span>
+      </a>
+
+      <div class="sidebar-footer">
+        <button class="theme-btn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          Light Mode
+        </button>
+      </div>
+    </aside>
+
+    <main class="center-content">
+      <div class="section-header">
+        <h1 class="section-title">Project Overview</h1>
+        <div class="view-tabs">
+          <button class="view-tab active">Grid</button>
+          <button class="view-tab">List</button>
+          <button class="view-tab">Board</button>
+        </div>
+      </div>
+
+      <div class="project-grid">
+        <div class="project-card">
+          <div class="card-header">
+            <div>
+              <div class="card-icon cyan">🚀</div>
+              <div class="card-id">PRJ-001</div>
+              <div class="card-title">project-beta</div>
+            </div>
+            <span class="badge badge-active">Active</span>
+          </div>
+          <div class="card-desc">Claude Code skill library and prompt templates for enhanced AI workflows</div>
+          <div class="progress-section">
+            <div class="progress-ring">
+              <svg width="56" height="56" viewBox="0 0 56 56">
+                <circle class="bg" cx="28" cy="28" r="24"/>
+                <circle class="fg" cx="28" cy="28" r="24" stroke-dasharray="151" stroke-dashoffset="30"/>
+              </svg>
+              <span class="value">80%</span>
+            </div>
+            <div class="progress-details">
+              <div class="progress-label">Completion</div>
+              <div class="progress-stats">12 / 15 tasks</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Updated 2h ago</span>
+            <span class="session-indicator">
+              <span class="pulse-dot"></span>
+              Session active
+            </span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="card-header">
+            <div>
+              <div class="card-icon amber">🚂</div>
+              <div class="card-id">PRJ-002</div>
+              <div class="card-title">alpha-app</div>
+            </div>
+            <span class="badge badge-stalled">Stalled</span>
+          </div>
+          <div class="card-desc">Train puzzle game with React and PixiJS rendering engine</div>
+          <div class="progress-section">
+            <div class="progress-ring">
+              <svg width="56" height="56" viewBox="0 0 56 56">
+                <circle class="bg" cx="28" cy="28" r="24"/>
+                <circle class="fg" cx="28" cy="28" r="24" stroke-dasharray="151" stroke-dashoffset="90" style="stroke: var(--accent-amber); filter: drop-shadow(0 0 6px var(--accent-amber));"/>
+              </svg>
+              <span class="value">40%</span>
+            </div>
+            <div class="progress-details">
+              <div class="progress-label">Completion</div>
+              <div class="progress-stats">8 / 20 tasks</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Updated 3d ago</span>
+            <span class="session-indicator">
+              <span class="pulse-dot"></span>
+              Session active
+            </span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="card-header">
+            <div>
+              <div class="card-icon violet">⌨️</div>
+              <div class="card-id">PRJ-003</div>
+              <div class="card-title">project-alpha</div>
+            </div>
+            <span class="badge badge-active">Active</span>
+          </div>
+          <div class="card-desc">Go TUI for tmux session management with fuzzy search</div>
+          <div class="progress-section">
+            <div class="progress-ring">
+              <svg width="56" height="56" viewBox="0 0 56 56">
+                <circle class="bg" cx="28" cy="28" r="24"/>
+                <circle class="fg" cx="28" cy="28" r="24" stroke-dasharray="151" stroke-dashoffset="27" style="stroke: var(--accent-violet); filter: drop-shadow(0 0 6px var(--accent-violet));"/>
+              </svg>
+              <span class="value">82%</span>
+            </div>
+            <div class="progress-details">
+              <div class="progress-label">Completion</div>
+              <div class="progress-stats">18 / 22 tasks</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Updated 5h ago</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="card-header">
+            <div>
+              <div class="card-icon emerald">💰</div>
+              <div class="card-id">PRJ-004</div>
+              <div class="card-title">beta-tracker</div>
+            </div>
+            <span class="badge badge-complete">Complete</span>
+          </div>
+          <div class="card-desc">FastAPI backend for personal finance tracking with React frontend</div>
+          <div class="progress-section">
+            <div class="progress-ring">
+              <svg width="56" height="56" viewBox="0 0 56 56">
+                <circle class="bg" cx="28" cy="28" r="24"/>
+                <circle class="fg" cx="28" cy="28" r="24" stroke-dasharray="151" stroke-dashoffset="0"/>
+              </svg>
+              <span class="value">100%</span>
+            </div>
+            <div class="progress-details">
+              <div class="progress-label">Completion</div>
+              <div class="progress-stats">25 / 25 tasks</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Updated 1w ago</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="right-panel">
+      <div class="panel-section">
+        <div class="panel-title">Resource Allocation</div>
+        <div class="resource-grid">
+          <div class="resource-card">
+            <div class="resource-icon" style="background: var(--accent-emerald-dim); color: var(--accent-emerald);">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <div class="resource-value">7</div>
+            <div class="resource-label">Active</div>
+          </div>
+          <div class="resource-card">
+            <div class="resource-icon" style="background: var(--accent-amber-dim); color: var(--accent-amber);">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="resource-value">3</div>
+            <div class="resource-label">Stalled</div>
+          </div>
+          <div class="resource-card">
+            <div class="resource-icon" style="background: var(--accent-cyan-dim); color: var(--accent-cyan);">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div class="resource-value">12</div>
+            <div class="resource-label">Complete</div>
+          </div>
+          <div class="resource-card">
+            <div class="resource-icon" style="background: var(--accent-violet-dim); color: var(--accent-violet);">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+            </div>
+            <div class="resource-value">142</div>
+            <div class="resource-label">Tasks</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-title">Activity Timeline</div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-icon complete">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title">Completed "Add prompt caching"</div>
+              <div class="timeline-meta">project-beta · 2h ago</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-icon start">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+              </svg>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title">Started "Fix save migration"</div>
+              <div class="timeline-meta">alpha-app · 5h ago</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-icon milestone">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+              </svg>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title">Milestone "v1.2 Release"</div>
+              <div class="timeline-meta">project-alpha · Yesterday</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section alerts-section">
+        <div class="panel-title">System Alerts</div>
+        <div class="alert-item warning">
+          <svg class="alert-icon warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div class="alert-content">
+            <div class="alert-title">alpha-app stalled for 3 days</div>
+            <div class="alert-desc">No progress on save migration</div>
+          </div>
+        </div>
+        <div class="alert-item info">
+          <svg class="alert-icon info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="alert-content">
+            <div class="alert-title">2 projects near completion</div>
+            <div class="alert-desc">project-beta, project-alpha > 80%</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="footer-bar">
+    <div class="system-status">
+      <span class="status-dot-sm"></span>
+      System operational
+    </div>
+    <div>Last sync: 2 min ago</div>
+  </footer>
+</body>
+</html>

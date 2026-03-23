@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cc-dash - Earth & Organic Theme</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-canvas: #f8f6f3;
+      --bg-paper: #fffffe;
+      --bg-warm: #faf8f5;
+      --bg-accent: #f3efe9;
+      --border: #e8e2d9;
+      --border-light: #f0ebe3;
+      --text-primary: #2d2a26;
+      --text-secondary: #5c574f;
+      --text-muted: #8a8479;
+      --accent-forest: #4a7c59;
+      --accent-forest-light: #e8f0ea;
+      --accent-earth: #a67c52;
+      --accent-earth-light: #f5efe8;
+      --accent-stone: #6b7280;
+      --accent-stone-light: #f3f4f6;
+      --accent-clay: #c75d3a;
+      --accent-clay-light: #fef2ed;
+      --accent-sky: #4a90a4;
+      --accent-sky-light: #e8f4f7;
+      --shadow-soft: 0 2px 8px rgba(45, 42, 38, 0.06);
+      --shadow-hover: 0 4px 16px rgba(45, 42, 38, 0.1);
+    }
+
+    body {
+      font-family: 'Source Sans Pro', 'Segoe UI', -apple-system, sans-serif;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar - warm and natural */
+    .sidebar {
+      width: 240px;
+      background: var(--bg-paper);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--accent-forest);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent-forest-light);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-section {
+      padding: 16px 12px;
+      flex: 1;
+    }
+
+    .nav-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      padding: 8px 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-accent);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--accent-forest-light);
+      color: var(--accent-forest);
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      opacity: 0.75;
+    }
+
+    .nav-item.active .nav-icon {
+      opacity: 1;
+    }
+
+    .session-indicator {
+      margin-left: auto;
+      width: 7px;
+      height: 7px;
+      background: var(--accent-forest);
+      border-radius: 50%;
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--bg-accent);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .theme-toggle:hover {
+      background: var(--border);
+    }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      padding: 24px 32px;
+      background: var(--bg-paper);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .greeting {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-outline {
+      background: var(--bg-paper);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-accent);
+      border-color: var(--text-muted);
+    }
+
+    .btn-primary {
+      background: var(--accent-forest);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #3d6a4a;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--bg-warm);
+      border-radius: 12px;
+      border: 1px solid var(--border-light);
+    }
+
+    .stat-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-icon.forest { background: var(--accent-forest-light); color: var(--accent-forest); }
+    .stat-icon.earth { background: var(--accent-earth-light); color: var(--accent-earth); }
+    .stat-icon.sky { background: var(--accent-sky-light); color: var(--accent-sky); }
+    .stat-icon.clay { background: var(--accent-clay-light); color: var(--accent-clay); }
+
+    .stat-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Content area */
+    .content {
+      flex: 1;
+      padding: 28px 32px;
+      overflow: auto;
+    }
+
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .section-link {
+      font-size: 13px;
+      color: var(--accent-forest);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .section-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Project Grid */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    /* Organic Card */
+    .card {
+      background: var(--bg-paper);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .card-icon.forest { background: var(--accent-forest-light); }
+    .card-icon.earth { background: var(--accent-earth-light); }
+    .card-icon.sky { background: var(--accent-sky-light); }
+    .card-icon.clay { background: var(--accent-clay-light); }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    /* Status tags - natural colors */
+    .tag {
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .tag-growing {
+      background: var(--accent-forest-light);
+      color: var(--accent-forest);
+    }
+
+    .tag-resting {
+      background: var(--accent-earth-light);
+      color: var(--accent-earth);
+    }
+
+    .tag-complete {
+      background: var(--accent-sky-light);
+      color: var(--accent-sky);
+    }
+
+    /* Progress - organic feel */
+    .progress-section {
+      margin-bottom: 16px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .progress-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .progress-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--bg-accent);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-fill.forest { background: var(--accent-forest); }
+    .progress-fill.earth { background: var(--accent-earth); }
+    .progress-fill.sky { background: var(--accent-sky); }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-light);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .session-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent-forest);
+      font-weight: 500;
+    }
+
+    /* Activity section */
+    .activity-section {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
+    }
+
+    .activity-list {
+      background: var(--bg-paper);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .activity-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .activity-avatar.complete {
+      background: var(--accent-forest-light);
+      color: var(--accent-forest);
+    }
+
+    .activity-avatar.start {
+      background: var(--accent-sky-light);
+      color: var(--accent-sky);
+    }
+
+    .activity-avatar.milestone {
+      background: var(--accent-earth-light);
+      color: var(--accent-earth);
+    }
+
+    .activity-content {
+      flex: 1;
+    }
+
+    .activity-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 3px;
+    }
+
+    .activity-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .activity-time {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Quick actions panel */
+    .quick-panel {
+      background: var(--bg-paper);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .quick-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .quick-action {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      border: 1px solid var(--border-light);
+    }
+
+    .quick-action:hover {
+      background: var(--bg-accent);
+    }
+
+    .quick-action-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quick-action-text {
+      flex: 1;
+    }
+
+    .quick-action-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .quick-action-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Motivational quote */
+    .quote-card {
+      background: linear-gradient(135deg, var(--accent-forest-light), var(--accent-sky-light));
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    .quote-text {
+      font-size: 14px;
+      font-style: italic;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .quote-author {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+          </svg>
+        </div>
+        cc-dash
+      </div>
+    </div>
+
+    <nav class="nav-section">
+      <div class="nav-label">Navigate</div>
+      <a href="#" class="nav-item active">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+        </svg>
+        Projects
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+        Ideas
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Activity
+      </a>
+      <a href="#" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        Settings
+      </a>
+
+      <div class="nav-label" style="margin-top: 28px;">Growing</div>
+      <a href="#" class="nav-item">
+        project-beta
+        <span class="session-indicator"></span>
+      </a>
+      <a href="#" class="nav-item">
+        alpha-app
+        <span class="session-indicator"></span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="theme-toggle">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        </svg>
+        Dark mode
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-top">
+        <div>
+          <div class="greeting">Good afternoon, Antonin</div>
+          <h1 class="page-title">Your Projects</h1>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-outline">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+            </svg>
+            Filter
+          </button>
+          <button class="btn btn-primary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            New Project
+          </button>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-pill">
+          <div class="stat-icon forest">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">23</div>
+            <div class="stat-label">Projects</div>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-icon earth">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">7</div>
+            <div class="stat-label">Growing</div>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-icon sky">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">68%</div>
+            <div class="stat-label">Harvested</div>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-icon clay">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">2</div>
+            <div class="stat-label">Sessions</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">Currently Growing</h2>
+          <a href="#" class="section-link">View all projects</a>
+        </div>
+        <div class="project-grid">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-icon forest">🌱</div>
+                <div class="card-title">project-beta</div>
+              </div>
+              <span class="tag tag-growing">Growing</span>
+            </div>
+            <div class="card-desc">Claude Code skill library and prompt templates for enhanced AI workflows</div>
+            <div class="progress-section">
+              <div class="progress-header">
+                <span class="progress-label">Growth</span>
+                <span class="progress-value">12/15</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill forest" style="width: 80%"></div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span>Tended 2h ago</span>
+              <span class="session-badge">
+                <span class="session-indicator"></span>
+                Active session
+              </span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-icon earth">🍂</div>
+                <div class="card-title">alpha-app</div>
+              </div>
+              <span class="tag tag-resting">Resting</span>
+            </div>
+            <div class="card-desc">Train puzzle game with React and PixiJS rendering engine</div>
+            <div class="progress-section">
+              <div class="progress-header">
+                <span class="progress-label">Growth</span>
+                <span class="progress-value">8/20</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill earth" style="width: 40%"></div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span>Tended 3d ago</span>
+              <span class="session-badge">
+                <span class="session-indicator"></span>
+                Active session
+              </span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-icon forest">🌿</div>
+                <div class="card-title">project-alpha</div>
+              </div>
+              <span class="tag tag-growing">Growing</span>
+            </div>
+            <div class="card-desc">Go TUI for tmux session management with fuzzy search</div>
+            <div class="progress-section">
+              <div class="progress-header">
+                <span class="progress-label">Growth</span>
+                <span class="progress-value">18/22</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill forest" style="width: 82%"></div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span>Tended 5h ago</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-icon sky">🌻</div>
+                <div class="card-title">beta-tracker</div>
+              </div>
+              <span class="tag tag-complete">Harvested</span>
+            </div>
+            <div class="card-desc">FastAPI backend for personal finance tracking</div>
+            <div class="progress-section">
+              <div class="progress-header">
+                <span class="progress-label">Growth</span>
+                <span class="progress-value">25/25</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill sky" style="width: 100%"></div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span>Harvested 1w ago</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="activity-section">
+        <div class="activity-list">
+          <h3 class="section-title" style="margin-bottom: 12px;">Garden Journal</h3>
+          <div class="activity-item">
+            <div class="activity-avatar complete">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <div class="activity-content">
+              <div class="activity-title">Completed "Add prompt caching"</div>
+              <div class="activity-meta">project-beta</div>
+            </div>
+            <div class="activity-time">2h ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-avatar start">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+              </svg>
+            </div>
+            <div class="activity-content">
+              <div class="activity-title">Started "Fix save migration"</div>
+              <div class="activity-meta">alpha-app</div>
+            </div>
+            <div class="activity-time">5h ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-avatar milestone">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+              </svg>
+            </div>
+            <div class="activity-content">
+              <div class="activity-title">Milestone "v1.2 Release"</div>
+              <div class="activity-meta">project-alpha</div>
+            </div>
+            <div class="activity-time">Yesterday</div>
+          </div>
+        </div>
+
+        <div class="quick-panel">
+          <div class="quick-title">Quick Actions</div>
+          <div class="quick-action">
+            <div class="quick-action-icon stat-icon forest">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/>
+              </svg>
+            </div>
+            <div class="quick-action-text">
+              <div class="quick-action-title">Plant new project</div>
+              <div class="quick-action-desc">Start something fresh</div>
+            </div>
+          </div>
+          <div class="quick-action">
+            <div class="quick-action-icon stat-icon earth">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+            </div>
+            <div class="quick-action-text">
+              <div class="quick-action-title">Review resting</div>
+              <div class="quick-action-desc">3 projects need attention</div>
+            </div>
+          </div>
+
+          <div class="quote-card">
+            <div class="quote-text">"The best time to plant a tree was 20 years ago. The second best time is now."</div>
+            <div class="quote-author">- Chinese Proverb</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

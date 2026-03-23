@@ -103,7 +103,7 @@
   --secondary: oklch(0.22 0.008 240);
   --secondary-foreground: oklch(0.95 0.005 240);
   --muted: oklch(0.22 0.008 240);
-  --muted-foreground: oklch(0.65 0.01 240);
+  --muted-foreground: oklch(0.7 0.01 240);
   --accent: oklch(0.24 0.008 240);
   --accent-foreground: oklch(0.95 0.005 240);
   --destructive: oklch(0.704 0.191 22.216);
@@ -140,6 +140,10 @@
   }
   body {
     @apply bg-background text-foreground leading-relaxed;
+  }
+  .dark body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   html {
     @apply font-sans;

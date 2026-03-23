@@ -87,7 +87,7 @@ export function IdeaDetail({ idea }: IdeaDetailProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-3">
-        <h1 className="text-2xl font-semibold">{idea.title}</h1>
+        <h1 className="text-xl font-semibold">{idea.title}</h1>
         <div className="flex items-center gap-3">
           <IdeaStatusBadge status={idea.status} />
           {idea.stack && idea.stack.length > 0 && (

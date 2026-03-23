@@ -52,14 +52,14 @@ describe("SESS-03: TaskSection (read-only mode)", () => {
     expect(checkboxes[1]).toBeDisabled();
   });
 
-  it("checked tasks have strikethrough and dimmed opacity", () => {
+  it("checked tasks have strikethrough and muted color", () => {
     const tasks = [
       makeTask({ id: "t_abc12", checked: true, description: "Done task" }),
     ];
     render(<TaskSection tasks={tasks} taskNames={taskNames} />);
     const text = screen.getByText("Done task");
     expect(text).toHaveClass("line-through");
-    expect(text).toHaveClass("opacity-50");
+    expect(text).toHaveClass("text-muted-foreground");
   });
 
   it("renders dependency badges with tooltip", () => {

@@ -6,7 +6,7 @@ export default async function ActivityPage() {
 
   return (
     <main className="p-8 lg:p-10">
-      <h1 className="mb-6 text-3xl font-semibold">Activity</h1>
+      <h1 className="mb-6 text-xl font-semibold">Activity</h1>
       <ActivityFeed events={events} />
     </main>
   );

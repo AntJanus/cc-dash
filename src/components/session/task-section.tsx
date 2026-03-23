@@ -77,14 +77,14 @@ export function TaskSection({
                 onSave={(newDesc) => onEditDescription(task.id, newDesc)}
                 className={cn(
                   "text-sm",
-                  task.checked && "line-through opacity-50",
+                  task.checked && "line-through text-muted-foreground",
                 )}
               />
             ) : (
               <span
                 className={cn(
                   "text-sm",
-                  task.checked && "line-through opacity-50",
+                  task.checked && "line-through text-muted-foreground",
                 )}
               >
                 {task.description}

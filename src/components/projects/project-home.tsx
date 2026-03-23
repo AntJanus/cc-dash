@@ -17,7 +17,7 @@ export function ProjectHome({ projects }: ProjectHomeProps) {
   return (
     <>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-semibold">Projects</h1>
+        <h1 className="text-xl font-semibold">Projects</h1>
         <div className="flex items-center gap-3">
           <HomeSearchInput value={searchQuery} onChange={setSearchQuery} />
           <CrossProjectPromptButton />

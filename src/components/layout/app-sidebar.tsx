@@ -79,7 +79,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
         {/* Personal section */}
         {isOpen && activeSessionProjects.length > 0 && (
           <div className="mb-3">
-            <div className="px-3 py-1.5 text-sm font-semibold uppercase tracking-widest text-sidebar-foreground/60">
+            <div className="px-3 py-1.5 text-sm font-semibold uppercase tracking-widest text-sidebar-foreground">
               Personal
             </div>
             <ul className="mt-1 space-y-0.5">
@@ -89,7 +89,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
                     href={`/project/${p.slug}/session`}
                     onClick={closeMobile}
                     className={cn(
-                      "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors",
+                      "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                       pathname.includes(`/project/${p.slug}`)
                         ? "bg-sidebar-accent text-sidebar-accent-foreground"
                         : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
@@ -106,7 +106,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
 
         {/* Navigation */}
         {isOpen && (
-          <div className="px-3 py-1.5 text-sm font-semibold uppercase tracking-widest text-sidebar-foreground/60">
+          <div className="px-3 py-1.5 text-sm font-semibold uppercase tracking-widest text-sidebar-foreground">
             Navigation
           </div>
         )}
@@ -137,7 +137,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
             <button
               type="button"
               onClick={() => setProjectsExpanded((p) => !p)}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-sm font-semibold uppercase tracking-widest text-sidebar-foreground/60 hover:text-sidebar-foreground"
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-sm font-semibold uppercase tracking-widest text-sidebar-foreground hover:text-sidebar-foreground"
             >
               {projectsExpanded ? (
                 <ChevronDown className="h-3 w-3" />
@@ -154,7 +154,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
                       href={`/project/${p.slug}/roadmap`}
                       onClick={closeMobile}
                       className={cn(
-                        "flex items-center gap-2 truncate rounded-md px-3 py-1.5 text-sm transition-colors",
+                        "flex items-center gap-2 truncate rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                         pathname.includes(`/project/${p.slug}`)
                           ? "bg-sidebar-accent text-sidebar-accent-foreground"
                           : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
@@ -180,7 +180,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
           <button
             type="button"
             onClick={toggleTheme}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
             aria-label="Toggle theme"
           >
             {theme === "dark" ? (
@@ -198,7 +198,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
         <button
           type="button"
           onClick={toggle}
-          className="hidden lg:inline-flex h-8 w-8 items-center justify-center rounded-md text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          className="hidden lg:inline-flex h-8 w-8 items-center justify-center rounded-md text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
           aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
         >
           {isOpen ? (

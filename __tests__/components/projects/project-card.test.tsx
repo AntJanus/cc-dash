@@ -42,32 +42,30 @@ describe("ProjectCard", () => {
     expect(screen.getByText("A cool project")).toBeInTheDocument();
   });
 
-  it("renders a progress bar reflecting done/total ratio", () => {
+  it("renders a progress ring with correct percentage", () => {
     render(
       <ProjectCard project={makeProject({ doneCount: 7, totalCount: 10 })} />,
     );
-    // Progress component should have value=70 (7/10 * 100)
-    const progress = screen.getByRole("progressbar");
-    expect(progress).toBeInTheDocument();
-    expect(progress).toHaveAttribute("aria-valuenow", "70");
+    // ProgressRing shows percentage in the center
+    expect(screen.getByText("70%")).toBeInTheDocument();
   });
 
-  it("renders item count", () => {
+  it("renders item count in new format", () => {
     render(
       <ProjectCard project={makeProject({ doneCount: 3, totalCount: 10 })} />,
     );
-    expect(screen.getByText("3/10")).toBeInTheDocument();
+    // New format: "3 / 10 tasks"
+    expect(screen.getByText(/3\s*\/\s*10\s*tasks/)).toBeInTheDocument();
   });
 
-  it("shows a green dot indicator when project is active", () => {
+  it("shows session active text when project has active session", () => {
     render(<ProjectCard project={makeProject({ hasActiveSession: true })} />);
-    const dot = screen.getByTestId("active-session-dot");
-    expect(dot).toBeInTheDocument();
+    expect(screen.getByText("Session active")).toBeInTheDocument();
   });
 
-  it("does not show green dot when project is inactive", () => {
+  it("does not show session active when project is inactive", () => {
     render(<ProjectCard project={makeProject({ hasActiveSession: false })} />);
-    expect(screen.queryByTestId("active-session-dot")).not.toBeInTheDocument();
+    expect(screen.queryByText("Session active")).not.toBeInTheDocument();
   });
 
   it("displays session status text when available", () => {
@@ -137,13 +135,12 @@ describe("ProjectCard", () => {
     }
   });
 
-  it("handles zero totalCount without dividing by zero", () => {
+  it("handles zero totalCount without error", () => {
     render(
       <ProjectCard project={makeProject({ doneCount: 0, totalCount: 0 })} />,
     );
-    const progress = screen.getByRole("progressbar");
-    expect(progress).toHaveAttribute("aria-valuenow", "0");
-    expect(screen.getByText("0/0")).toBeInTheDocument();
+    expect(screen.getByText("0%")).toBeInTheDocument();
+    expect(screen.getByText(/0\s*\/\s*0\s*tasks/)).toBeInTheDocument();
   });
 
   it("shows 'No activity' when lastUpdated is null", () => {

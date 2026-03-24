@@ -29,7 +29,7 @@ export function IdeaCard({ idea }: IdeaCardProps) {
   return (
     <Link href={`/ideas/${idea.id}`} className="block">
       <Card
-        className={`border-l-[3px] rounded-l-lg ${IDEA_ACCENT_COLORS[idea.status] ?? ""} transition-all duration-200 hover:shadow-lg hover:shadow-primary/5`}
+        className={`border-l-[3px] rounded-l-lg ${IDEA_ACCENT_COLORS[idea.status] ?? ""} interactive-card`}
       >
         <CardHeader>
           <div className="flex items-center justify-between">

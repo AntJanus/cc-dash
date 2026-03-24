@@ -86,7 +86,7 @@ export function RoadmapCard({
       size="sm"
       ref={setNodeRef}
       style={style}
-      className="transition-all duration-200 hover:ring-2 hover:ring-foreground/10"
+      className="interactive-card hover:ring-2 hover:ring-foreground/10"
       {...(enableDnd ? attributes : {})}
     >
       <CardHeader>

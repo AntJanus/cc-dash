@@ -1,49 +1,45 @@
+import { ProjectGridSkeleton } from "@/components/ui/skeleton";
+
 export default function Loading() {
   return (
-    <div className="p-8 lg:p-10">
-      {/* Page heading skeleton */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="h-9 w-40 animate-pulse rounded-lg bg-muted" />
-        <div className="h-9 w-48 animate-pulse rounded-lg bg-muted" />
+    <div className="flex flex-1 min-h-0">
+      <div className="flex-1 overflow-auto p-8 lg:p-10">
+        {/* Page heading skeleton */}
+        <div className="mb-6 flex items-center justify-between">
+          <div className="skeleton skeleton-title w-32" />
+          <div className="flex items-center gap-3">
+            <div className="skeleton h-9 w-28 rounded-lg" />
+            <div className="skeleton h-9 w-48 rounded-lg" />
+          </div>
+        </div>
+
+        {/* Project grid skeleton */}
+        <ProjectGridSkeleton count={6} />
       </div>
 
-      {/* Stats bar skeleton */}
-      <div className="mb-4 flex items-center gap-6">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-5 w-28 animate-pulse rounded bg-muted" />
-        ))}
-      </div>
-
-      {/* Board columns skeleton */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, colIdx) => (
-          <div
-            key={colIdx}
-            className="flex flex-col gap-3 rounded-xl bg-muted/40 p-4"
-          >
-            {/* Column header */}
-            <div className="flex items-center gap-2">
-              <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-muted" />
-              <div className="h-5 w-20 animate-pulse rounded bg-muted" />
-            </div>
-
-            {/* Card skeletons */}
-            {Array.from({ length: colIdx === 0 ? 3 : 2 }).map((_, cardIdx) => (
-              <div
-                key={cardIdx}
-                className="rounded-xl bg-card p-4 ring-1 ring-foreground/5"
-              >
-                <div className="mb-3 flex items-center gap-2">
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-muted" />
-                  <div className="h-4 w-32 animate-pulse rounded bg-muted" />
-                </div>
-                <div className="mb-2 h-3 w-full animate-pulse rounded bg-muted" />
-                <div className="h-2 w-full animate-pulse rounded-full bg-muted" />
-              </div>
+      {/* Right panel skeleton */}
+      <aside className="hidden xl:flex flex-col border-l border-border bg-card w-[340px]">
+        <div className="border-b border-[var(--border-light)] p-5">
+          <div className="skeleton skeleton-text w-24 mb-4" />
+          <div className="grid grid-cols-2 gap-2.5">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="skeleton h-24 rounded-lg" />
             ))}
           </div>
-        ))}
-      </div>
+        </div>
+        <div className="p-5">
+          <div className="skeleton skeleton-text w-32 mb-4" />
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex gap-3 py-3">
+              <div className="skeleton skeleton-circle h-8 w-8" />
+              <div className="flex-1 space-y-2">
+                <div className="skeleton skeleton-text w-3/4" />
+                <div className="skeleton skeleton-text w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </aside>
     </div>
   );
 }

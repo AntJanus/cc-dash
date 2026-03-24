@@ -44,8 +44,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <div
         className={cn(
           "relative overflow-hidden rounded-xl border border-border bg-card p-5",
-          "transition-all duration-200",
-          "hover:shadow-lg hover:-translate-y-0.5",
+          "interactive-card",
           "dark:card-glow dark:gradient-border-top",
           "hover:border-[var(--accent-teal)] dark:hover:border-[var(--accent-cyan)]",
         )}

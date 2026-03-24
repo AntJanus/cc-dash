@@ -28,7 +28,7 @@ export function ProjectBoardCard({ project }: ProjectBoardCardProps) {
     <Link href={`/project/${project.slug}/roadmap`} className="block">
       <Card
         size="sm"
-        className="transition-all duration-200 hover:ring-2 hover:ring-foreground/10"
+        className="interactive-card hover:ring-2 hover:ring-foreground/10"
       >
         <CardHeader>
           <div className="flex items-center gap-2">

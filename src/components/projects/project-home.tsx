@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { X } from "lucide-react";
 import { ProjectBoard } from "./project-board";
 import { ProjectList } from "./project-list";
 import { ProjectCard } from "./project-card";
@@ -10,34 +12,79 @@ import { cn } from "@/lib/utils";
 import type { ProjectCardData } from "@/lib/projects/get-projects";
 
 type ViewMode = "grid" | "list" | "board";
+type StatusFilter = "all" | "active" | "stalled" | "complete";
+
+const STATUS_FILTER_LABELS: Record<StatusFilter, string> = {
+  all: "All",
+  active: "Active",
+  stalled: "Stalled",
+  complete: "Complete",
+};
 
 interface ProjectHomeProps {
   projects: ProjectCardData[];
 }
 
 export function ProjectHome({ projects }: ProjectHomeProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
-  // Filter projects for grid view
+  // Read status filter from URL
+  const statusParam = searchParams.get("status");
+  const statusFilter: StatusFilter =
+    statusParam === "active" ||
+    statusParam === "stalled" ||
+    statusParam === "complete"
+      ? statusParam
+      : "all";
+
+  // Filter projects by status first
+  const statusFilteredProjects =
+    statusFilter === "all"
+      ? projects
+      : projects.filter((p) => p.status === statusFilter);
+
+  // Then filter by search query
   const filteredProjects = searchQuery.trim()
-    ? projects.filter(
+    ? statusFilteredProjects.filter(
         (p) =>
           p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.description.toLowerCase().includes(searchQuery.toLowerCase()),
       )
-    : projects;
+    : statusFilteredProjects;
+
+  function clearStatusFilter() {
+    router.push("/");
+  }
 
   return (
     <>
       {/* Header with title and controls */}
       <div className="mb-6 flex items-center justify-between">
-        <h1
-          className="text-xl font-semibold"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Projects
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1
+            className="text-xl font-semibold"
+            style={{ color: "var(--text-primary)" }}
+          >
+            Projects
+          </h1>
+          {statusFilter !== "all" && (
+            <button
+              type="button"
+              onClick={clearStatusFilter}
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium transition-colors hover:opacity-80"
+              style={{
+                background: "var(--accent-teal-light)",
+                color: "var(--accent-teal)",
+              }}
+            >
+              {STATUS_FILTER_LABELS[statusFilter]}
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
         <div className="flex items-center gap-3">
           {/* View mode tabs */}
           <ViewTabs value={viewMode} onChange={setViewMode} />
@@ -65,11 +112,17 @@ export function ProjectHome({ projects }: ProjectHomeProps) {
       )}
 
       {viewMode === "list" && (
-        <ProjectList projects={projects} searchQuery={searchQuery} />
+        <ProjectList
+          projects={statusFilteredProjects}
+          searchQuery={searchQuery}
+        />
       )}
 
       {viewMode === "board" && (
-        <ProjectBoard projects={projects} searchQuery={searchQuery} />
+        <ProjectBoard
+          projects={statusFilteredProjects}
+          searchQuery={searchQuery}
+        />
       )}
     </>
   );

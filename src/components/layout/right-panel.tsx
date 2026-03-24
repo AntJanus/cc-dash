@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   BarChart3,
   Zap,
@@ -7,7 +8,6 @@ import {
   CheckCircle,
   Clock,
   Play,
-  Sparkles,
   Bell,
 } from "lucide-react";
 import type { ActivityEvent } from "@/lib/activity/types";
@@ -52,18 +52,21 @@ export function RightPanel({ stats, recentActivity, alerts }: RightPanelProps) {
             value={stats.active}
             label="Active"
             color="emerald"
+            href="/?status=active"
           />
           <ResourceCard
             icon={AlertCircle}
             value={stats.stalled}
             label="Stalled"
             color="amber"
+            href="/?status=stalled"
           />
           <ResourceCard
             icon={CheckCircle}
             value={stats.complete}
             label="Complete"
             color="blue"
+            href="/?status=complete"
           />
           <ResourceCard
             icon={BarChart3}
@@ -138,6 +141,7 @@ interface ResourceCardProps {
   value: number;
   label: string;
   color: "emerald" | "amber" | "blue" | "violet";
+  href?: string;
 }
 
 const COLOR_STYLES = {
@@ -159,14 +163,17 @@ const COLOR_STYLES = {
   },
 };
 
-function ResourceCard({ icon: Icon, value, label, color }: ResourceCardProps) {
+function ResourceCard({
+  icon: Icon,
+  value,
+  label,
+  color,
+  href,
+}: ResourceCardProps) {
   const styles = COLOR_STYLES[color];
 
-  return (
-    <div
-      className="flex flex-col items-center rounded-lg p-3.5 text-center"
-      style={{ background: "var(--bg-accent)" }}
-    >
+  const content = (
+    <>
       <div
         className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg"
         style={{ background: styles.bg, color: styles.fg }}
@@ -182,6 +189,31 @@ function ResourceCard({ icon: Icon, value, label, color }: ResourceCardProps) {
       <span className="text-sm" style={{ color: "var(--text-muted)" }}>
         {label}
       </span>
+    </>
+  );
+
+  const className =
+    "flex flex-col items-center rounded-lg p-3.5 text-center transition-all";
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={`${className} hover:ring-2 hover:ring-offset-1 cursor-pointer`}
+        style={{
+          background: "var(--bg-accent)",
+          // @ts-expect-error CSS custom property
+          "--tw-ring-color": styles.fg,
+        }}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <div className={className} style={{ background: "var(--bg-accent)" }}>
+      {content}
     </div>
   );
 }

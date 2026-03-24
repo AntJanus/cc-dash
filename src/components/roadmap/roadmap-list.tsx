@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -20,7 +20,38 @@ import { MoveCategorySelect } from "./move-category-select";
 import { DeleteItemDialog } from "./delete-item-dialog";
 import { DeleteCategoryDialog } from "./delete-category-dialog";
 import { RoadmapItemForm } from "./roadmap-item-form";
-import type { RoadmapCategory } from "@/lib/schemas/roadmap";
+import type { RoadmapCategory, RoadmapItem } from "@/lib/schemas/roadmap";
+
+type SortOption = "manual" | "status" | "name" | "started";
+
+const STATUS_ORDER: Record<string, number> = {
+  idea: 0,
+  planned: 1,
+  "in-progress": 2,
+  done: 3,
+};
+
+function sortItems(items: RoadmapItem[], sortBy: SortOption): RoadmapItem[] {
+  if (sortBy === "manual") return items;
+
+  return [...items].sort((a, b) => {
+    switch (sortBy) {
+      case "status":
+        return (STATUS_ORDER[a.status] ?? 0) - (STATUS_ORDER[b.status] ?? 0);
+      case "name":
+        return a.name.localeCompare(b.name);
+      case "started": {
+        // Items with no started date go to the end
+        if (!a.started && !b.started) return 0;
+        if (!a.started) return 1;
+        if (!b.started) return -1;
+        return a.started.localeCompare(b.started);
+      }
+      default:
+        return 0;
+    }
+  });
+}
 
 export interface RoadmapListProps {
   categories: RoadmapCategory[];
@@ -57,16 +88,25 @@ export function RoadmapList({
   onDeleteCategory,
 }: RoadmapListProps) {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [sortBy, setSortBy] = useState<SortOption>("manual");
   const [addingItemForCategory, setAddingItemForCategory] = useState<
     string | null
   >(null);
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
 
-  const visibleCategories =
+  const filteredCategories =
     selectedCategory === "all"
       ? categories
       : categories.filter((cat) => cat.slug === selectedCategory);
+
+  // Apply sorting to each category's items
+  const visibleCategories = useMemo(() => {
+    return filteredCategories.map((cat) => ({
+      ...cat,
+      items: sortItems(cat.items, sortBy),
+    }));
+  }, [filteredCategories, sortBy]);
 
   const totalItems = visibleCategories.reduce(
     (sum, cat) => sum + cat.items.length,
@@ -74,6 +114,7 @@ export function RoadmapList({
   );
 
   const hasCrud = Boolean(onAddItem);
+  const canReorder = sortBy === "manual";
 
   function handleMoveItem(
     itemId: string,
@@ -105,24 +146,43 @@ export function RoadmapList({
 
   return (
     <div data-testid="roadmap-list" className="space-y-6">
-      <div className="flex items-center gap-2">
-        <label htmlFor="category-filter" className="text-sm font-medium">
-          Category:
-        </label>
-        <select
-          id="category-filter"
-          data-testid="category-filter"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          <option value="all">All</option>
-          {categories.map((cat) => (
-            <option key={cat.slug} value={cat.slug}>
-              {cat.title}
-            </option>
-          ))}
-        </select>
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <label htmlFor="category-filter" className="text-sm font-medium">
+            Category:
+          </label>
+          <select
+            id="category-filter"
+            data-testid="category-filter"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <option value="all">All</option>
+            {categories.map((cat) => (
+              <option key={cat.slug} value={cat.slug}>
+                {cat.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <label htmlFor="sort-by" className="text-sm font-medium">
+            Sort:
+          </label>
+          <select
+            id="sort-by"
+            data-testid="sort-by"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <option value="manual">Manual</option>
+            <option value="status">Status</option>
+            <option value="name">Name (A-Z)</option>
+            <option value="started">Started Date</option>
+          </select>
+        </div>
       </div>
 
       {totalItems === 0 && !hasCrud && (
@@ -151,7 +211,7 @@ export function RoadmapList({
                 <TableHead>Started</TableHead>
                 <TableHead>Dependencies</TableHead>
                 {hasCrud && <TableHead>Move</TableHead>}
-                {hasCrud && <TableHead>Order</TableHead>}
+                {hasCrud && canReorder && <TableHead>Order</TableHead>}
                 {hasCrud && <TableHead>Actions</TableHead>}
               </TableRow>
             </TableHeader>
@@ -203,7 +263,7 @@ export function RoadmapList({
                       )}
                     </TableCell>
                   )}
-                  {hasCrud && (
+                  {hasCrud && canReorder && (
                     <TableCell>
                       <ReorderButtons
                         onMoveUp={() => handleReorder(category, idx, "up")}

@@ -196,4 +196,126 @@ describe("RoadmapList", () => {
     expect(screen.getByText("Feature A")).toBeInTheDocument();
     expect(screen.getByText("Feature C")).toBeInTheDocument();
   });
+
+  // RLST-04: Sort functionality
+  describe("sorting", () => {
+    const sortTestCategories: RoadmapCategory[] = [
+      {
+        title: "Test Category",
+        slug: "test",
+        items: [
+          {
+            id: "r_item1",
+            status: "done",
+            name: "Zebra Feature",
+            description: "Last alphabetically",
+            started: "2026-01-15",
+          },
+          {
+            id: "r_item2",
+            status: "idea",
+            name: "Alpha Feature",
+            description: "First alphabetically",
+          },
+          {
+            id: "r_item3",
+            status: "in-progress",
+            name: "Beta Feature",
+            description: "Middle alphabetically",
+            started: "2026-01-01",
+          },
+        ],
+      },
+    ];
+
+    it("shows sort dropdown with Manual as default", () => {
+      render(
+        <RoadmapList
+          categories={sortTestCategories}
+          sessionRefs={defaultSessionRefs}
+          itemNames={{}}
+        />,
+      );
+      const sortSelect = screen.getByTestId("sort-by");
+      expect(sortSelect).toHaveValue("manual");
+    });
+
+    it("sorts by status (idea → planned → in-progress → done)", () => {
+      render(
+        <RoadmapList
+          categories={sortTestCategories}
+          sessionRefs={defaultSessionRefs}
+          itemNames={{}}
+        />,
+      );
+      const sortSelect = screen.getByTestId("sort-by");
+      fireEvent.change(sortSelect, { target: { value: "status" } });
+
+      // Get all table rows (excluding header)
+      const rows = screen.getAllByRole("row").slice(1);
+      const names = rows.map((row) => row.querySelector("td")?.textContent);
+
+      // idea (Alpha) → in-progress (Beta) → done (Zebra)
+      expect(names).toEqual(["Alpha Feature", "Beta Feature", "Zebra Feature"]);
+    });
+
+    it("sorts by name alphabetically", () => {
+      render(
+        <RoadmapList
+          categories={sortTestCategories}
+          sessionRefs={defaultSessionRefs}
+          itemNames={{}}
+        />,
+      );
+      const sortSelect = screen.getByTestId("sort-by");
+      fireEvent.change(sortSelect, { target: { value: "name" } });
+
+      const rows = screen.getAllByRole("row").slice(1);
+      const names = rows.map((row) => row.querySelector("td")?.textContent);
+
+      expect(names).toEqual(["Alpha Feature", "Beta Feature", "Zebra Feature"]);
+    });
+
+    it("sorts by started date (oldest first, null at end)", () => {
+      render(
+        <RoadmapList
+          categories={sortTestCategories}
+          sessionRefs={defaultSessionRefs}
+          itemNames={{}}
+        />,
+      );
+      const sortSelect = screen.getByTestId("sort-by");
+      fireEvent.change(sortSelect, { target: { value: "started" } });
+
+      const rows = screen.getAllByRole("row").slice(1);
+      const names = rows.map((row) => row.querySelector("td")?.textContent);
+
+      // 2026-01-01 (Beta) → 2026-01-15 (Zebra) → null (Alpha)
+      expect(names).toEqual(["Beta Feature", "Zebra Feature", "Alpha Feature"]);
+    });
+
+    it("hides Order column when not in manual sort mode", () => {
+      render(
+        <RoadmapList
+          categories={sortTestCategories}
+          sessionRefs={defaultSessionRefs}
+          itemNames={{}}
+          onAddItem={() => {}}
+          onUpdateItem={() => {}}
+          onDeleteItem={() => {}}
+          onReorderItems={() => {}}
+        />,
+      );
+
+      // In manual mode, Order column should be visible
+      expect(screen.getByText("Order")).toBeInTheDocument();
+
+      // Switch to status sort
+      const sortSelect = screen.getByTestId("sort-by");
+      fireEvent.change(sortSelect, { target: { value: "status" } });
+
+      // Order column should be hidden
+      expect(screen.queryByText("Order")).not.toBeInTheDocument();
+    });
+  });
 });

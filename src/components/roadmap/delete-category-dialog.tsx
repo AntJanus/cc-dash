@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 interface DeleteCategoryDialogProps {
   categoryName: string;
   itemCount: number;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   trigger?: React.ReactNode;
 }
 
@@ -22,11 +22,22 @@ export function DeleteCategoryDialog({
   trigger,
 }: DeleteCategoryDialogProps) {
   const [open, setOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const description =
     itemCount > 0
       ? `This will delete the category and all ${itemCount} items in it. This action cannot be undone.`
       : "This will delete the empty category. This action cannot be undone.";
+
+  async function handleConfirm() {
+    setDeleting(true);
+    try {
+      await onConfirm();
+      setOpen(false);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <>
@@ -50,7 +61,7 @@ export function DeleteCategoryDialog({
         >
           <div
             className="fixed inset-0 bg-black/10"
-            onClick={() => setOpen(false)}
+            onClick={() => !deleting && setOpen(false)}
           />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-background p-4 ring-1 ring-foreground/10 shadow-lg">
             <h2 className="text-base font-medium">
@@ -58,17 +69,19 @@ export function DeleteCategoryDialog({
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">{description}</p>
             <div className="mt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={deleting}
+              >
                 Cancel
               </Button>
               <Button
                 variant="destructive"
-                onClick={() => {
-                  onConfirm();
-                  setOpen(false);
-                }}
+                onClick={handleConfirm}
+                disabled={deleting}
               >
-                Delete
+                {deleting ? "Deleting..." : "Delete"}
               </Button>
             </div>
           </div>

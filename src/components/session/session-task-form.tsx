@@ -10,7 +10,7 @@ interface SessionTaskFormData {
 }
 
 interface SessionTaskFormProps {
-  onSubmit: (data: SessionTaskFormData) => void;
+  onSubmit: (data: SessionTaskFormData) => void | Promise<void>;
   onCancel: () => void;
   existingTasks: Array<{ id: string; description: string }>;
   initialValues?: SessionTaskFormData;
@@ -28,15 +28,21 @@ export function SessionTaskForm({
   const [dependency, setDependency] = useState(
     initialValues?.dependency ?? "none",
   );
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!description.trim()) return;
-    onSubmit({ description: description.trim(), dependency });
-    // Reset form if not in edit mode (no initialValues)
-    if (!initialValues) {
-      setDescription("");
-      setDependency("none");
+    setSubmitting(true);
+    try {
+      await onSubmit({ description: description.trim(), dependency });
+      // Reset form if not in edit mode (no initialValues)
+      if (!initialValues) {
+        setDescription("");
+        setDependency("none");
+      }
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -62,8 +68,15 @@ export function SessionTaskForm({
         ))}
       </select>
       <div className="flex gap-2">
-        <Button type="submit">Add</Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="submit" disabled={submitting}>
+          {submitting ? "Adding..." : "Add"}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={submitting}
+        >
           Cancel
         </Button>
       </div>

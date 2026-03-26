@@ -1,5 +1,11 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 
 import { SessionTaskForm } from "@/components/session/session-task-form";
@@ -68,8 +74,8 @@ describe("SessionTaskForm", () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it("resets form after successful submit when no initialValues", () => {
-    const onSubmit = vi.fn();
+  it("resets form after successful submit when no initialValues", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
     render(
       <SessionTaskForm
         onSubmit={onSubmit}
@@ -83,7 +89,9 @@ describe("SessionTaskForm", () => {
       target: { value: "t_abc02" },
     });
     fireEvent.click(screen.getByRole("button", { name: /add|save|submit/i }));
-    expect(descInput).toHaveValue("");
+    await waitFor(() => {
+      expect(descInput).toHaveValue("");
+    });
     expect(screen.getByRole("combobox")).toHaveValue("none");
   });
 

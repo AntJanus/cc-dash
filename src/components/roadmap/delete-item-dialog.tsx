@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 interface DeleteItemDialogProps {
   itemName: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   trigger?: React.ReactNode;
 }
 
@@ -20,6 +20,17 @@ export function DeleteItemDialog({
   trigger,
 }: DeleteItemDialogProps) {
   const [open, setOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleConfirm() {
+    setDeleting(true);
+    try {
+      await onConfirm();
+      setOpen(false);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <>
@@ -43,7 +54,7 @@ export function DeleteItemDialog({
         >
           <div
             className="fixed inset-0 bg-black/10"
-            onClick={() => setOpen(false)}
+            onClick={() => !deleting && setOpen(false)}
           />
           <div className="relative z-10 w-full max-w-sm rounded-xl bg-background p-4 ring-1 ring-foreground/10 shadow-lg">
             <h2 className="text-base font-medium">
@@ -54,17 +65,19 @@ export function DeleteItemDialog({
               cannot be undone.
             </p>
             <div className="mt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={deleting}
+              >
                 Cancel
               </Button>
               <Button
                 variant="destructive"
-                onClick={() => {
-                  onConfirm();
-                  setOpen(false);
-                }}
+                onClick={handleConfirm}
+                disabled={deleting}
               >
-                Delete
+                {deleting ? "Deleting..." : "Delete"}
               </Button>
             </div>
           </div>

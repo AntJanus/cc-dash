@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { RoadmapFile, RoadmapItem } from "@/lib/schemas/roadmap";
 import type { SessionFile } from "@/lib/schemas/session";
+import type { SessionMeta } from "@/lib/projects/get-projects";
 
 // --- Mocks must be set up before importing the module under test ---
 
@@ -26,15 +27,17 @@ vi.mock("@/lib/fs", () => ({
   parseSession: mockParseSession,
 }));
 
-const { mockReadFile } = vi.hoisted(() => ({
+const { mockReadFile, mockStat } = vi.hoisted(() => ({
   mockReadFile: vi.fn(),
+  mockStat: vi.fn(),
 }));
 vi.mock("node:fs/promises", async (importOriginal) => {
   const actual = await importOriginal<typeof import("node:fs/promises")>();
   return {
     ...actual,
-    default: { ...actual, readFile: mockReadFile },
+    default: { ...actual, readFile: mockReadFile, stat: mockStat },
     readFile: mockReadFile,
+    stat: mockStat,
   };
 });
 
@@ -91,6 +94,16 @@ function makeRoadmapItem(overrides: Partial<RoadmapItem> = {}): RoadmapItem {
   };
 }
 
+function makeSessionMeta(overrides: Partial<SessionMeta> = {}): SessionMeta {
+  return {
+    status: null,
+    hasUncheckedTasks: false,
+    exists: false,
+    isSessionStale: false,
+    ...overrides,
+  };
+}
+
 // --- Tests ---
 
 describe("extractWorkingOn", () => {
@@ -114,8 +127,18 @@ describe("extractWorkingOn", () => {
 
 describe("deriveStatus", () => {
   it("returns 'active' when session is in-progress", () => {
-    const session = makeSession({ status: "in-progress" });
-    const result = deriveStatus(null, session, false);
+    const meta = makeSessionMeta({ status: "in-progress", exists: true });
+    const result = deriveStatus(null, meta);
+    expect(result).toBe("active");
+  });
+
+  it("returns 'active' when session has unchecked tasks (even if paused)", () => {
+    const meta = makeSessionMeta({
+      status: "paused",
+      hasUncheckedTasks: true,
+      exists: true,
+    });
+    const result = deriveStatus(null, meta);
     expect(result).toBe("active");
   });
 
@@ -132,11 +155,12 @@ describe("deriveStatus", () => {
         },
       ],
     });
-    const result = deriveStatus(roadmap, null, false);
+    const meta = makeSessionMeta();
+    const result = deriveStatus(roadmap, meta);
     expect(result).toBe("complete");
   });
 
-  it("returns 'stalled' when isStale is true and no active session", () => {
+  it("returns 'stalled' when session is paused with no unchecked tasks", () => {
     const roadmap = makeRoadmap({
       categories: [
         {
@@ -149,8 +173,40 @@ describe("deriveStatus", () => {
         },
       ],
     });
-    const result = deriveStatus(roadmap, null, true);
+    const meta = makeSessionMeta({ status: "paused", exists: true });
+    const result = deriveStatus(roadmap, meta);
     expect(result).toBe("stalled");
+  });
+
+  it("returns 'stalled' when session is blocked", () => {
+    const meta = makeSessionMeta({ status: "blocked", exists: true });
+    const result = deriveStatus(null, meta);
+    expect(result).toBe("stalled");
+  });
+
+  it("returns 'stalled' when session file is stale", () => {
+    const meta = makeSessionMeta({
+      status: "completed",
+      exists: true,
+      isSessionStale: true,
+    });
+    const result = deriveStatus(null, meta);
+    expect(result).toBe("stalled");
+  });
+
+  it("returns 'inactive' when no session exists regardless of staleness", () => {
+    const roadmap = makeRoadmap({
+      categories: [
+        {
+          title: "Core",
+          slug: "core",
+          items: [makeRoadmapItem({ id: "r_abc12", status: "planned" })],
+        },
+      ],
+    });
+    const meta = makeSessionMeta({ exists: false, isSessionStale: false });
+    const result = deriveStatus(roadmap, meta);
+    expect(result).toBe("inactive");
   });
 
   it("returns 'inactive' as default when no session and not complete", () => {
@@ -163,7 +219,8 @@ describe("deriveStatus", () => {
         },
       ],
     });
-    const result = deriveStatus(roadmap, null, false);
+    const meta = makeSessionMeta();
+    const result = deriveStatus(roadmap, meta);
     expect(result).toBe("inactive");
   });
 
@@ -181,19 +238,14 @@ describe("deriveStatus", () => {
         },
       ],
     });
-    const session = makeSession({ status: "in-progress" });
-    const result = deriveStatus(roadmap, session, false);
+    const meta = makeSessionMeta({ status: "in-progress", exists: true });
+    const result = deriveStatus(roadmap, meta);
     expect(result).toBe("active");
   });
 });
 
 describe("stale detection", () => {
-  it("marks project as stale when lastUpdated is 8+ days ago", () => {
-    // We test stale logic indirectly through getProjectCards
-    // but deriveStatus receives isStale as a parameter.
-    // The stale calculation happens in getProjectCards.
-    // We verify via getProjectCards integration test below.
-    // Here, we test deriveStatus with isStale=true.
+  it("marks project as stalled when session exists and is stale", () => {
     const roadmap = makeRoadmap({
       categories: [
         {
@@ -203,11 +255,12 @@ describe("stale detection", () => {
         },
       ],
     });
-    const result = deriveStatus(roadmap, null, true);
+    const meta = makeSessionMeta({ exists: true, isSessionStale: true });
+    const result = deriveStatus(roadmap, meta);
     expect(result).toBe("stalled");
   });
 
-  it("marks project as not stale when lastUpdated is 6 days ago", () => {
+  it("marks project as inactive when no session and not complete", () => {
     const roadmap = makeRoadmap({
       categories: [
         {
@@ -217,21 +270,27 @@ describe("stale detection", () => {
         },
       ],
     });
-    // isStale = false for 6 days ago
-    const result = deriveStatus(roadmap, null, false);
+    const meta = makeSessionMeta();
+    const result = deriveStatus(roadmap, meta);
     expect(result).toBe("inactive");
   });
 
-  it("marks project as stale when lastUpdated is null", () => {
-    // null lastUpdated = stale by default.
-    // This is tested through getProjectCards integration.
-    // For deriveStatus alone, we just test with isStale=true.
-    const result = deriveStatus(null, null, true);
-    expect(result).toBe("stalled");
+  it("marks project as inactive when no session exists and null timestamps", () => {
+    // No session → inactive, not stalled (stalled requires a session)
+    const meta = makeSessionMeta();
+    const result = deriveStatus(null, meta);
+    expect(result).toBe("inactive");
   });
 });
 
 describe("sorting", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockStat.mockRejectedValue(
+      Object.assign(new Error("ENOENT"), { code: "ENOENT" }),
+    );
+  });
+
   it("sorts projects descending by lastUpdated", async () => {
     const now = new Date();
     const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
@@ -364,6 +423,10 @@ describe("sorting", () => {
 describe("getProjectCards aggregation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: stat rejects with ENOENT (no file mtimes)
+    mockStat.mockRejectedValue(
+      Object.assign(new Error("ENOENT"), { code: "ENOENT" }),
+    );
   });
 
   it("degrades gracefully when a project file fails to parse", async () => {
@@ -534,7 +597,7 @@ describe("getProjectCards aggregation", () => {
 
     const cards = await getProjectCards();
     expect(cards).toHaveLength(1);
-    expect(cards[0].status).toBe("stalled");
+    expect(cards[0].status).toBe("inactive");
     expect(cards[0].doneCount).toBe(0);
     expect(cards[0].totalCount).toBe(0);
     expect(cards[0].isStale).toBe(true);
@@ -622,7 +685,8 @@ describe("getProjectCards aggregation", () => {
     const freshCard = cards.find((c) => c.slug === "fresh-project");
 
     expect(staleCard!.isStale).toBe(true);
-    expect(staleCard!.status).toBe("stalled");
+    // No session file → inactive, not stalled (stalled requires a session)
+    expect(staleCard!.status).toBe("inactive");
 
     expect(freshCard!.isStale).toBe(false);
     expect(freshCard!.status).toBe("inactive");

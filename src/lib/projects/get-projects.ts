@@ -17,6 +17,18 @@ import type { SessionFile } from "@/lib/schemas/session";
 /** 7 days in milliseconds */
 const STALE_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000;
 
+/** Session metadata used by deriveStatus to determine project status. */
+export interface SessionMeta {
+  /** Parsed session status, or null if no session / parse failed */
+  status: "in-progress" | "paused" | "completed" | "blocked" | null;
+  /** Whether the session has at least one unchecked task */
+  hasUncheckedTasks: boolean;
+  /** Whether a session file exists on disk */
+  exists: boolean;
+  /** Whether the session file mtime is older than 7 days */
+  isSessionStale: boolean;
+}
+
 /** Derived data for a single project card on the dashboard home. */
 export interface ProjectCardData {
   /** URL-safe identifier (directory basename) */
@@ -54,18 +66,21 @@ export function extractWorkingOn(currentStatus: string): string | null {
 }
 
 /**
- * Derive project status from roadmap, session, and staleness.
+ * Derive project status from roadmap and session metadata.
  *
- * Priority: active session > all-done roadmap > stale check > inactive default.
+ * Priority: active > complete > stalled > inactive.
+ *
+ * - **active**: session in-progress OR session has unchecked tasks
+ * - **complete**: all roadmap items done
+ * - **stalled**: session exists AND (paused/blocked OR session file stale)
+ * - **inactive**: default fallback
  */
 export function deriveStatus(
   roadmap: RoadmapFile | null,
-  session: SessionFile | null,
-  isStale: boolean,
-  fallbackSessionActive = false,
+  sessionMeta: SessionMeta,
 ): "active" | "stalled" | "complete" | "inactive" {
-  // Active session always wins (parsed or fallback from frontmatter)
-  if (session?.status === "in-progress" || fallbackSessionActive)
+  // Active: session in-progress or has unchecked tasks
+  if (sessionMeta.status === "in-progress" || sessionMeta.hasUncheckedTasks)
     return "active";
 
   // Check if all roadmap items are done
@@ -76,8 +91,14 @@ export function deriveStatus(
     }
   }
 
-  // Stale projects with incomplete work are "stalled"
-  if (isStale) return "stalled";
+  // Stalled: session file exists AND (paused/blocked/stale)
+  if (
+    sessionMeta.exists &&
+    (sessionMeta.status === "paused" ||
+      sessionMeta.status === "blocked" ||
+      sessionMeta.isSessionStale)
+  )
+    return "stalled";
 
   return "inactive";
 }
@@ -123,11 +144,11 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
       }
 
       // Fallback: when full parse fails, extract session status from frontmatter
-      let fallbackSessionActive = false;
+      let fallbackSessionStatus: string | null = null;
       if (!session && sessionRaw) {
         try {
           const { data } = matter(sessionRaw);
-          if (data?.status === "in-progress") fallbackSessionActive = true;
+          if (data?.status) fallbackSessionStatus = data.status;
         } catch {
           /* ignore */
         }
@@ -137,6 +158,7 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
       // Frontmatter last_updated may be stale (set weeks ago) while the
       // actual file was modified recently.
       const fileMtimes: string[] = [];
+      let sessionMtime: Date | null = null;
       if (project.roadmapPath) {
         try {
           const s = await stat(project.roadmapPath);
@@ -149,6 +171,7 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
         try {
           const s = await stat(project.sessionPath);
           fileMtimes.push(s.mtime.toISOString());
+          sessionMtime = s.mtime;
         } catch {
           /* ignore */
         }
@@ -173,8 +196,24 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
         ? Date.now() - new Date(lastUpdated).getTime() > STALE_THRESHOLD_MS
         : true;
 
+      // Build SessionMeta for deriveStatus
+      const effectiveStatus =
+        (session?.status as SessionMeta["status"]) ??
+        (fallbackSessionStatus as SessionMeta["status"]) ??
+        null;
+      const hasUncheckedTasks = session?.tasks.some((t) => !t.checked) ?? false;
+      const isSessionStale = sessionMtime
+        ? Date.now() - sessionMtime.getTime() > STALE_THRESHOLD_MS
+        : false;
+      const sessionMeta: SessionMeta = {
+        status: effectiveStatus,
+        hasUncheckedTasks,
+        exists: !!project.sessionPath,
+        isSessionStale,
+      };
+
       const hasActiveSession =
-        session?.status === "in-progress" || fallbackSessionActive;
+        sessionMeta.status === "in-progress" || sessionMeta.hasUncheckedTasks;
 
       return {
         slug: project.slug,
@@ -190,7 +229,7 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
             : null,
         lastUpdated,
         isStale,
-        status: deriveStatus(roadmap, session, isStale, fallbackSessionActive),
+        status: deriveStatus(roadmap, sessionMeta),
       } satisfies ProjectCardData;
     }),
   );

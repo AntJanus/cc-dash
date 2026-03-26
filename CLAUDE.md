@@ -92,6 +92,7 @@ Dashboard config lives at `~/.config/cc-dash/config.json`:
 ## Learnings
 
 - **No text-xs in dashboard UI** — `text-xs` (12px) must never be used for any content. Minimum is `text-sm` (14px). Card titles need `text-base` (16px)+. Page headings need `text-3xl` (30px)+. When user says "bigger", go 2 steps up, not 1. _(captured 2026-03-21)_
+- **Use CSS utility classes for interactive states** — Define shared interaction patterns (hover lift, active press) as CSS utility classes (`interactive-card`, `interactive-btn` in globals.css) rather than repeating `transition` and `transform` styles inline on each component. Ensures consistent UX and simplifies timing/effect adjustments. _(captured 2026-03-23)_
 
 ## Do Not
 

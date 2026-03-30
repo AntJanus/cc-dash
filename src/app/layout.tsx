@@ -6,6 +6,7 @@ import { SidebarProvider } from "@/components/layout/sidebar-context";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { TopBar } from "@/components/layout/top-bar";
+import { CommandPalette } from "@/components/command-palette/command-palette";
 import { getProjectNav } from "@/lib/projects/get-project-nav";
 import { getProjectCards } from "@/lib/projects/get-projects";
 
@@ -65,6 +66,7 @@ export default async function RootLayout({
           }}
         />
         <SidebarProvider>
+          <CommandPalette projects={projects} />
           <div className="flex min-h-screen flex-col">
             {/* Top bar - hidden on mobile */}
             <div className="hidden lg:block">

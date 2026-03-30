@@ -104,6 +104,8 @@ interface RoadmapBoardProps {
   categories: RoadmapCategory[];
   sessionRefs: Record<string, string>;
   itemNames: Record<string, string>;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
   onDragStatusChange?: (itemId: string, newStatus: string) => void;
   onUpdateItem?: (
     itemId: string,
@@ -131,6 +133,8 @@ export function RoadmapBoard({
   categories,
   sessionRefs,
   itemNames,
+  selectedIds,
+  onToggleSelect,
   onDragStatusChange,
   onUpdateItem,
   onDeleteItem,
@@ -199,6 +203,8 @@ export function RoadmapBoard({
       sessionRefs={sessionRefs}
       itemNames={itemNames}
       allItems={allItems}
+      selectedIds={selectedIds}
+      onToggleSelect={onToggleSelect}
       onUpdateItem={onUpdateItem}
       onDeleteItem={onDeleteItem}
       onAddItem={onAddItem}

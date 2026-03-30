@@ -30,6 +30,9 @@ export const ConfigSchema = z.object({
   /** Absolute or ~-relative path to PROJECT_IDEAS.md file */
   ideas_file: z.string().optional(),
 
+  /** Project slugs that have been archived (hidden from dashboard) */
+  archived_projects: z.array(z.string()).default([]),
+
   /** Display preferences for the dashboard UI */
   display: z
     .object({

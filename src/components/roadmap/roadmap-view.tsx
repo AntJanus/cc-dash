@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RoadmapBoard } from "./roadmap-board";
 import { RoadmapList } from "./roadmap-list";
+import { BulkActionBar } from "./bulk-action-bar";
 import type {
   RoadmapFile,
   RoadmapCategory,
@@ -17,6 +18,11 @@ import {
   addRoadmapCategory,
   deleteRoadmapCategory,
 } from "@/lib/actions/roadmap-actions";
+import {
+  bulkUpdateStatus,
+  bulkMoveToCategory,
+  bulkDeleteItems,
+} from "@/lib/actions/bulk-roadmap-actions";
 
 interface RoadmapViewProps {
   roadmap: RoadmapFile;
@@ -28,11 +34,46 @@ interface RoadmapViewProps {
  * Client Component that manages the board/list view toggle.
  * When slug is provided, manages local state for optimistic CRUD updates.
  * Computes a flat itemNames lookup for DependencyBadge tooltips.
+ * Also manages multi-select state for bulk operations.
  */
 export function RoadmapView({ roadmap, sessionRefs, slug }: RoadmapViewProps) {
   const [categories, setCategories] = useState<RoadmapCategory[]>(
     roadmap.categories,
   );
+
+  // --- Selection state ---
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const selectAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      // Collect all visible item IDs
+      const allIds = new Set(prev);
+      // We add all item IDs from current categories
+      for (const cat of categories) {
+        for (const item of cat.items) {
+          allIds.add(item.id);
+        }
+      }
+      return allIds;
+    });
+  }, [categories]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
 
   // Build flat item ID -> name lookup across all categories
   const itemNames = useMemo(() => {
@@ -44,6 +85,107 @@ export function RoadmapView({ roadmap, sessionRefs, slug }: RoadmapViewProps) {
     }
     return names;
   }, [categories]);
+
+  // --- Bulk handlers ---
+
+  const handleBulkStatusChange = useCallback(
+    async (status: string) => {
+      if (!slug || selectedIds.size === 0) return;
+
+      const ids = Array.from(selectedIds);
+      const prev = categories;
+
+      // Optimistic update
+      setCategories((cats) =>
+        cats.map((cat) => ({
+          ...cat,
+          items: cat.items.map((item) =>
+            selectedIds.has(item.id)
+              ? ({ ...item, status } as RoadmapItem)
+              : item,
+          ),
+        })),
+      );
+
+      const result = await bulkUpdateStatus(slug, ids, status);
+      if (!result.success) {
+        setCategories(prev);
+      } else {
+        setSelectedIds(new Set());
+      }
+    },
+    [slug, selectedIds, categories],
+  );
+
+  const handleBulkMoveToCategory = useCallback(
+    async (targetCategorySlug: string) => {
+      if (!slug || selectedIds.size === 0) return;
+
+      const ids = Array.from(selectedIds);
+      const prev = categories;
+
+      // Optimistic update: move items to target category
+      setCategories((cats) => {
+        let newCats = cats.map((cat) => ({ ...cat, items: [...cat.items] }));
+        const movedItems: RoadmapCategory["items"] = [];
+
+        // Remove from source categories
+        newCats = newCats.map((cat) => {
+          if (cat.slug === targetCategorySlug) return cat;
+          const remaining: RoadmapCategory["items"] = [];
+          for (const item of cat.items) {
+            if (selectedIds.has(item.id)) {
+              movedItems.push(item);
+            } else {
+              remaining.push(item);
+            }
+          }
+          return { ...cat, items: remaining };
+        });
+
+        // Add to target category
+        newCats = newCats.map((cat) =>
+          cat.slug === targetCategorySlug
+            ? { ...cat, items: [...cat.items, ...movedItems] }
+            : cat,
+        );
+
+        return newCats;
+      });
+
+      const result = await bulkMoveToCategory(slug, ids, targetCategorySlug);
+      if (!result.success) {
+        setCategories(prev);
+      } else {
+        setSelectedIds(new Set());
+      }
+    },
+    [slug, selectedIds, categories],
+  );
+
+  const handleBulkDelete = useCallback(async () => {
+    if (!slug || selectedIds.size === 0) return;
+
+    const ids = Array.from(selectedIds);
+    const prev = categories;
+
+    // Optimistic update: remove selected items
+    setCategories((cats) =>
+      cats.map((cat) => ({
+        ...cat,
+        items: cat.items.filter((item) => !selectedIds.has(item.id)),
+      })),
+    );
+    setSelectedIds(new Set());
+    setShowBulkDeleteDialog(false);
+
+    const result = await bulkDeleteItems(slug, ids);
+    if (!result.success) {
+      setCategories(prev);
+    }
+  }, [slug, selectedIds, categories]);
+
+  // --- Single-item CRUD handlers ---
 
   const handleAddItem = useCallback(
     async (
@@ -261,36 +403,98 @@ export function RoadmapView({ roadmap, sessionRefs, slug }: RoadmapViewProps) {
     [slug, categories],
   );
 
+  // Derive selected item name for bulk delete dialog
+  const selectedCount = selectedIds.size;
+  const bulkDeleteLabel =
+    selectedCount === 1 ? "1 selected item" : `${selectedCount} selected items`;
+
   return (
-    <Tabs defaultValue="board">
-      <TabsList>
-        <TabsTrigger value="board">Board</TabsTrigger>
-        <TabsTrigger value="list">List</TabsTrigger>
-      </TabsList>
-      <TabsContent value="board">
-        <RoadmapBoard
+    <>
+      <Tabs defaultValue="board">
+        <TabsList>
+          <TabsTrigger value="board">Board</TabsTrigger>
+          <TabsTrigger value="list">List</TabsTrigger>
+        </TabsList>
+        <TabsContent value="board">
+          <RoadmapBoard
+            categories={categories}
+            sessionRefs={sessionRefs}
+            itemNames={itemNames}
+            selectedIds={selectedIds}
+            onToggleSelect={slug ? toggleSelect : undefined}
+            onDragStatusChange={slug ? handleDragStatusChange : undefined}
+            onUpdateItem={slug ? handleUpdateItem : undefined}
+            onDeleteItem={slug ? handleDeleteItem : undefined}
+            onAddItem={slug ? handleAddItem : undefined}
+          />
+        </TabsContent>
+        <TabsContent value="list">
+          <RoadmapList
+            categories={categories}
+            sessionRefs={sessionRefs}
+            itemNames={itemNames}
+            selectedIds={selectedIds}
+            onToggleSelect={slug ? toggleSelect : undefined}
+            onSelectAll={slug ? selectAll : undefined}
+            onClearSelection={slug ? clearSelection : undefined}
+            onAddItem={slug ? handleAddItem : undefined}
+            onUpdateItem={slug ? handleUpdateItem : undefined}
+            onDeleteItem={slug ? handleDeleteItem : undefined}
+            onReorderItems={slug ? handleReorderItems : undefined}
+            onAddCategory={slug ? handleAddCategory : undefined}
+            onDeleteCategory={slug ? handleDeleteCategory : undefined}
+          />
+        </TabsContent>
+      </Tabs>
+
+      {/* Bulk action bar — shown when items are selected and slug is available */}
+      {slug && selectedCount > 0 && (
+        <BulkActionBar
+          selectedCount={selectedCount}
           categories={categories}
-          sessionRefs={sessionRefs}
-          itemNames={itemNames}
-          onDragStatusChange={slug ? handleDragStatusChange : undefined}
-          onUpdateItem={slug ? handleUpdateItem : undefined}
-          onDeleteItem={slug ? handleDeleteItem : undefined}
-          onAddItem={slug ? handleAddItem : undefined}
+          onChangeStatus={handleBulkStatusChange}
+          onMoveToCategory={handleBulkMoveToCategory}
+          onDelete={() => setShowBulkDeleteDialog(true)}
+          onClearSelection={clearSelection}
         />
-      </TabsContent>
-      <TabsContent value="list">
-        <RoadmapList
-          categories={categories}
-          sessionRefs={sessionRefs}
-          itemNames={itemNames}
-          onAddItem={slug ? handleAddItem : undefined}
-          onUpdateItem={slug ? handleUpdateItem : undefined}
-          onDeleteItem={slug ? handleDeleteItem : undefined}
-          onReorderItems={slug ? handleReorderItems : undefined}
-          onAddCategory={slug ? handleAddCategory : undefined}
-          onDeleteCategory={slug ? handleDeleteCategory : undefined}
-        />
-      </TabsContent>
-    </Tabs>
+      )}
+
+      {/* Bulk delete confirmation dialog */}
+      {showBulkDeleteDialog && (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center"
+        >
+          <div
+            className="fixed inset-0 bg-black/10"
+            onClick={() => setShowBulkDeleteDialog(false)}
+          />
+          <div className="relative z-10 w-full max-w-sm rounded-xl bg-background p-4 ring-1 ring-foreground/10 shadow-lg">
+            <h2 className="text-base font-medium">Delete {bulkDeleteLabel}?</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              This will permanently remove the selected items from the roadmap
+              file. This action cannot be undone.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                className="interactive-btn inline-flex h-8 items-center justify-center rounded-lg border border-border bg-background px-2.5 text-sm font-medium"
+                onClick={() => setShowBulkDeleteDialog(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="interactive-btn inline-flex h-8 items-center justify-center rounded-lg bg-destructive/10 px-2.5 text-sm font-medium text-destructive hover:bg-destructive/20"
+                onClick={handleBulkDelete}
+              >
+                Delete {selectedCount} {selectedCount === 1 ? "item" : "items"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -59,6 +59,14 @@ export function SettingsForm({ initialConfig }: SettingsFormProps) {
 
     // Persist to localStorage for FOIT prevention
     localStorage.setItem("cc-dash-theme", JSON.stringify(theme));
+
+    const resolved =
+      theme === "system"
+        ? window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light"
+        : theme;
+    window.dispatchEvent(new CustomEvent("theme-change", { detail: resolved }));
   }
 
   async function handleSave() {

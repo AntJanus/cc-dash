@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -71,6 +71,16 @@ export function AppSidebar({ projects }: AppSidebarProps) {
 
   const activeSessionProjects = projects.filter((p) => p.hasActiveSession);
 
+  // Listen for theme changes from other components (e.g. command palette)
+  useEffect(() => {
+    function onThemeChange(e: Event) {
+      const detail = (e as CustomEvent<"light" | "dark">).detail;
+      setTheme(detail);
+    }
+    window.addEventListener("theme-change", onThemeChange);
+    return () => window.removeEventListener("theme-change", onThemeChange);
+  }, []);
+
   function toggleTheme() {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
@@ -80,6 +90,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
     } catch {
       // ignore
     }
+    window.dispatchEvent(new CustomEvent("theme-change", { detail: next }));
   }
 
   function isActive(href: string) {

@@ -57,6 +57,10 @@ export interface RoadmapListProps {
   categories: RoadmapCategory[];
   sessionRefs: Record<string, string>;
   itemNames: Record<string, string>;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
+  onSelectAll?: () => void;
+  onClearSelection?: () => void;
   onAddItem?: (
     categorySlug: string,
     input: { name: string; description: string; status: string },
@@ -80,6 +84,10 @@ export function RoadmapList({
   categories,
   sessionRefs: _sessionRefs,
   itemNames,
+  selectedIds,
+  onToggleSelect,
+  onSelectAll,
+  onClearSelection,
   onAddItem,
   onUpdateItem,
   onDeleteItem,
@@ -115,6 +123,18 @@ export function RoadmapList({
 
   const hasCrud = Boolean(onAddItem);
   const canReorder = sortBy === "manual";
+  const hasBulk = Boolean(onToggleSelect);
+
+  // Compute all visible item IDs for select-all state
+  const allVisibleIds = useMemo(
+    () => visibleCategories.flatMap((cat) => cat.items.map((i) => i.id)),
+    [visibleCategories],
+  );
+  const allSelected =
+    allVisibleIds.length > 0 &&
+    allVisibleIds.every((id) => selectedIds?.has(id));
+  const someSelected =
+    !allSelected && allVisibleIds.some((id) => selectedIds?.has(id));
 
   function handleMoveItem(
     itemId: string,
@@ -146,7 +166,35 @@ export function RoadmapList({
 
   return (
     <div data-testid="roadmap-list" className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
+        {hasBulk && (
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="select-all-items"
+              data-testid="select-all-checkbox"
+              checked={allSelected}
+              ref={(el) => {
+                if (el) el.indeterminate = someSelected;
+              }}
+              onChange={() => {
+                if (allSelected) {
+                  onClearSelection?.();
+                } else {
+                  onSelectAll?.();
+                }
+              }}
+              aria-label="Select all items"
+              className="h-4 w-4 cursor-pointer rounded border-border accent-primary"
+            />
+            <label
+              htmlFor="select-all-items"
+              className="cursor-pointer text-sm font-medium"
+            >
+              Select all
+            </label>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <label htmlFor="category-filter" className="text-sm font-medium">
             Category:
@@ -206,6 +254,7 @@ export function RoadmapList({
           <Table>
             <TableHeader>
               <TableRow>
+                {hasBulk && <TableHead className="w-10" />}
                 <TableHead>Name</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Started</TableHead>
@@ -217,7 +266,25 @@ export function RoadmapList({
             </TableHeader>
             <TableBody>
               {category.items.map((item, idx) => (
-                <TableRow key={item.id}>
+                <TableRow
+                  key={item.id}
+                  data-selected={selectedIds?.has(item.id) ? "true" : undefined}
+                  className={
+                    selectedIds?.has(item.id) ? "bg-primary/5" : undefined
+                  }
+                >
+                  {hasBulk && (
+                    <TableCell className="w-10">
+                      <input
+                        type="checkbox"
+                        data-testid={`list-select-item-${item.id}`}
+                        checked={selectedIds?.has(item.id) ?? false}
+                        onChange={() => onToggleSelect?.(item.id)}
+                        aria-label={`Select ${item.name}`}
+                        className="h-4 w-4 cursor-pointer rounded border-border accent-primary"
+                      />
+                    </TableCell>
+                  )}
                   <TableCell className="font-medium">
                     {onUpdateItem ? (
                       <EditableText

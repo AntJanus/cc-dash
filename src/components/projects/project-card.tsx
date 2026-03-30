@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { StaleBadge } from "@/components/shared/stale-badge";
 import { RelativeTime } from "@/components/shared/relative-time";
 import { PromptButton } from "@/components/prompt/prompt-button";
+import { ArchiveButton } from "@/components/projects/archive-button";
 import type { ProjectCardData } from "@/lib/projects/get-projects";
 import { cn } from "@/lib/utils";
 
@@ -67,6 +68,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </div>
           <div className="flex items-center gap-1">
             <PromptButton slug={project.slug} />
+            <ArchiveButton slug={project.slug} name={project.name} />
             <StatusBadge status={project.status} />
           </div>
         </div>

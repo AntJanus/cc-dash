@@ -133,6 +133,12 @@ async function scanDirectory(
   return candidates;
 }
 
+/** Options for discoverProjects. */
+export interface DiscoverOptions {
+  /** When true, include archived projects (slugs in config.archived_projects). Default: false. */
+  includeArchived?: boolean;
+}
+
 /**
  * Discover all cc-dash projects across configured directories.
  *
@@ -140,10 +146,13 @@ async function scanDirectory(
  *    SESSION_PROGRESS.md with valid cc-dash schema frontmatter.
  * 2. Merges explicit_projects (always included even without files).
  * 3. Deduplicates by resolved path.
+ * 4. Filters out archived projects unless includeArchived is true.
  */
 export async function discoverProjects(
   config: Config,
+  options: DiscoverOptions = {},
 ): Promise<DiscoveredProject[]> {
+  const { includeArchived = false } = options;
   const excludeDirs = new Set(config.exclude_dirs);
   const projects = new Map<string, DiscoveredProject>();
 
@@ -243,5 +252,13 @@ export async function discoverProjects(
     }
   }
 
-  return Array.from(projects.values());
+  const allProjects = Array.from(projects.values());
+
+  // Phase 4: Filter out archived projects (unless caller wants them included)
+  if (includeArchived) return allProjects;
+
+  const archivedSlugs = new Set(config.archived_projects ?? []);
+  if (archivedSlugs.size === 0) return allProjects;
+
+  return allProjects.filter((p) => !archivedSlugs.has(p.slug));
 }

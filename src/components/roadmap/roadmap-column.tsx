@@ -15,6 +15,8 @@ interface RoadmapColumnProps {
   sessionRefs: Record<string, string>;
   itemNames: Record<string, string>;
   allItems?: Array<{ id: string; name: string }>;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
   onUpdateItem?: (
     itemId: string,
     updates: {
@@ -45,6 +47,8 @@ export function RoadmapColumn({
   sessionRefs,
   itemNames,
   allItems,
+  selectedIds,
+  onToggleSelect,
   onUpdateItem,
   onDeleteItem,
   enableDnd,
@@ -69,6 +73,8 @@ export function RoadmapColumn({
               sessionRefs={sessionRefs}
               itemNames={itemNames}
               allItems={allItems}
+              isSelected={selectedIds?.has(item.id) ?? false}
+              onToggleSelect={onToggleSelect}
               onUpdateItem={onUpdateItem}
               onDeleteItem={onDeleteItem}
               enableDnd={enableDnd}

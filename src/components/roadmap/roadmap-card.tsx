@@ -26,6 +26,8 @@ interface RoadmapCardProps {
   sessionRefs: Record<string, string>;
   itemNames: Record<string, string>;
   allItems?: Array<{ id: string; name: string }>;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
   onUpdateItem?: (
     itemId: string,
     updates: {
@@ -51,6 +53,8 @@ export function RoadmapCard({
   sessionRefs,
   itemNames,
   allItems,
+  isSelected,
+  onToggleSelect,
   onUpdateItem,
   onDeleteItem,
   enableDnd,
@@ -91,6 +95,23 @@ export function RoadmapCard({
     >
       <CardHeader>
         <div className="flex items-start justify-between gap-1">
+          {onToggleSelect && (
+            <div className="mt-0.5 shrink-0">
+              <input
+                type="checkbox"
+                data-testid={`select-item-${item.id}`}
+                checked={isSelected ?? false}
+                onChange={(e) => {
+                  // Prevent checkbox click from bubbling to card (dnd)
+                  e.stopPropagation();
+                  onToggleSelect(item.id);
+                }}
+                onClick={(e) => e.stopPropagation()}
+                aria-label={`Select ${item.name}`}
+                className="h-4 w-4 cursor-pointer rounded border-border accent-primary"
+              />
+            </div>
+          )}
           {enableDnd && (
             <div
               data-testid="drag-handle"

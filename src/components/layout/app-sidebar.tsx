@@ -8,6 +8,7 @@ import {
   Lightbulb,
   Activity,
   Settings,
+  Search,
   ChevronDown,
   ChevronRight,
   PanelLeftClose,
@@ -26,6 +27,7 @@ interface AppSidebarProps {
 
 const NAV_ITEMS = [
   { href: "/", label: "All Projects", icon: LayoutDashboard, color: "teal" },
+  { href: "/search", label: "Search", icon: Search, color: "blue" },
   { href: "/ideas", label: "Ideas", icon: Lightbulb, color: "violet" },
   { href: "/activity", label: "Activity", icon: Activity, color: "blue" },
   { href: "/settings", label: "Settings", icon: Settings, color: "amber" },

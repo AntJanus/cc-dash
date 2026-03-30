@@ -6,9 +6,12 @@ import { X } from "lucide-react";
 import { ProjectBoard } from "./project-board";
 import { ProjectList } from "./project-list";
 import { ProjectCard } from "./project-card";
+import { ProjectSort } from "./project-sort";
 import { HomeSearchInput } from "./home-search-input";
 import { CrossProjectPromptButton } from "@/components/prompt/cross-project-prompt-button";
 import { cn } from "@/lib/utils";
+import { sortProjects } from "@/lib/projects/sort-projects";
+import type { SortState } from "@/lib/projects/sort-projects";
 import type { ProjectCardData } from "@/lib/projects/get-projects";
 
 type ViewMode = "grid" | "list" | "board";
@@ -30,6 +33,10 @@ export function ProjectHome({ projects }: ProjectHomeProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [sort, setSort] = useState<SortState>({
+    field: "last_updated",
+    direction: "desc",
+  });
 
   // Read status filter from URL
   const statusParam = searchParams.get("status");
@@ -47,13 +54,16 @@ export function ProjectHome({ projects }: ProjectHomeProps) {
       : projects.filter((p) => p.status === statusFilter);
 
   // Then filter by search query
-  const filteredProjects = searchQuery.trim()
+  const searchFilteredProjects = searchQuery.trim()
     ? statusFilteredProjects.filter(
         (p) =>
           p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.description.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : statusFilteredProjects;
+
+  // Finally apply sort
+  const filteredProjects = sortProjects(searchFilteredProjects, sort);
 
   function clearStatusFilter() {
     router.push("/");
@@ -86,6 +96,8 @@ export function ProjectHome({ projects }: ProjectHomeProps) {
           )}
         </div>
         <div className="flex items-center gap-3">
+          {/* Sort controls */}
+          <ProjectSort sort={sort} onChange={setSort} />
           {/* View mode tabs */}
           <ViewTabs value={viewMode} onChange={setViewMode} />
           <HomeSearchInput value={searchQuery} onChange={setSearchQuery} />
@@ -112,17 +124,11 @@ export function ProjectHome({ projects }: ProjectHomeProps) {
       )}
 
       {viewMode === "list" && (
-        <ProjectList
-          projects={statusFilteredProjects}
-          searchQuery={searchQuery}
-        />
+        <ProjectList projects={filteredProjects} searchQuery={searchQuery} />
       )}
 
       {viewMode === "board" && (
-        <ProjectBoard
-          projects={statusFilteredProjects}
-          searchQuery={searchQuery}
-        />
+        <ProjectBoard projects={filteredProjects} searchQuery={searchQuery} />
       )}
     </>
   );

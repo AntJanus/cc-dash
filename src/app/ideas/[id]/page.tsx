@@ -1,8 +1,11 @@
 import { getIdeasData } from "@/lib/projects/get-ideas";
+import { loadConfig } from "@/lib/config";
+import { expandTilde } from "@/lib/fs/discovery";
 import { IdeaDetail } from "@/components/ideas/idea-detail";
 import { IdeaMetadataEditor } from "@/components/ideas/idea-metadata-editor";
 import { IdeaBodyEditor } from "@/components/ideas/idea-body-editor";
 import { DeleteIdeaDialog } from "@/components/ideas/delete-idea-dialog";
+import { CreateProjectWizard } from "@/components/ideas/create-project-wizard";
 
 export default async function IdeaDetailPage({
   params,
@@ -11,6 +14,8 @@ export default async function IdeaDetailPage({
 }) {
   const { id } = await params;
   const result = await getIdeasData();
+  const config = await loadConfig();
+  const scanDirs = config.scan_dirs.map(expandTilde);
 
   if (!result) {
     return (
@@ -32,7 +37,8 @@ export default async function IdeaDetailPage({
 
   return (
     <main className="p-8 lg:p-10">
-      <div className="mb-4 flex items-center justify-end">
+      <div className="mb-4 flex items-center justify-end gap-2">
+        <CreateProjectWizard idea={idea} scanDirs={scanDirs} />
         <DeleteIdeaDialog
           ideaId={idea.id}
           ideaTitle={idea.title}

@@ -9,6 +9,7 @@ import type { ProjectCardData } from "@/lib/projects/get-projects";
 const mockPush = vi.fn();
 const mockSearchParams = vi.hoisted(() => ({
   get: vi.fn().mockReturnValue(null),
+  toString: vi.fn().mockReturnValue(""),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -131,13 +132,16 @@ describe("ProjectHome", () => {
     });
 
     it("clears filter when badge is clicked", () => {
-      mockSearchParams.get.mockReturnValue("stalled");
+      mockSearchParams.get.mockImplementation((key: string) =>
+        key === "status" ? "stalled" : null,
+      );
+      mockSearchParams.toString.mockReturnValue("status=stalled");
       render(<ProjectHome projects={testProjects} />);
 
       const badge = screen.getByRole("button", { name: /stalled/i });
       fireEvent.click(badge);
 
-      expect(mockPush).toHaveBeenCalledWith("/");
+      expect(mockPush).toHaveBeenCalledWith("/", { scroll: false });
     });
   });
 });

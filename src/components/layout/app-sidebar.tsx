@@ -60,16 +60,17 @@ export function AppSidebar({ projects }: AppSidebarProps) {
   const { isOpen, isMobileOpen, toggle, closeMobile } = useSidebar();
   const pathname = usePathname();
   const [projectsExpanded, setProjectsExpanded] = useState(true);
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof document !== "undefined") {
-      return document.documentElement.classList.contains("dark")
-        ? "dark"
-        : "light";
-    }
-    return "light";
-  });
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   const activeSessionProjects = projects.filter((p) => p.hasActiveSession);
+
+  // Sync theme state with DOM after mount (avoids hydration mismatch)
+  useEffect(() => {
+    const current = document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light";
+    setTheme(current);
+  }, []);
 
   // Listen for theme changes from other components (e.g. command palette)
   useEffect(() => {

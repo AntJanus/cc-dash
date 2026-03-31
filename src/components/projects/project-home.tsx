@@ -33,10 +33,33 @@ export function ProjectHome({ projects }: ProjectHomeProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [sort, setSort] = useState<SortState>({
-    field: "last_updated",
-    direction: "desc",
-  });
+
+  // Read sort from URL params
+  const sortFieldParam = searchParams.get("sort");
+  const sortDirParam = searchParams.get("dir");
+  const sort: SortState = {
+    field:
+      sortFieldParam === "name" ||
+      sortFieldParam === "progress" ||
+      sortFieldParam === "last_updated" ||
+      sortFieldParam === "status"
+        ? sortFieldParam
+        : "last_updated",
+    direction:
+      sortDirParam === "asc" || sortDirParam === "desc" ? sortDirParam : "desc",
+  };
+
+  function setSort(next: SortState) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next.field === "last_updated" && next.direction === "desc") {
+      params.delete("sort");
+      params.delete("dir");
+    } else {
+      params.set("sort", next.field);
+      params.set("dir", next.direction);
+    }
+    router.push(`/?${params.toString()}`, { scroll: false });
+  }
 
   // Read status filter from URL
   const statusParam = searchParams.get("status");
@@ -66,7 +89,10 @@ export function ProjectHome({ projects }: ProjectHomeProps) {
   const filteredProjects = sortProjects(searchFilteredProjects, sort);
 
   function clearStatusFilter() {
-    router.push("/");
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("status");
+    const qs = params.toString();
+    router.push(qs ? `/?${qs}` : "/", { scroll: false });
   }
 
   return (

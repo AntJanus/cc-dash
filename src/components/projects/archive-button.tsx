@@ -53,15 +53,17 @@ export function ArchiveButton({ slug, name }: ArchiveButtonProps) {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={handleTriggerClick}
-          aria-label={`Archive ${name}`}
-        >
-          <Archive className="size-4" />
-        </Button>
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={handleTriggerClick}
+            aria-label={`Archive ${name}`}
+          />
+        }
+      >
+        <Archive className="size-4" />
       </AlertDialogTrigger>
       <AlertDialogContent size="sm">
         <AlertDialogHeader>

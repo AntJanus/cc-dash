@@ -7,6 +7,7 @@ import { StaleBadge } from "@/components/shared/stale-badge";
 import { RelativeTime } from "@/components/shared/relative-time";
 import { PromptButton } from "@/components/prompt/prompt-button";
 import { ArchiveButton } from "@/components/projects/archive-button";
+import { PortfolioStatusMenu } from "@/components/projects/portfolio-status-menu";
 import type { ProjectCardData } from "@/lib/projects/get-projects";
 import { cn } from "@/lib/utils";
 
@@ -129,6 +130,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </span>
 
           <div className="flex items-center gap-2">
+            <PortfolioStatusMenu
+              slug={project.slug}
+              currentStatus={project.portfolioStatus}
+            />
             {project.isStale && <StaleBadge />}
             {project.hasActiveSession && (
               <span

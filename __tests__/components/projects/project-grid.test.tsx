@@ -22,6 +22,8 @@ function makeProject(
     lastUpdated: new Date().toISOString(),
     isStale: false,
     status: "inactive",
+    portfolioStatus: "active",
+    portfolioOrder: undefined,
     ...overrides,
   };
 }

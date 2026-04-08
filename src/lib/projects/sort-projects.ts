@@ -7,7 +7,12 @@
 
 import type { ProjectCardData } from "./get-projects";
 
-export type SortField = "name" | "progress" | "last_updated" | "status";
+export type SortField =
+  | "name"
+  | "progress"
+  | "last_updated"
+  | "status"
+  | "priority";
 export type SortDirection = "asc" | "desc";
 
 export interface SortState {
@@ -68,6 +73,24 @@ export function sortProjects(
         const aOrder = STATUS_ORDER[a.status] ?? 99;
         const bOrder = STATUS_ORDER[b.status] ?? 99;
         cmp = aOrder - bOrder;
+        break;
+      }
+
+      case "priority": {
+        // Projects with order come first, then unranked sorted alphabetically
+        const aOrd = a.portfolioOrder;
+        const bOrd = b.portfolioOrder;
+        if (aOrd !== undefined && bOrd !== undefined) {
+          cmp = aOrd - bOrd;
+        } else if (aOrd !== undefined) {
+          return -1;
+        } else if (bOrd !== undefined) {
+          return 1;
+        } else {
+          cmp = a.name.localeCompare(b.name, undefined, {
+            sensitivity: "base",
+          });
+        }
         break;
       }
     }

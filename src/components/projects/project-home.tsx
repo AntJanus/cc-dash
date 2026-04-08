@@ -42,7 +42,8 @@ export function ProjectHome({ projects }: ProjectHomeProps) {
       sortFieldParam === "name" ||
       sortFieldParam === "progress" ||
       sortFieldParam === "last_updated" ||
-      sortFieldParam === "status"
+      sortFieldParam === "status" ||
+      sortFieldParam === "priority"
         ? sortFieldParam
         : "last_updated",
     direction:

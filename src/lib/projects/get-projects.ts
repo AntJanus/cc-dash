@@ -11,8 +11,11 @@ import { readFile, stat } from "node:fs/promises";
 import matter from "gray-matter";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects, parseRoadmap, parseSession } from "@/lib/fs";
+import { loadAllPortfolios } from "@/lib/fs/portfolio";
+import { expandTilde } from "@/lib/fs/discovery";
 import type { RoadmapFile } from "@/lib/schemas/roadmap";
 import type { SessionFile } from "@/lib/schemas/session";
+import type { ProjectStatus } from "@/lib/schemas/portfolio";
 
 /** 7 days in milliseconds */
 const STALE_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000;
@@ -53,6 +56,10 @@ export interface ProjectCardData {
   isStale: boolean;
   /** Derived status for filtering */
   status: "active" | "stalled" | "complete" | "inactive";
+  /** Portfolio status from .cc-dash/portfolio.json */
+  portfolioStatus: ProjectStatus;
+  /** Portfolio priority order (lower = higher priority) */
+  portfolioOrder: number | undefined;
 }
 
 /**
@@ -114,6 +121,8 @@ export function deriveStatus(
 export async function getProjectCards(): Promise<ProjectCardData[]> {
   const config = await loadConfig();
   const discovered = await discoverProjects(config);
+  const resolvedDirs = config.scan_dirs.map((d) => expandTilde(d));
+  const allMeta = await loadAllPortfolios(resolvedDirs);
 
   const cards = await Promise.allSettled(
     discovered.map(async (project) => {
@@ -215,6 +224,8 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
       const hasActiveSession =
         sessionMeta.status === "in-progress" || sessionMeta.hasUncheckedTasks;
 
+      const meta = allMeta.get(project.slug);
+
       return {
         slug: project.slug,
         name: project.name,
@@ -230,6 +241,8 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
         lastUpdated,
         isStale,
         status: deriveStatus(roadmap, sessionMeta),
+        portfolioStatus: (meta?.status as ProjectStatus) ?? "active",
+        portfolioOrder: meta?.order,
       } satisfies ProjectCardData;
     }),
   );

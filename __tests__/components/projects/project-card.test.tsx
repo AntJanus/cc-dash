@@ -21,6 +21,8 @@ function makeProject(
     lastUpdated: new Date().toISOString(),
     isStale: false,
     status: "inactive",
+    portfolioStatus: "active",
+    portfolioOrder: undefined,
     ...overrides,
   };
 }
@@ -116,7 +118,10 @@ describe("ProjectCard", () => {
 
   it("renders status badge with correct status text", () => {
     render(<ProjectCard project={makeProject({ status: "active" })} />);
-    expect(screen.getByText("Active")).toBeInTheDocument();
+    const badge = screen.getByText("Active", {
+      selector: '[data-slot="badge"]',
+    });
+    expect(badge).toBeInTheDocument();
   });
 
   it("renders status badge for each status variant", () => {
@@ -130,7 +135,10 @@ describe("ProjectCard", () => {
       const { unmount } = render(
         <ProjectCard project={makeProject({ status })} />,
       );
-      expect(screen.getByText(label)).toBeInTheDocument();
+      const badge = screen.getByText(label, {
+        selector: '[data-slot="badge"]',
+      });
+      expect(badge).toBeInTheDocument();
       unmount();
     }
   });

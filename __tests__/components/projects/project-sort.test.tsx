@@ -26,6 +26,8 @@ function makeProject(
     lastUpdated: "2026-03-20T10:00:00Z",
     isStale: false,
     status: "inactive",
+    portfolioStatus: "active",
+    portfolioOrder: undefined,
     ...overrides,
   };
 }
@@ -166,6 +168,70 @@ describe("sortProjects", () => {
     });
   });
 
+  describe("sort by priority", () => {
+    it("sorts by portfolio order (asc), unranked last alphabetically", () => {
+      const ranked1 = makeProject({
+        slug: "ranked-1",
+        name: "Zeta",
+        portfolioOrder: 0,
+      });
+      const ranked2 = makeProject({
+        slug: "ranked-2",
+        name: "Yank",
+        portfolioOrder: 1,
+      });
+      const unrankedA = makeProject({
+        slug: "unranked-a",
+        name: "Alpha",
+        portfolioOrder: undefined,
+      });
+      const unrankedB = makeProject({
+        slug: "unranked-b",
+        name: "Beta",
+        portfolioOrder: undefined,
+      });
+
+      const result = sortProjects([unrankedB, ranked2, unrankedA, ranked1], {
+        field: "priority",
+        direction: "asc",
+      });
+      expect(result.map((p) => p.slug)).toEqual([
+        "ranked-1",
+        "ranked-2",
+        "unranked-a",
+        "unranked-b",
+      ]);
+    });
+
+    it("reverses ranked order in desc, unranked still last", () => {
+      const ranked1 = makeProject({
+        slug: "ranked-1",
+        name: "Zeta",
+        portfolioOrder: 0,
+      });
+      const ranked2 = makeProject({
+        slug: "ranked-2",
+        name: "Yank",
+        portfolioOrder: 1,
+      });
+      const unranked = makeProject({
+        slug: "unranked",
+        name: "Alpha",
+        portfolioOrder: undefined,
+      });
+
+      const result = sortProjects([unranked, ranked1, ranked2], {
+        field: "priority",
+        direction: "desc",
+      });
+      expect(result.map((p) => p.slug)).toEqual([
+        "ranked-2",
+        "ranked-1",
+        "unranked",
+      ]);
+    });
+  });
+
   it("does not mutate the input array", () => {
     const input = [bravo, alpha, charlie];
     const original = [...input];
@@ -203,6 +269,9 @@ describe("ProjectSort", () => {
 
     expect(
       screen.getByRole("button", { name: /updated/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /priority/i }),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /name/i })).toBeInTheDocument();
     expect(
@@ -280,6 +349,7 @@ describe("ProjectSort", () => {
       expectedDir: SortState["direction"];
     }> = [
       { field: "last_updated", label: "Updated", expectedDir: "desc" },
+      { field: "priority", label: "Priority", expectedDir: "asc" },
       { field: "name", label: "Name", expectedDir: "asc" },
       { field: "progress", label: "Progress", expectedDir: "desc" },
       { field: "status", label: "Status", expectedDir: "asc" },

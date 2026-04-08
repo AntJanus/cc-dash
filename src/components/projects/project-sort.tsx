@@ -10,6 +10,7 @@ import type {
 
 const SORT_OPTIONS: { field: SortField; label: string }[] = [
   { field: "last_updated", label: "Updated" },
+  { field: "priority", label: "Priority" },
   { field: "name", label: "Name" },
   { field: "progress", label: "Progress" },
   { field: "status", label: "Status" },
@@ -90,5 +91,7 @@ function getDefaultDirection(field: SortField): SortDirection {
       return "asc"; // A-Z
     case "status":
       return "asc"; // active first
+    case "priority":
+      return "asc"; // highest priority (lowest order) first
   }
 }

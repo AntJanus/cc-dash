@@ -1,0 +1,1052 @@
+/**
+ * cc-dash MCP Server factory
+ *
+ * Creates and configures the McpServer with all tool registrations.
+ * Separated from the entry point so tests can create server instances
+ * without triggering stdio transport.
+ */
+
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+import { readFile } from "node:fs/promises";
+import { loadConfig, CONFIG_PATH } from "@/lib/config";
+import {
+  discoverProjects,
+  parseRoadmap,
+  parseSession,
+  parseIdeas,
+  writeRoadmapFile,
+  writeSessionFile,
+} from "@/lib/fs";
+import { expandTilde } from "@/lib/fs/discovery";
+import {
+  generateRoadmapId,
+  generateCategorySlug,
+} from "@/lib/utils/generate-id";
+import {
+  loadPortfolio,
+  savePortfolio,
+  loadAllPortfolios,
+} from "@/lib/fs/portfolio";
+
+async function resolveProject(slug: string) {
+  const config = await loadConfig();
+  const projects = await discoverProjects(config);
+  return projects.find((p) => p.slug === slug);
+}
+
+/** Find which scan dir a project path belongs to. */
+function findScanDir(projectPath: string, scanDirs: string[]): string | null {
+  for (const dir of scanDirs) {
+    const resolved = expandTilde(dir);
+    if (
+      projectPath.startsWith(resolved + "/") ||
+      projectPath.startsWith(resolved + "\\")
+    ) {
+      return resolved;
+    }
+  }
+  return null;
+}
+
+function today(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+function createServer(): McpServer {
+  const server = new McpServer({
+    name: "cc-dash",
+    version: "3.0.0",
+  });
+
+  // -------------------------------------------------------------------------
+  // Tool: list_projects
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "list_projects",
+    "List all discovered projects with their roadmap/session status and progress summary",
+    {},
+    async () => {
+      const config = await loadConfig();
+      const projects = await discoverProjects(config);
+      const resolvedDirs = config.scan_dirs.map((d) => expandTilde(d));
+      const allMeta = await loadAllPortfolios(resolvedDirs);
+
+      const summaries = await Promise.all(
+        projects.map(async (p) => {
+          const meta = allMeta.get(p.slug);
+          const summary: Record<string, unknown> = {
+            slug: p.slug,
+            name: p.name,
+            path: p.path,
+            hasRoadmap: !!p.roadmapPath,
+            hasSession: !!p.sessionPath,
+            portfolioStatus: meta?.status ?? "active",
+            portfolioOrder: meta?.order,
+          };
+
+          if (p.roadmapPath) {
+            try {
+              const raw = await readFile(p.roadmapPath, "utf-8");
+              const result = parseRoadmap(raw, p.roadmapPath);
+              if (result.success) {
+                const items = result.data.categories.flatMap((c) => c.items);
+                summary.roadmapTotal = items.length;
+                summary.roadmapDone = items.filter(
+                  (i) => i.status === "done",
+                ).length;
+                summary.roadmapInProgress = items.filter(
+                  (i) => i.status === "in-progress",
+                ).length;
+              }
+            } catch {
+              // skip unreadable
+            }
+          }
+
+          if (p.sessionPath) {
+            try {
+              const raw = await readFile(p.sessionPath, "utf-8");
+              const result = parseSession(raw, p.sessionPath);
+              if (result.success) {
+                summary.sessionStatus = result.data.status;
+                summary.sessionId = result.data.session_id;
+                const tasks = result.data.tasks;
+                summary.tasksTotal = tasks.length;
+                summary.tasksDone = tasks.filter((t) => t.checked).length;
+              }
+            } catch {
+              // skip unreadable
+            }
+          }
+
+          return summary;
+        }),
+      );
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(summaries, null, 2) }],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: get_project
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "get_project",
+    "Get full detail for a project including all roadmap items and session tasks",
+    { slug: z.string().describe("Project slug") },
+    async ({ slug }) => {
+      const project = await resolveProject(slug);
+      if (!project) {
+        return {
+          content: [{ type: "text", text: `Project "${slug}" not found` }],
+          isError: true,
+        };
+      }
+
+      const detail: Record<string, unknown> = {
+        slug: project.slug,
+        name: project.name,
+        path: project.path,
+      };
+
+      if (project.roadmapPath) {
+        try {
+          const raw = await readFile(project.roadmapPath, "utf-8");
+          const result = parseRoadmap(raw, project.roadmapPath);
+          if (result.success) {
+            detail.roadmap = {
+              description: result.data.description,
+              lastUpdated: result.data.last_updated,
+              categories: result.data.categories.map((c) => ({
+                title: c.title,
+                slug: c.slug,
+                items: c.items.map((i) => ({
+                  id: i.id,
+                  name: i.name,
+                  description: i.description,
+                  status: i.status,
+                  started: i.started,
+                  completed: i.completed,
+                  depends: i.depends,
+                })),
+              })),
+            };
+          }
+        } catch {
+          detail.roadmapError = "Could not read roadmap file";
+        }
+      }
+
+      if (project.sessionPath) {
+        try {
+          const raw = await readFile(project.sessionPath, "utf-8");
+          const result = parseSession(raw, project.sessionPath);
+          if (result.success) {
+            detail.session = {
+              sessionId: result.data.session_id,
+              status: result.data.status,
+              started: result.data.started,
+              lastUpdated: result.data.last_updated,
+              currentStatus: result.data.currentStatus,
+              tasks: result.data.tasks.map((t) => ({
+                id: t.id,
+                description: t.description,
+                checked: t.checked,
+                dependency: t.dependency,
+              })),
+              decisions: result.data.decisions,
+              failedAttempts: result.data.failedAttempts,
+              completedWork: result.data.completedWork,
+            };
+          }
+        } catch {
+          detail.sessionError = "Could not read session file";
+        }
+      }
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(detail, null, 2) }],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: search
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "search",
+    "Search across all projects' roadmap items, session tasks, and ideas",
+    { query: z.string().describe("Search query (case-insensitive)") },
+    async ({ query }) => {
+      const trimmed = query.trim();
+      if (!trimmed) {
+        return {
+          content: [{ type: "text", text: "Empty query" }],
+          isError: true,
+        };
+      }
+
+      const config = await loadConfig();
+      const projects = await discoverProjects(config);
+      const lower = trimmed.toLowerCase();
+      const results: Record<string, unknown>[] = [];
+
+      await Promise.allSettled(
+        projects.map(async (p) => {
+          if (p.roadmapPath) {
+            try {
+              const raw = await readFile(p.roadmapPath, "utf-8");
+              const result = parseRoadmap(raw, p.roadmapPath);
+              if (result.success) {
+                for (const cat of result.data.categories) {
+                  for (const item of cat.items) {
+                    if (
+                      item.name.toLowerCase().includes(lower) ||
+                      item.description.toLowerCase().includes(lower)
+                    ) {
+                      results.push({
+                        type: "roadmap",
+                        project: p.name,
+                        projectSlug: p.slug,
+                        id: item.id,
+                        name: item.name,
+                        description: item.description,
+                        status: item.status,
+                        category: cat.title,
+                      });
+                    }
+                  }
+                }
+              }
+            } catch {
+              // skip
+            }
+          }
+
+          if (p.sessionPath) {
+            try {
+              const raw = await readFile(p.sessionPath, "utf-8");
+              const result = parseSession(raw, p.sessionPath);
+              if (result.success) {
+                for (const task of result.data.tasks) {
+                  if (task.description.toLowerCase().includes(lower)) {
+                    results.push({
+                      type: "session",
+                      project: p.name,
+                      projectSlug: p.slug,
+                      id: task.id,
+                      description: task.description,
+                      checked: task.checked,
+                    });
+                  }
+                }
+              }
+            } catch {
+              // skip
+            }
+          }
+        }),
+      );
+
+      // Ideas
+      if (config.ideas_file) {
+        try {
+          const filePath = expandTilde(config.ideas_file);
+          const raw = await readFile(filePath, "utf-8");
+          const result = parseIdeas(raw, filePath);
+          if (result.success) {
+            for (const idea of result.data.ideas) {
+              if (
+                idea.title.toLowerCase().includes(lower) ||
+                idea.body.toLowerCase().includes(lower)
+              ) {
+                results.push({
+                  type: "idea",
+                  id: idea.id,
+                  title: idea.title,
+                  status: idea.status,
+                  body: idea.body.slice(0, 200),
+                });
+              }
+            }
+          }
+        } catch {
+          // no ideas file
+        }
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              { query: trimmed, resultCount: results.length, results },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: update_roadmap_item
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "update_roadmap_item",
+    "Update a roadmap item's status, name, description, or move it to a different category",
+    {
+      slug: z.string().describe("Project slug"),
+      itemId: z.string().describe("Roadmap item ID (r_xxxxx)"),
+      name: z.string().optional().describe("New name"),
+      description: z.string().optional().describe("New description"),
+      status: z
+        .enum(["planned", "in-progress", "done", "idea"])
+        .optional()
+        .describe("New status"),
+      categorySlug: z
+        .string()
+        .optional()
+        .describe("Move item to this category slug"),
+    },
+    async ({ slug, itemId, name, description, status, categorySlug }) => {
+      const project = await resolveProject(slug);
+      if (!project?.roadmapPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no roadmap`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const raw = await readFile(project.roadmapPath, "utf-8");
+      const parsed = parseRoadmap(raw, project.roadmapPath);
+      if (!parsed.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse roadmap" }],
+          isError: true,
+        };
+      }
+
+      const data = parsed.data;
+
+      // Find item
+      let item: (typeof data.categories)[0]["items"][0] | undefined;
+      let sourceCategory: (typeof data.categories)[0] | undefined;
+      for (const cat of data.categories) {
+        const found = cat.items.find((i) => i.id === itemId);
+        if (found) {
+          item = found;
+          sourceCategory = cat;
+          break;
+        }
+      }
+
+      if (!item || !sourceCategory) {
+        return {
+          content: [{ type: "text", text: `Item "${itemId}" not found` }],
+          isError: true,
+        };
+      }
+
+      if (name !== undefined) item.name = name.trim();
+      if (description !== undefined) item.description = description.trim();
+      if (status !== undefined) {
+        if (status === "in-progress" && !item.started) item.started = today();
+        if (status === "done" && !item.completed) item.completed = today();
+        item.status = status;
+      }
+
+      // Move between categories
+      if (categorySlug && categorySlug !== sourceCategory.slug) {
+        const target = data.categories.find((c) => c.slug === categorySlug);
+        if (!target) {
+          return {
+            content: [
+              { type: "text", text: `Category "${categorySlug}" not found` },
+            ],
+            isError: true,
+          };
+        }
+        sourceCategory.items = sourceCategory.items.filter(
+          (i) => i.id !== itemId,
+        );
+        target.items.push(item);
+      }
+
+      const writeResult = await writeRoadmapFile(
+        project.roadmapPath,
+        data,
+        parsed.preserved,
+      );
+      if (!writeResult.success) {
+        return {
+          content: [{ type: "text", text: "Failed to write roadmap file" }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [{ type: "text", text: `Updated item ${itemId}` }],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: add_roadmap_item
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "add_roadmap_item",
+    "Add a new roadmap item to a project category",
+    {
+      slug: z.string().describe("Project slug"),
+      categorySlug: z.string().describe("Target category slug"),
+      name: z.string().describe("Item name"),
+      description: z.string().describe("Item description"),
+      status: z
+        .enum(["planned", "in-progress", "done", "idea"])
+        .default("planned")
+        .describe("Initial status"),
+    },
+    async ({ slug, categorySlug, name, description, status }) => {
+      const project = await resolveProject(slug);
+      if (!project?.roadmapPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no roadmap`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const raw = await readFile(project.roadmapPath, "utf-8");
+      const parsed = parseRoadmap(raw, project.roadmapPath);
+      if (!parsed.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse roadmap" }],
+          isError: true,
+        };
+      }
+
+      const category = parsed.data.categories.find(
+        (c) => c.slug === categorySlug,
+      );
+      if (!category) {
+        return {
+          content: [
+            { type: "text", text: `Category "${categorySlug}" not found` },
+          ],
+          isError: true,
+        };
+      }
+
+      const id = generateRoadmapId();
+      const newItem: Record<string, unknown> = {
+        id,
+        name: name.trim(),
+        description: description.trim(),
+        status,
+      };
+
+      if (status === "in-progress") newItem.started = today();
+      if (status === "done") newItem.completed = today();
+
+      category.items.push(newItem as (typeof category.items)[number]);
+
+      const writeResult = await writeRoadmapFile(
+        project.roadmapPath,
+        parsed.data,
+        parsed.preserved,
+      );
+      if (!writeResult.success) {
+        return {
+          content: [{ type: "text", text: "Failed to write roadmap file" }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [
+          { type: "text", text: `Created item ${id} in ${categorySlug}` },
+        ],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: add_roadmap_category
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "add_roadmap_category",
+    "Add a new empty category to a project's roadmap",
+    {
+      slug: z.string().describe("Project slug"),
+      title: z.string().describe("Category title"),
+    },
+    async ({ slug, title }) => {
+      const project = await resolveProject(slug);
+      if (!project?.roadmapPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no roadmap`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const raw = await readFile(project.roadmapPath, "utf-8");
+      const parsed = parseRoadmap(raw, project.roadmapPath);
+      if (!parsed.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse roadmap" }],
+          isError: true,
+        };
+      }
+
+      const catSlug = generateCategorySlug(title);
+      if (parsed.data.categories.some((c) => c.slug === catSlug)) {
+        return {
+          content: [
+            { type: "text", text: `Category "${catSlug}" already exists` },
+          ],
+          isError: true,
+        };
+      }
+
+      parsed.data.categories.push({
+        title: title.trim(),
+        slug: catSlug,
+        items: [],
+      });
+
+      const writeResult = await writeRoadmapFile(
+        project.roadmapPath,
+        parsed.data,
+        parsed.preserved,
+      );
+      if (!writeResult.success) {
+        return {
+          content: [{ type: "text", text: "Failed to write roadmap file" }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Created category "${title}" (${catSlug})`,
+          },
+        ],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: bulk_update_status
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "bulk_update_status",
+    "Update the status of multiple roadmap items at once",
+    {
+      slug: z.string().describe("Project slug"),
+      itemIds: z.array(z.string()).describe("Array of roadmap item IDs"),
+      status: z
+        .enum(["planned", "in-progress", "done", "idea"])
+        .describe("New status for all items"),
+    },
+    async ({ slug, itemIds, status }) => {
+      const project = await resolveProject(slug);
+      if (!project?.roadmapPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no roadmap`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const raw = await readFile(project.roadmapPath, "utf-8");
+      const parsed = parseRoadmap(raw, project.roadmapPath);
+      if (!parsed.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse roadmap" }],
+          isError: true,
+        };
+      }
+
+      const idSet = new Set(itemIds);
+      let count = 0;
+
+      for (const cat of parsed.data.categories) {
+        for (const item of cat.items) {
+          if (!idSet.has(item.id)) continue;
+          if (status === "in-progress" && !item.started) item.started = today();
+          if (status === "done" && !item.completed) item.completed = today();
+          item.status = status;
+          count++;
+        }
+      }
+
+      if (count === 0) {
+        return {
+          content: [{ type: "text", text: "No matching items found" }],
+          isError: true,
+        };
+      }
+
+      const writeResult = await writeRoadmapFile(
+        project.roadmapPath,
+        parsed.data,
+        parsed.preserved,
+      );
+      if (!writeResult.success) {
+        return {
+          content: [{ type: "text", text: "Failed to write roadmap file" }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [
+          { type: "text", text: `Updated ${count} items to "${status}"` },
+        ],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: get_session
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "get_session",
+    "Get the current session state for a project (tasks, status, decisions, failed attempts)",
+    { slug: z.string().describe("Project slug") },
+    async ({ slug }) => {
+      const project = await resolveProject(slug);
+      if (!project?.sessionPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no session file`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const raw = await readFile(project.sessionPath, "utf-8");
+      const result = parseSession(raw, project.sessionPath);
+      if (!result.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse session" }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                sessionId: result.data.session_id,
+                status: result.data.status,
+                started: result.data.started,
+                lastUpdated: result.data.last_updated,
+                currentStatus: result.data.currentStatus,
+                tasks: result.data.tasks,
+                decisions: result.data.decisions,
+                failedAttempts: result.data.failedAttempts,
+                completedWork: result.data.completedWork,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: update_session_status
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "update_session_status",
+    "Change a session's lifecycle status (in-progress, paused, completed, blocked)",
+    {
+      slug: z.string().describe("Project slug"),
+      status: z
+        .enum(["in-progress", "paused", "completed", "blocked"])
+        .describe("New session status"),
+    },
+    async ({ slug, status }) => {
+      const project = await resolveProject(slug);
+      if (!project?.sessionPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no session file`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const raw = await readFile(project.sessionPath, "utf-8");
+      const result = parseSession(raw, project.sessionPath);
+      if (!result.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse session" }],
+          isError: true,
+        };
+      }
+
+      const updated = { ...result.data, status };
+      const writeResult = await writeSessionFile(
+        project.sessionPath,
+        updated,
+        result.preserved,
+      );
+      if (!writeResult.success) {
+        return {
+          content: [{ type: "text", text: "Failed to write session file" }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [
+          { type: "text", text: `Session status updated to "${status}"` },
+        ],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: list_ideas
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "list_ideas",
+    "List all project ideas from the portfolio ideas file",
+    {},
+    async () => {
+      const config = await loadConfig();
+      if (!config.ideas_file) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: "No ideas_file configured in cc-dash config",
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const filePath = expandTilde(config.ideas_file);
+      let raw: string;
+      try {
+        raw = await readFile(filePath, "utf-8");
+      } catch {
+        return {
+          content: [{ type: "text", text: "Ideas file not found" }],
+          isError: true,
+        };
+      }
+
+      const result = parseIdeas(raw, filePath);
+      if (!result.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse ideas file" }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              result.data.ideas.map((i) => ({
+                id: i.id,
+                title: i.title,
+                status: i.status,
+                stack: i.stack,
+                body: i.body.slice(0, 200),
+              })),
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: get_config
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "get_config",
+    "Get the current cc-dash configuration (scan dirs, archived projects, display preferences)",
+    {},
+    async () => {
+      const config = await loadConfig();
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              { configPath: CONFIG_PATH, ...config },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: get_portfolio
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "get_portfolio",
+    "Get project ordering and status for all scan directories. Shows priority order and active/inactive/maintenance status.",
+    {},
+    async () => {
+      const config = await loadConfig();
+      const resolvedDirs = config.scan_dirs.map((d) => expandTilde(d));
+      const allMeta = await loadAllPortfolios(resolvedDirs);
+      const projects = await discoverProjects(config, {
+        includeArchived: true,
+      });
+
+      const result = projects.map((p) => {
+        const meta = allMeta.get(p.slug);
+        return {
+          slug: p.slug,
+          name: p.name,
+          status: meta?.status ?? "active",
+          order: meta?.order,
+        };
+      });
+
+      // Sort: by order (if present), then alphabetical
+      result.sort((a, b) => {
+        if (a.order !== undefined && b.order !== undefined)
+          return a.order - b.order;
+        if (a.order !== undefined) return -1;
+        if (b.order !== undefined) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: set_project_status
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "set_project_status",
+    "Set a project's status (active, inactive, maintenance)",
+    {
+      slug: z.string().describe("Project slug"),
+      status: z
+        .enum(["active", "inactive", "maintenance"])
+        .describe("New project status"),
+    },
+    async ({ slug, status }) => {
+      const config = await loadConfig();
+      const projects = await discoverProjects(config, {
+        includeArchived: true,
+      });
+      const project = projects.find((p) => p.slug === slug);
+      if (!project) {
+        return {
+          content: [{ type: "text", text: `Project "${slug}" not found` }],
+          isError: true,
+        };
+      }
+
+      const scanDir = findScanDir(
+        project.path,
+        config.scan_dirs.map((d) => expandTilde(d)),
+      );
+      if (!scanDir) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Could not determine scan directory for "${slug}"`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const portfolio = await loadPortfolio(scanDir);
+      if (!portfolio.projects[slug]) {
+        portfolio.projects[slug] = { status };
+      } else {
+        portfolio.projects[slug].status = status;
+      }
+      await savePortfolio(scanDir, portfolio);
+
+      return {
+        content: [
+          { type: "text", text: `Set "${slug}" status to "${status}"` },
+        ],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Tool: reorder_projects
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "reorder_projects",
+    "Set the priority order of projects. First slug = highest priority (order 0).",
+    {
+      slugs: z
+        .array(z.string())
+        .describe("Project slugs in desired priority order (first = highest)"),
+    },
+    async ({ slugs }) => {
+      const config = await loadConfig();
+      const resolvedDirs = config.scan_dirs.map((d) => expandTilde(d));
+      const projects = await discoverProjects(config, {
+        includeArchived: true,
+      });
+      const projectMap = new Map(projects.map((p) => [p.slug, p]));
+
+      // Validate all slugs exist
+      const unknown = slugs.filter((s) => !projectMap.has(s));
+      if (unknown.length > 0) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Unknown project slugs: ${unknown.join(", ")}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      // Group slugs by scan dir
+      const byDir = new Map<string, { slug: string; order: number }[]>();
+      for (let i = 0; i < slugs.length; i++) {
+        const project = projectMap.get(slugs[i])!;
+        const scanDir = findScanDir(project.path, resolvedDirs);
+        if (!scanDir) continue;
+        if (!byDir.has(scanDir)) byDir.set(scanDir, []);
+        byDir.get(scanDir)!.push({ slug: slugs[i], order: i });
+      }
+
+      // Update each portfolio file
+      for (const [scanDir, entries] of byDir) {
+        const portfolio = await loadPortfolio(scanDir);
+        for (const { slug, order } of entries) {
+          if (!portfolio.projects[slug]) {
+            portfolio.projects[slug] = { status: "active", order };
+          } else {
+            portfolio.projects[slug].order = order;
+          }
+        }
+        await savePortfolio(scanDir, portfolio);
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Reordered ${slugs.length} projects`,
+          },
+        ],
+      };
+    },
+  );
+
+  return server;
+}
+
+export { createServer };

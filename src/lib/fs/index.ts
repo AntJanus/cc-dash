@@ -53,3 +53,11 @@ export {
 // Discovery (Phase 03-02)
 export { discoverProjects, slugify, type DiscoveredProject } from "./discovery";
 export { DiscoveryCache } from "./discovery-cache";
+
+// Portfolio metadata (v3.0)
+export {
+  portfolioPath,
+  loadPortfolio,
+  savePortfolio,
+  loadAllPortfolios,
+} from "./portfolio";

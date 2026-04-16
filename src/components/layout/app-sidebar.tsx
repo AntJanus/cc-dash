@@ -8,6 +8,7 @@ import {
   Lightbulb,
   Activity,
   BarChart3,
+  Bot,
   Settings,
   Search,
   ChevronDown,
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { href: "/ideas", label: "Ideas", icon: Lightbulb, color: "violet" },
   { href: "/activity", label: "Activity", icon: Activity, color: "blue" },
   { href: "/metrics", label: "Metrics", icon: BarChart3, color: "emerald" },
+  { href: "/agents", label: "Agents", icon: Bot, color: "violet" },
   { href: "/settings", label: "Settings", icon: Settings, color: "amber" },
 ] as const;
 

@@ -15,12 +15,14 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeft,
+  RefreshCw,
   Moon,
   Sun,
   Terminal,
 } from "lucide-react";
 import { useSidebar } from "./sidebar-context";
 import { RefreshButton } from "@/components/shared/refresh-button";
+import { useAutoRefresh } from "@/components/shared/auto-refresh-provider";
 import { cn } from "@/lib/utils";
 
 interface AppSidebarProps {
@@ -62,6 +64,8 @@ const ICON_COLORS = {
 
 export function AppSidebar({ projects }: AppSidebarProps) {
   const { isOpen, isMobileOpen, toggle, closeMobile } = useSidebar();
+  const { enabled: autoRefreshEnabled, setEnabled: setAutoRefresh } =
+    useAutoRefresh();
   const pathname = usePathname();
   const [projectsExpanded, setProjectsExpanded] = useState(true);
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -274,6 +278,37 @@ export function AppSidebar({ projects }: AppSidebarProps) {
       >
         <div className="flex items-center gap-1">
           <RefreshButton />
+          <button
+            type="button"
+            onClick={() => setAutoRefresh(!autoRefreshEnabled)}
+            className={cn(
+              "inline-flex h-8 items-center gap-1.5 rounded-lg px-2 transition-colors hover:bg-sidebar-accent",
+              autoRefreshEnabled && "bg-sidebar-accent",
+            )}
+            style={{
+              color: autoRefreshEnabled
+                ? "var(--accent-emerald)"
+                : "var(--text-secondary)",
+            }}
+            aria-label={
+              autoRefreshEnabled
+                ? "Disable auto-refresh"
+                : "Enable auto-refresh"
+            }
+            title={autoRefreshEnabled ? "Auto-refresh on" : "Auto-refresh off"}
+          >
+            <RefreshCw
+              className={cn("h-4 w-4", autoRefreshEnabled && "animate-spin")}
+              style={
+                autoRefreshEnabled ? { animationDuration: "3s" } : undefined
+              }
+            />
+            {isOpen && (
+              <span className="text-sm">
+                {autoRefreshEnabled ? "Auto" : "Auto"}
+              </span>
+            )}
+          </button>
           <button
             type="button"
             onClick={toggleTheme}

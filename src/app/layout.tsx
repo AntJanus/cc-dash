@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { TopBar } from "@/components/layout/top-bar";
 import { CommandPalette } from "@/components/command-palette/command-palette";
+import { AutoRefreshProvider } from "@/components/shared/auto-refresh-provider";
 import { getProjectNav } from "@/lib/projects/get-project-nav";
 import { getProjectCards } from "@/lib/projects/get-projects";
 
@@ -66,27 +67,29 @@ export default async function RootLayout({
           }}
         />
         <SidebarProvider>
-          <CommandPalette projects={projects} />
-          <div className="flex min-h-screen flex-col">
-            {/* Top bar - hidden on mobile */}
-            <div className="hidden lg:block">
-              <TopBar
-                projectCount={projectCount}
-                activeSessionCount={activeSessionCount}
-                completionPercent={completionPercent}
-              />
-            </div>
+          <AutoRefreshProvider>
+            <CommandPalette projects={projects} />
+            <div className="flex min-h-screen flex-col">
+              {/* Top bar - hidden on mobile */}
+              <div className="hidden lg:block">
+                <TopBar
+                  projectCount={projectCount}
+                  activeSessionCount={activeSessionCount}
+                  completionPercent={completionPercent}
+                />
+              </div>
 
-            <div className="flex flex-1 min-h-0">
-              <AppSidebar projects={projects} />
-              <div className="flex-1 flex flex-col min-w-0">
-                <MobileHeader />
-                <main className="flex-1 flex flex-col overflow-hidden">
-                  {children}
-                </main>
+              <div className="flex flex-1 min-h-0">
+                <AppSidebar projects={projects} />
+                <div className="flex-1 flex flex-col min-w-0">
+                  <MobileHeader />
+                  <main className="flex-1 flex flex-col overflow-hidden">
+                    {children}
+                  </main>
+                </div>
               </div>
             </div>
-          </div>
+          </AutoRefreshProvider>
         </SidebarProvider>
       </body>
     </html>

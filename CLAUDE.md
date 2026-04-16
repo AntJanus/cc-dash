@@ -4,7 +4,7 @@
 
 **cc-dash** is a local Next.js web dashboard that aggregates `ROADMAP.md` and `SESSION_PROGRESS.md` files across 20+ projects into a single Kanban/CRUD interface. All project state lives in markdown files; the dashboard is a lens, not a database.
 
-**Status**: v2.0 shipped (14 phases complete, 800+ tests).
+**Status**: v3.0 shipped (1247 tests). v2.0 complete (14 phases), v3.0 adds AI integration and portfolio intelligence.
 
 **Stack**: Next.js 15 (App Router) + TypeScript + Tailwind CSS v4 + Zod v4 + Vitest 4.x
 
@@ -15,7 +15,7 @@ npm install              # Install dependencies
 npm run dev              # Next.js dev server at localhost:3000
 npm run build            # Production build
 npm run lint             # ESLint
-npm run test:run         # Run all tests (847 tests)
+npm run test:run         # Run all tests (1247 tests)
 npm test                 # Watch mode
 npm run format:check     # Prettier check
 ```
@@ -25,35 +25,43 @@ npm run format:check     # Prettier check
 ```
 src/
 ├── app/                         # Next.js App Router pages
-│   ├── layout.tsx               # Root layout with sidebar nav
+│   ├── layout.tsx               # Root layout with sidebar nav + auto-refresh provider
 │   ├── page.tsx                 # Dashboard home (project grid)
 │   ├── activity/page.tsx        # Milestone timeline
+│   ├── agents/page.tsx          # Agent activity feed (Co-Authored-By parsing)
+│   ├── api/watch/route.ts       # File change detection API (mtime fingerprint)
 │   ├── ideas/                   # Ideas system pages
+│   ├── metrics/page.tsx         # Portfolio metrics dashboard
 │   ├── settings/page.tsx        # Settings page
 │   └── project/[slug]/
 │       ├── layout.tsx           # Project layout with tabs
 │       ├── roadmap/page.tsx     # Roadmap board/list view
 │       └── session/page.tsx     # Session progress view
 ├── components/
+│   ├── agents/                  # Agent activity feed, commit list, filters
 │   ├── ideas/                   # Idea cards, grid, wizard, forms
+│   ├── metrics/                 # Status chart, velocity, progress, stale list
 │   ├── projects/                # Dashboard home cards, grid, filters
 │   ├── prompt/                  # Prompt generation modal/buttons
 │   ├── roadmap/                 # Board columns, cards, list view, editor
 │   ├── session/                 # Task list, status, decisions, verification
-│   ├── shared/                  # Status badges, refresh button, sidebar
+│   ├── shared/                  # Status badges, refresh button, auto-refresh provider
 │   └── ui/                      # Base UI primitives (accordion, button, etc.)
 └── lib/
     ├── actions/                 # Next.js Server Actions for CRUD
-    ├── activity/                # Milestone timeline event extraction
+    ├── activity/                # Milestone timeline + agent activity (git log parsing)
     ├── config.ts                # Config loading (~/.config/cc-dash/config.json)
     ├── fs/
     │   ├── parser.ts            # Markdown parsing (gray-matter + regex)
     │   ├── serializer.ts        # Markdown generation (preserves unrecognized content)
     │   ├── discovery.ts         # Project scanning with slug generation
     │   ├── atomic-write.ts      # Safe writes (write .tmp then rename)
-    │   └── discovery-cache.ts   # In-memory discovery cache
+    │   ├── discovery-cache.ts   # In-memory discovery cache
+    │   ├── file-fingerprint.ts  # File mtime fingerprinting for auto-refresh
+    │   └── portfolio.ts         # Portfolio metadata (.cc-dash/portfolio.json)
+    ├── metrics/                 # Portfolio-level aggregate metrics computation
     ├── prompt/                  # Prompt assembly for Claude Code
-    ├── schemas/                 # Zod schemas (roadmap, session, ideas, config)
+    ├── schemas/                 # Zod schemas (roadmap, session, ideas, config, portfolio)
     └── utils/                   # ID generation, helpers
 ```
 

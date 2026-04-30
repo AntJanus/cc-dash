@@ -7,8 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --font-display: var(--font-display);
+  --font-serif: var(--font-serif);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,194 +50,324 @@
 }
 
 :root {
-  /* Base colors - Light theme */
-  --background: #f7f8fa;
-  --foreground: #1a1d24;
-  --card: #ffffff;
-  --card-foreground: #1a1d24;
-  --popover: #ffffff;
-  --popover-foreground: #1a1d24;
-  --primary: #0d9488;
-  --primary-foreground: #ffffff;
-  --secondary: #f1f3f9;
-  --secondary-foreground: #1a1d24;
-  --muted: #f1f3f9;
-  --muted-foreground: #8891a4;
-  --accent: #f1f3f9;
-  --accent-foreground: #1a1d24;
-  --destructive: #e11d48;
-  --border: #e4e7ed;
-  --input: #e4e7ed;
-  --ring: #0d9488;
+  /* === Cozy / Almanac palette (light) ===
+     Synthesized from .planning/research/COZY_UX_SYNTHESIS.md.
+     Warm parchment surfaces, dark forest rail, muted accents, sticky-note colors. */
+
+  /* --- Synthesis tokens (canonical) --- */
+  --bg-app: #eee4d2;
+  --bg-paper: #f8f1e4;
+  --bg-paper-2: #f2e7d3;
+  --bg-canvas: #f6eedd;
+  --ink-strong: #403629;
+  --ink: #5a4c3c;
+  --ink-soft: #7b6b58;
+  --border: #bca98b;
+
+  /* Forest sidebar (two layers + ink) */
+  --sidebar: #2f4a3c;
+  --sidebar-2: #3f5c4b;
+  --sidebar-ink: #e9dfc9;
+
+  /* Muted accent palette — five voices */
+  --accent-gold: #c59a3d;
+  --accent-moss: #7a8f58;
+  --accent-clay: #c97e5a;
+  --accent-sky: #8ea7b8;
+  --accent-plum: #9a7c92;
+
+  /* Sticky-note color family */
+  --note-sage: #dde6c8;
+  --note-butter: #f3e3a1;
+  --note-blush: #ebc8be;
+  --note-apricot: #edc39a;
+  --note-lavender: #d8cce8;
+  --note-mist: #c8d8df;
+
+  /* --- shadcn / Tailwind token mappings --- */
+  --background: var(--bg-app);
+  --foreground: var(--ink-strong);
+  --card: var(--bg-paper);
+  --card-foreground: var(--ink-strong);
+  --popover: var(--bg-paper);
+  --popover-foreground: var(--ink-strong);
+  --primary: #8a6a2a;
+  --primary-foreground: var(--bg-paper);
+  --secondary: var(--bg-paper-2);
+  --secondary-foreground: var(--ink-strong);
+  --muted: var(--bg-paper-2);
+  --muted-foreground: var(--ink-soft);
+  --accent: #e0c98f;
+  --accent-foreground: var(--ink-strong);
+  --destructive: #b54134;
+  --input: var(--border);
+  --ring: var(--accent-gold);
   --radius: 0.625rem;
 
-  /* Panel colors */
-  --bg-canvas: #f7f8fa;
-  --bg-panel: #ffffff;
-  --bg-hover: #f8f9fb;
-  --bg-accent: #f1f3f9;
-  --border-light: #eef1f6;
-  --text-primary: #1a1d24;
-  --text-secondary: #5a6070;
-  --text-muted: #8891a4;
+  /* Legacy panel aliases (kept for already-styled components) */
+  --bg-panel: var(--bg-paper);
+  --bg-card: var(--bg-paper);
+  --bg-hover: #f5e9c8;
+  --bg-accent: var(--bg-paper-2);
+  --border-light: #d8be84;
+  --text-primary: var(--ink-strong);
+  --text-secondary: var(--ink);
+  --text-muted: var(--ink-soft);
 
-  /* Colorful accent palette - Light */
-  --accent-teal: #0d9488;
-  --accent-teal-light: #ccfbf1;
-  --accent-teal-bg: #f0fdfa;
-  --accent-violet: #7c3aed;
-  --accent-violet-light: #ede9fe;
-  --accent-violet-bg: #f5f3ff;
-  --accent-amber: #d97706;
-  --accent-amber-light: #fef3c7;
-  --accent-amber-bg: #fffbeb;
-  --accent-rose: #e11d48;
-  --accent-rose-light: #ffe4e6;
-  --accent-rose-bg: #fff1f2;
-  --accent-blue: #2563eb;
-  --accent-blue-light: #dbeafe;
-  --accent-blue-bg: #eff6ff;
-  --accent-emerald: #059669;
-  --accent-emerald-light: #d1fae5;
-  --accent-emerald-bg: #ecfdf5;
+  /* Legacy accent aliases — map to new five-voice palette so existing
+     components keep rendering. Will be migrated to --accent-{gold,moss,...}
+     in later cozy-primitive tasks. */
+  --accent-teal: var(--accent-moss);
+  --accent-teal-light: var(--note-sage);
+  --accent-teal-bg: #e6ecca;
 
-  /* Chart colors */
-  --chart-1: #0d9488;
-  --chart-2: #7c3aed;
-  --chart-3: #2563eb;
-  --chart-4: #d97706;
-  --chart-5: #059669;
+  --accent-violet: var(--accent-plum);
+  --accent-violet-light: var(--note-lavender);
+  --accent-violet-bg: #ece4f0;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --accent-amber: var(--accent-gold);
+  --accent-amber-light: var(--note-butter);
+  --accent-amber-bg: #f7e8c2;
 
-  /* Sidebar */
-  --sidebar: #ffffff;
-  --sidebar-foreground: #1a1d24;
-  --sidebar-primary: #0d9488;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f0fdfa;
-  --sidebar-accent-foreground: #0d9488;
-  --sidebar-border: #e4e7ed;
-  --sidebar-ring: #0d9488;
+  --accent-rose: #b54134;
+  --accent-rose-light: var(--note-blush);
+  --accent-rose-bg: #f5d8d0;
 
-  /* Status colors */
-  --status-active: #059669;
-  --status-active-bg: #ecfdf5;
-  --status-stalled: #d97706;
-  --status-stalled-bg: #fffbeb;
-  --status-complete: #2563eb;
-  --status-complete-bg: #eff6ff;
-  --status-inactive: #8891a4;
-  --status-inactive-bg: #f1f3f9;
+  --accent-blue: var(--accent-sky);
+  --accent-blue-light: var(--note-mist);
+  --accent-blue-bg: #d8e0e8;
+
+  --accent-emerald: var(--accent-moss);
+  --accent-emerald-light: var(--note-sage);
+  --accent-emerald-bg: #e6ecca;
+
+  /* Chart colors — five-voice palette */
+  --chart-1: var(--accent-moss);
+  --chart-2: var(--accent-plum);
+  --chart-3: var(--accent-sky);
+  --chart-4: var(--accent-gold);
+  --chart-5: var(--accent-clay);
+
+  /* Shadows — soft paper drop shadows */
+  --shadow-sm: 0 1px 2px rgba(64, 54, 41, 0.08);
+  --shadow-md:
+    0 3px 8px rgba(64, 54, 41, 0.12), 0 1px 2px rgba(64, 54, 41, 0.08);
+  --shadow-lg:
+    0 8px 20px rgba(64, 54, 41, 0.14), 0 2px 6px rgba(64, 54, 41, 0.08);
+
+  /* Semantic elevation — use these on cards instead of ad-hoc shadows.
+     Each is a complete recipe (inset highlight + outline + drop shadow). */
+  --elevation-paper:
+    0 1px 0 rgba(255, 248, 220, 0.55) inset,
+    0 0 0 1px rgba(64, 54, 41, 0.04) inset, 0 1px 2px rgba(64, 54, 41, 0.1),
+    0 4px 10px rgba(64, 54, 41, 0.06);
+  --elevation-pinned:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 0 0 1px rgba(64, 54, 41, 0.04) inset, 0 2px 8px rgba(64, 54, 41, 0.14);
+  --elevation-active:
+    0 1px 0 rgba(255, 248, 220, 0.6) inset,
+    0 0 0 1px rgba(197, 154, 61, 0.25) inset, 0 4px 14px rgba(64, 54, 41, 0.16);
+  --elevation-floating:
+    0 1px 0 rgba(255, 248, 220, 0.65) inset, 0 8px 24px rgba(64, 54, 41, 0.22),
+    0 2px 6px rgba(64, 54, 41, 0.1);
+
+  /* Border recipes — outline + faint inset highlight for paper edges. */
+  --border-paper: 1px solid var(--border);
+  --border-pinned: 1px solid var(--border);
+  --border-active: 1px solid var(--accent-gold);
+
+  /* Sidebar shadcn mappings */
+  --sidebar-foreground: var(--sidebar-ink);
+  --sidebar-primary: var(--accent-gold);
+  --sidebar-primary-foreground: var(--sidebar);
+  --sidebar-accent: rgba(197, 154, 61, 0.18);
+  --sidebar-accent-foreground: #f3dca6;
+  --sidebar-border: #1d2a1c;
+  --sidebar-ring: var(--accent-gold);
+
+  /* Status colors — mapped to the cozy palette */
+  --status-active: var(--accent-moss);
+  --status-active-bg: var(--note-sage);
+  --status-stalled: var(--accent-gold);
+  --status-stalled-bg: var(--note-butter);
+  --status-complete: var(--accent-sky);
+  --status-complete-bg: var(--note-mist);
+  --status-inactive: var(--ink-soft);
+  --status-inactive-bg: var(--bg-paper-2);
+
+  /* Motion — shared timings and easings.
+     Use these instead of ad-hoc duration/easing strings. */
+  --motion-instant: 80ms;
+  --motion-fast: 160ms;
+  --motion-base: 220ms;
+  --motion-slow: 360ms;
+  --motion-pulse: 1800ms;
+  /* Smooth, slightly weighted ease — feels paper-soft */
+  --ease-cozy: cubic-bezier(0.32, 0.72, 0.34, 0.98);
+  /* Slight overshoot for "settle" interactions (drag drop, tab flip) */
+  --ease-settle: cubic-bezier(0.5, 1.4, 0.4, 0.96);
 }
 
 .dark {
-  /* Base colors - Dark space theme */
-  --background: #0a0c10;
-  --foreground: #f0f4f8;
-  --card: #151a22;
-  --card-foreground: #f0f4f8;
-  --popover: #151a22;
-  --popover-foreground: #f0f4f8;
-  --primary: #00d4ff;
-  --primary-foreground: #0a0c10;
-  --secondary: #1a2030;
-  --secondary-foreground: #f0f4f8;
-  --muted: #1a2030;
-  --muted-foreground: #64748b;
-  --accent: #1a2030;
-  --accent-foreground: #f0f4f8;
-  --destructive: #f43f5e;
-  --border: #252d3a;
-  --input: #252d3a;
-  --ring: #00d4ff;
+  /* === Cozy / Almanac palette (dark) ===
+     Moss-and-charcoal interpretation: dark forest paper surfaces,
+     warm parchment ink, cozy accents at slightly higher saturation. */
 
-  /* Panel colors */
-  --bg-canvas: #0a0c10;
-  --bg-panel: #0f1218;
-  --bg-hover: #1e2536;
-  --bg-accent: #1a2030;
-  --bg-elevated: #1a2030;
-  --border-light: #2a3444;
-  --border-glow: rgba(0, 212, 255, 0.3);
-  --text-primary: #f0f4f8;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  /* --- Synthesis tokens (canonical, dark) --- */
+  --bg-app: #1e241f;
+  --bg-paper: #2a312b;
+  --bg-paper-2: #313a33;
+  --bg-canvas: #252c27;
+  --ink-strong: #f3ebdd;
+  --ink: #e0d4c2;
+  --ink-soft: #baae9b;
+  --border: #5d6a5d;
 
-  /* Glowing accent palette - Dark */
-  --accent-cyan: #00d4ff;
-  --accent-cyan-dim: rgba(0, 212, 255, 0.15);
-  --accent-cyan-glow: rgba(0, 212, 255, 0.4);
-  --accent-violet: #a855f7;
-  --accent-violet-dim: rgba(168, 85, 247, 0.15);
-  --accent-violet-glow: rgba(168, 85, 247, 0.4);
-  --accent-emerald: #10b981;
-  --accent-emerald-dim: rgba(16, 185, 129, 0.15);
-  --accent-emerald-glow: rgba(16, 185, 129, 0.4);
-  --accent-amber: #f59e0b;
-  --accent-amber-dim: rgba(245, 158, 11, 0.15);
-  --accent-rose: #f43f5e;
-  --accent-rose-dim: rgba(244, 63, 94, 0.15);
-  --accent-blue: #3b82f6;
-  --accent-blue-dim: rgba(59, 130, 246, 0.15);
+  /* Forest sidebar (deepest) */
+  --sidebar: #111713;
+  --sidebar-2: #182019;
+  --sidebar-ink: #e8dfc9;
 
-  /* Alias light variants to dim variants for dark mode */
-  --accent-teal: #00d4ff;
-  --accent-teal-light: rgba(0, 212, 255, 0.15);
-  --accent-teal-bg: rgba(0, 212, 255, 0.08);
-  --accent-violet-light: rgba(168, 85, 247, 0.15);
-  --accent-violet-bg: rgba(168, 85, 247, 0.08);
-  --accent-amber-light: rgba(245, 158, 11, 0.15);
-  --accent-amber-bg: rgba(245, 158, 11, 0.08);
-  --accent-rose-light: rgba(244, 63, 94, 0.15);
-  --accent-rose-bg: rgba(244, 63, 94, 0.08);
-  --accent-blue-light: rgba(59, 130, 246, 0.15);
-  --accent-blue-bg: rgba(59, 130, 246, 0.08);
-  --accent-emerald-light: rgba(16, 185, 129, 0.15);
-  --accent-emerald-bg: rgba(16, 185, 129, 0.08);
+  /* Accent palette — slightly brighter than light */
+  --accent-gold: #d7af58;
+  --accent-moss: #8ea56b;
+  --accent-clay: #d08b6d;
+  --accent-sky: #98b3c2;
+  --accent-plum: #b094b1;
 
-  /* Gradient */
-  --gradient-main: linear-gradient(135deg, #00d4ff, #a855f7);
+  /* Sticky-note color family (darker variants) */
+  --note-sage: #4f5f46;
+  --note-butter: #7c6b35;
+  --note-blush: #7a5c57;
+  --note-apricot: #83624c;
+  --note-lavender: #62586e;
+  --note-mist: #546872;
+
+  /* --- shadcn / Tailwind token mappings --- */
+  --background: var(--bg-app);
+  --foreground: var(--ink-strong);
+  --card: var(--bg-paper);
+  --card-foreground: var(--ink-strong);
+  --popover: var(--bg-paper);
+  --popover-foreground: var(--ink-strong);
+  --primary: var(--accent-gold);
+  --primary-foreground: var(--bg-app);
+  --secondary: var(--bg-paper-2);
+  --secondary-foreground: var(--ink-strong);
+  --muted: var(--bg-paper-2);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--bg-paper-2);
+  --accent-foreground: var(--ink-strong);
+  --destructive: #c25a4d;
+  --input: var(--border);
+  --ring: var(--accent-gold);
+
+  /* Panel aliases */
+  --bg-panel: var(--bg-paper);
+  --bg-card: var(--bg-paper);
+  --bg-hover: var(--bg-paper-2);
+  --bg-accent: var(--bg-paper-2);
+  --bg-elevated: var(--bg-paper-2);
+  --border-light: #404a40;
+  --border-glow: rgba(215, 175, 88, 0.3);
+  --text-primary: var(--ink-strong);
+  --text-secondary: var(--ink);
+  --text-muted: var(--ink-soft);
+
+  /* Legacy accent aliases — map cyan/violet/etc to cozy palette so
+     existing dark-mode glows render in the new analog palette instead
+     of the old space theme. Migrated in later cozy-primitive tasks. */
+  --accent-cyan: var(--accent-sky);
+  --accent-cyan-dim: rgba(152, 179, 194, 0.18);
+  --accent-cyan-glow: rgba(152, 179, 194, 0.4);
+  --accent-violet: var(--accent-plum);
+  --accent-violet-dim: rgba(176, 148, 177, 0.18);
+  --accent-violet-glow: rgba(176, 148, 177, 0.4);
+  --accent-emerald: var(--accent-moss);
+  --accent-emerald-dim: rgba(142, 165, 107, 0.18);
+  --accent-emerald-glow: rgba(142, 165, 107, 0.4);
+  --accent-amber: var(--accent-gold);
+  --accent-amber-dim: rgba(215, 175, 88, 0.18);
+  --accent-amber-glow: rgba(215, 175, 88, 0.4);
+  --accent-rose: var(--accent-clay);
+  --accent-rose-dim: rgba(208, 139, 109, 0.18);
+  --accent-blue: var(--accent-sky);
+  --accent-blue-dim: rgba(152, 179, 194, 0.18);
+
+  --accent-teal: var(--accent-moss);
+  --accent-teal-light: rgba(142, 165, 107, 0.22);
+  --accent-teal-bg: rgba(142, 165, 107, 0.1);
+  --accent-violet-light: rgba(176, 148, 177, 0.22);
+  --accent-violet-bg: rgba(176, 148, 177, 0.1);
+  --accent-amber-light: rgba(215, 175, 88, 0.22);
+  --accent-amber-bg: rgba(215, 175, 88, 0.1);
+  --accent-rose-light: rgba(208, 139, 109, 0.22);
+  --accent-rose-bg: rgba(208, 139, 109, 0.1);
+  --accent-blue-light: rgba(152, 179, 194, 0.22);
+  --accent-blue-bg: rgba(152, 179, 194, 0.1);
+  --accent-emerald-light: rgba(142, 165, 107, 0.22);
+  --accent-emerald-bg: rgba(142, 165, 107, 0.1);
+
+  /* Gradient — warm gold to moss instead of cyan to violet */
+  --gradient-main: linear-gradient(
+    135deg,
+    var(--accent-gold),
+    var(--accent-moss)
+  );
   --gradient-bg: linear-gradient(
     135deg,
-    rgba(0, 212, 255, 0.03),
-    rgba(168, 85, 247, 0.03)
+    rgba(215, 175, 88, 0.04),
+    rgba(142, 165, 107, 0.04)
   );
 
-  /* Chart colors */
-  --chart-1: #00d4ff;
-  --chart-2: #a855f7;
-  --chart-3: #3b82f6;
-  --chart-4: #f59e0b;
-  --chart-5: #10b981;
+  /* Chart colors — cozy five-voice */
+  --chart-1: var(--accent-moss);
+  --chart-2: var(--accent-plum);
+  --chart-3: var(--accent-sky);
+  --chart-4: var(--accent-gold);
+  --chart-5: var(--accent-clay);
 
-  /* Shadows - glow style */
-  --shadow-sm: 0 0 10px rgba(0, 212, 255, 0.05);
-  --shadow-md: 0 0 20px rgba(0, 212, 255, 0.08);
-  --shadow-lg: 0 0 30px rgba(0, 212, 255, 0.1);
+  /* Shadows — soft warm glow rather than cool cyan */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 3px 8px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.25);
 
-  /* Sidebar */
-  --sidebar: #0f1218;
-  --sidebar-foreground: #f0f4f8;
-  --sidebar-primary: #00d4ff;
-  --sidebar-primary-foreground: #0a0c10;
-  --sidebar-accent: rgba(0, 212, 255, 0.15);
-  --sidebar-accent-foreground: #00d4ff;
-  --sidebar-border: #252d3a;
-  --sidebar-ring: #00d4ff;
+  /* Semantic elevation (dark) — preserve the recipe shape but darker. */
+  --elevation-paper:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.25) inset, 0 1px 2px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  --elevation-pinned:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 2px 10px rgba(0, 0, 0, 0.45);
+  --elevation-active:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 0 0 1px rgba(215, 175, 88, 0.35) inset, 0 4px 14px rgba(0, 0, 0, 0.45);
+  --elevation-floating:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 8px 24px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.35);
 
-  /* Status colors - glowing */
-  --status-active: #10b981;
-  --status-active-bg: rgba(16, 185, 129, 0.15);
-  --status-stalled: #f59e0b;
-  --status-stalled-bg: rgba(245, 158, 11, 0.15);
-  --status-complete: #00d4ff;
-  --status-complete-bg: rgba(0, 212, 255, 0.15);
-  --status-inactive: #64748b;
-  --status-inactive-bg: rgba(100, 116, 139, 0.15);
+  --border-paper: 1px solid var(--border);
+  --border-pinned: 1px solid var(--border);
+  --border-active: 1px solid var(--accent-gold);
+
+  /* Sidebar shadcn mappings */
+  --sidebar-foreground: var(--sidebar-ink);
+  --sidebar-primary: var(--accent-gold);
+  --sidebar-primary-foreground: var(--sidebar);
+  --sidebar-accent: rgba(215, 175, 88, 0.18);
+  --sidebar-accent-foreground: #f3dca6;
+  --sidebar-border: #050805;
+  --sidebar-ring: var(--accent-gold);
+
+  /* Status colors — cozy palette */
+  --status-active: var(--accent-moss);
+  --status-active-bg: rgba(142, 165, 107, 0.18);
+  --status-stalled: var(--accent-gold);
+  --status-stalled-bg: rgba(215, 175, 88, 0.18);
+  --status-complete: var(--accent-sky);
+  --status-complete-bg: rgba(152, 179, 194, 0.18);
+  --status-inactive: var(--ink-soft);
+  --status-inactive-bg: rgba(186, 174, 155, 0.12);
 }
 
 @layer base {
@@ -244,14 +376,89 @@
   }
   body {
     @apply bg-background text-foreground leading-relaxed;
+    background-image:
+      /* aged stain top-left */
+      radial-gradient(
+        ellipse 60% 40% at 18% 22%,
+        rgba(166, 116, 40, 0.09),
+        transparent 70%
+      ),
+      /* aged stain bottom-right */
+        radial-gradient(
+          ellipse 50% 35% at 82% 78%,
+          rgba(120, 88, 40, 0.08),
+          transparent 70%
+        ),
+      /* mossy stain middle */
+        radial-gradient(
+          ellipse 30% 25% at 55% 45%,
+          rgba(90, 122, 74, 0.05),
+          transparent 70%
+        ),
+      /* horizontal fiber lines */
+        repeating-linear-gradient(
+          0deg,
+          rgba(120, 90, 40, 0.025) 0px,
+          rgba(120, 90, 40, 0.025) 1px,
+          transparent 1px,
+          transparent 3px
+        ),
+      /* vertical fiber lines (lighter) */
+        repeating-linear-gradient(
+          90deg,
+          rgba(120, 90, 40, 0.018) 0px,
+          rgba(120, 90, 40, 0.018) 1px,
+          transparent 1px,
+          transparent 5px
+        ),
+      /* SVG paper grain — fractal noise */
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.32  0 0 0 0 0.22  0 0 0 0 0.10  0 0 0 0.42 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-attachment: fixed;
+    background-size:
+      cover,
+      cover,
+      cover,
+      auto,
+      auto,
+      280px 280px;
+    background-blend-mode: normal, normal, normal, multiply, multiply, multiply;
   }
   .dark body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-image: none;
   }
   html {
-    @apply font-sans;
+    font-family:
+      var(--font-sans),
+      system-ui,
+      -apple-system,
+      sans-serif;
   }
+
+  /* Cozy typography hierarchy
+     h1 = Cormorant Garamond display, h2/h3 = Fraunces UI serif */
+  h1,
+  .font-display {
+    font-family: var(--font-display), Georgia, "Times New Roman", serif;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  h2,
+  h3,
+  .font-serif {
+    font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  code,
+  kbd,
+  samp,
+  pre,
+  .font-mono {
+    font-family: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  /* Dark mode keeps the same hierarchy — no font swap. */
 }
 
 /* Glow effects for dark mode */
@@ -318,6 +525,354 @@
 }
 
 /* ============================================
+   COTTAGECORE PAPER STYLING (light mode only)
+   ============================================ */
+
+.paper-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 1px 0 rgba(255, 248, 220, 0.7) inset,
+    0 0 0 1px rgba(120, 90, 40, 0.03) inset,
+    0 0 18px rgba(120, 90, 40, 0.06) inset,
+    0 2px 4px rgba(90, 66, 29, 0.12),
+    0 8px 20px rgba(90, 66, 29, 0.1);
+  border-radius: 0.75rem;
+  position: relative;
+}
+
+.dark .paper-card {
+  box-shadow: var(--shadow-md);
+}
+
+.paper-card-aged {
+  background-color: var(--card);
+  background-image:
+    /* aged stain top-left */
+    radial-gradient(
+      ellipse 70% 60% at 8% 10%,
+      rgba(184, 134, 46, 0.1),
+      transparent 60%
+    ),
+    /* aged stain bottom-right */
+    radial-gradient(
+        ellipse 60% 50% at 95% 92%,
+        rgba(120, 90, 40, 0.09),
+        transparent 60%
+      ),
+    /* coffee ring on the corner */
+    radial-gradient(
+        ellipse 14% 9% at 86% 14%,
+        rgba(160, 100, 30, 0.07),
+        transparent 70%
+      ),
+    /* horizontal paper fibers */
+    repeating-linear-gradient(
+        0deg,
+        rgba(120, 90, 40, 0.03) 0px,
+        rgba(120, 90, 40, 0.03) 1px,
+        transparent 1px,
+        transparent 3px
+      ),
+    /* vertical paper fibers */
+    repeating-linear-gradient(
+        90deg,
+        rgba(120, 90, 40, 0.02) 0px,
+        rgba(120, 90, 40, 0.02) 1px,
+        transparent 1px,
+        transparent 6px
+      ),
+    /* SVG fractal grain */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.32  0 0 0 0 0.22  0 0 0 0 0.10  0 0 0 0.32 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size:
+    cover,
+    cover,
+    cover,
+    auto,
+    auto,
+    220px 220px;
+}
+
+.dark .paper-card-aged {
+  background-image: none;
+}
+
+/* Pill button used for "Suggest Next Work" and stat pills */
+.cottage-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+
+.dark .cottage-pill {
+  background: var(--bg-elevated);
+  border-color: var(--border);
+}
+
+.cottage-pill-accent {
+  background: linear-gradient(180deg, #f7e8c2 0%, #ead7ae 100%);
+  border-color: var(--accent-amber);
+  color: #5a3a14;
+}
+
+.dark .cottage-pill-accent {
+  background: var(--accent-amber-dim);
+  border-color: var(--accent-amber);
+  color: var(--accent-amber);
+}
+
+/* Tag-style pill — softer outlined taxonomy.
+   Lowercase, smaller padding, muted fill, 1px outline.
+   Variants follow the cozy five-voice + sticky-note palettes. */
+.pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  background: var(--bg-paper-2);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-size: 0.8rem;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+
+.pill-tag-gold {
+  background: var(--note-butter);
+  border-color: rgba(197, 154, 61, 0.4);
+  color: var(--ink-strong);
+}
+.pill-tag-moss {
+  background: var(--note-sage);
+  border-color: rgba(122, 143, 88, 0.4);
+  color: var(--ink-strong);
+}
+.pill-tag-clay {
+  background: var(--note-blush);
+  border-color: rgba(201, 126, 90, 0.4);
+  color: var(--ink-strong);
+}
+.pill-tag-apricot {
+  background: var(--note-apricot);
+  border-color: rgba(201, 126, 90, 0.4);
+  color: var(--ink-strong);
+}
+.pill-tag-sky {
+  background: var(--note-mist);
+  border-color: rgba(142, 167, 184, 0.4);
+  color: var(--ink-strong);
+}
+.pill-tag-plum {
+  background: var(--note-lavender);
+  border-color: rgba(154, 124, 146, 0.4);
+  color: var(--ink-strong);
+}
+
+/* Sidebar cottage decorations — leather-bound book / forest panel */
+.cottage-sidebar {
+  background-color: var(--sidebar);
+  background-image:
+    /* gold glow top */
+    radial-gradient(
+      ellipse 90% 30% at 50% 0%,
+      rgba(201, 161, 74, 0.18),
+      transparent 70%
+    ),
+    /* mossy glow bottom */
+    radial-gradient(
+        ellipse 80% 30% at 50% 100%,
+        rgba(90, 122, 74, 0.18),
+        transparent 70%
+      ),
+    /* center dim */
+    radial-gradient(
+        ellipse 100% 60% at 50% 50%,
+        transparent 60%,
+        rgba(0, 0, 0, 0.25) 100%
+      ),
+    /* vertical leather-fiber lines */
+    repeating-linear-gradient(
+        90deg,
+        rgba(255, 240, 200, 0.025) 0px,
+        rgba(255, 240, 200, 0.025) 1px,
+        transparent 1px,
+        transparent 4px
+      ),
+    /* SVG fractal grain (slightly denser/darker) */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.45 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size:
+    cover,
+    cover,
+    cover,
+    auto,
+    240px 240px;
+  background-blend-mode: normal, normal, normal, normal, soft-light;
+  border-right: 2px solid var(--sidebar-border);
+  box-shadow: inset -8px 0 12px -8px rgba(0, 0, 0, 0.45);
+}
+
+.dark .cottage-sidebar {
+  background-image: none;
+  box-shadow: none;
+}
+
+/* ============================================
+   FIELD-BOOK SIDEBAR (cozy)
+   Inset shelf sections, stitched dividers, and a
+   tactile gold marker on active rows.
+   ============================================ */
+
+.sidebar-section + .sidebar-section {
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  /* Stitched dotted divider between shelves */
+  border-top: 1px dashed rgba(233, 223, 201, 0.16);
+  position: relative;
+}
+
+/* Tiny stitched accent dots either side of the divider — feels
+   hand-sewn rather than CSS dashed. */
+.sidebar-section + .sidebar-section::before,
+.sidebar-section + .sidebar-section::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: rgba(197, 154, 61, 0.35);
+}
+.sidebar-section + .sidebar-section::before {
+  left: 6px;
+}
+.sidebar-section + .sidebar-section::after {
+  right: 6px;
+}
+
+/* Shelf section title — serif uppercase with a short gold underline */
+.sidebar-section-title {
+  position: relative;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sidebar-primary);
+  opacity: 0.85;
+  padding: 0.4rem 0.75rem 0.55rem;
+}
+
+.sidebar-section-title::after {
+  content: "";
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.15rem;
+  width: 1.5rem;
+  height: 1.5px;
+  background: linear-gradient(90deg, var(--accent-gold), transparent);
+  opacity: 0.65;
+}
+
+/* Tactile active row marker — replaces the flat border-l-2.
+   A gold rod glued to the left edge with a soft glow. */
+.sidebar-nav-active {
+  position: relative;
+  background: rgba(197, 154, 61, 0.12) !important;
+}
+
+.sidebar-nav-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 22%;
+  bottom: 22%;
+  width: 3px;
+  background: var(--accent-gold);
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 6px rgba(197, 154, 61, 0.45);
+}
+
+.dark .sidebar-nav-active {
+  background: rgba(215, 175, 88, 0.15) !important;
+}
+
+.dark .sidebar-nav-active::before {
+  background: var(--accent-gold);
+  box-shadow: 0 0 8px rgba(215, 175, 88, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-nav-active::before {
+    box-shadow: none;
+  }
+}
+
+/* Lighter paper texture for column backgrounds */
+.cottage-paper {
+  background-color: var(--bg-accent);
+  background-image:
+    radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      rgba(184, 134, 46, 0.06),
+      transparent 70%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(120, 90, 40, 0.025) 0px,
+      rgba(120, 90, 40, 0.025) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.32  0 0 0 0 0.22  0 0 0 0 0.10  0 0 0 0.30 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size:
+    cover,
+    auto,
+    220px 220px;
+}
+
+.dark .cottage-paper {
+  background-image: none;
+}
+
+/* Top bar paper texture */
+.cottage-topbar {
+  background-color: var(--bg-canvas);
+  background-image:
+    radial-gradient(
+      ellipse 80% 60% at 50% 30%,
+      rgba(184, 134, 46, 0.07),
+      transparent 70%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(120, 90, 40, 0.02) 0px,
+      rgba(120, 90, 40, 0.02) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.32  0 0 0 0 0.22  0 0 0 0 0.10  0 0 0 0.32 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size:
+    cover,
+    auto,
+    200px 200px;
+}
+
+.dark .cottage-topbar {
+  background-image: none;
+}
+
+/* ============================================
    INTERACTIVE ELEMENT STYLES
    ============================================ */
 
@@ -338,7 +893,7 @@ button:disabled,
 
 /* Focus visible for keyboard navigation */
 :focus-visible {
-  outline: 2px solid var(--accent-teal);
+  outline: 2px solid var(--accent-amber);
   outline-offset: 2px;
 }
 
@@ -368,7 +923,7 @@ button:disabled,
 
 .interactive-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
 }
 
 .interactive-card:active {
@@ -431,4 +986,1144 @@ button:disabled,
 
 .skeleton-card {
   border-radius: 0.75rem;
+}
+
+/* ============================================
+   STICKY NOTE PRIMITIVE (cozy)
+   Six color variants, three tilt variants,
+   pin or tape decoration. Paper grain via SVG.
+   ============================================ */
+
+.sticky-note {
+  position: relative;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  padding: 0.875rem 1rem;
+  color: var(--ink-strong);
+  background-color: var(--note-butter);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.30  0 0 0 0 0.20  0 0 0 0 0.10  0 0 0 0.20 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 180px 180px;
+  background-blend-mode: multiply;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 0 0 1px rgba(64, 54, 41, 0.04) inset,
+    0 2px 8px rgba(64, 54, 41, 0.12);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.dark .sticky-note {
+  color: var(--ink-strong);
+  border-color: rgba(0, 0, 0, 0.35);
+  background-blend-mode: normal;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.sticky-note-sage {
+  background-color: var(--note-sage);
+}
+.sticky-note-butter {
+  background-color: var(--note-butter);
+}
+.sticky-note-blush {
+  background-color: var(--note-blush);
+}
+.sticky-note-apricot {
+  background-color: var(--note-apricot);
+}
+.sticky-note-lavender {
+  background-color: var(--note-lavender);
+}
+.sticky-note-mist {
+  background-color: var(--note-mist);
+}
+
+/* Tilt variants — gentle, not slanted */
+.sticky-note-tilt-left {
+  transform: rotate(-1deg);
+}
+.sticky-note-tilt-right {
+  transform: rotate(1deg);
+}
+
+/* Hover settle — slight lift + counter-tilt */
+.sticky-note:hover {
+  transform: translateY(-2px) rotate(0deg);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 0 0 1px rgba(64, 54, 41, 0.04) inset,
+    0 6px 14px rgba(64, 54, 41, 0.16);
+}
+
+.dark .sticky-note:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 6px 16px rgba(0, 0, 0, 0.55);
+}
+
+/* Decoration positions (where the pin/tape sits) */
+.sticky-note-deco-left .sticky-note-pin,
+.sticky-note-deco-left .sticky-note-tape {
+  left: 0.875rem;
+  transform: translate(0, -50%);
+}
+.sticky-note-deco-center .sticky-note-pin,
+.sticky-note-deco-center .sticky-note-tape {
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.sticky-note-deco-right .sticky-note-pin,
+.sticky-note-deco-right .sticky-note-tape {
+  right: 0.875rem;
+  transform: translate(0, -50%);
+}
+
+/* Pin: small round red/clay dot with shadow + highlight */
+.sticky-note-pin {
+  position: absolute;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background:
+    radial-gradient(
+      circle at 30% 30%,
+      rgba(255, 255, 255, 0.55),
+      transparent 50%
+    ),
+    var(--accent-clay);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(64, 54, 41, 0.2);
+  pointer-events: none;
+}
+
+/* Tape: short opaque-ish strip across the top edge */
+.sticky-note-tape {
+  position: absolute;
+  top: -6px;
+  width: 56px;
+  height: 16px;
+  background: rgba(255, 248, 220, 0.55);
+  border: 1px solid rgba(64, 54, 41, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+.dark .sticky-note-tape {
+  background: rgba(243, 235, 221, 0.16);
+  border-color: rgba(0, 0, 0, 0.45);
+}
+
+/* ============================================
+   FOLDER TAB PRIMITIVE (cozy)
+   Small protruding tab — paper fill, serif label,
+   gold underline on active. Use FolderTabs row wrapper
+   to compose attached or detached tab groups.
+   ============================================ */
+
+.folder-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  position: relative;
+}
+
+/* When attached, the active tab visually merges into a card below it. */
+.folder-tabs:not(.folder-tabs-detached)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.folder-tab {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.95rem 0.55rem;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-top-left-radius: 0.6rem;
+  border-top-right-radius: 0.6rem;
+  background: var(--bg-paper-2);
+  color: var(--ink-soft);
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.folder-tab:hover:not(.folder-tab-active) {
+  background: var(--bg-paper);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.folder-tab-active {
+  background: var(--bg-paper);
+  color: var(--ink-strong);
+  border-color: var(--border);
+  /* Gold underline accent flush along the inside-bottom of the tab,
+     hiding the parent ::after divider for that tab's width. */
+  box-shadow:
+    inset 0 -2px 0 var(--accent-gold),
+    0 -1px 0 rgba(64, 54, 41, 0.04);
+  /* Lift the active tab a hair above the divider line */
+  margin-bottom: -1px;
+  padding-bottom: 0.65rem;
+}
+
+.dark .folder-tab {
+  background: var(--bg-paper-2);
+  color: var(--ink-soft);
+}
+
+.dark .folder-tab:hover:not(.folder-tab-active) {
+  background: var(--bg-paper);
+  color: var(--ink);
+}
+
+.dark .folder-tab-active {
+  background: var(--bg-paper);
+  color: var(--ink-strong);
+  box-shadow:
+    inset 0 -2px 0 var(--accent-gold),
+    0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Detached folder tabs — standalone chips, no merging into a card */
+.folder-tabs-detached .folder-tab {
+  border-bottom: 1px solid var(--border);
+  border-top-left-radius: 0.6rem;
+  border-top-right-radius: 0.6rem;
+  border-bottom-left-radius: 0.3rem;
+  border-bottom-right-radius: 0.3rem;
+}
+
+.folder-tabs-detached .folder-tab-active {
+  margin-bottom: 0;
+}
+
+.folder-tab:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   STATUS DOT (cozy)
+   8px dot + soft glow ring, five states.
+   ============================================ */
+
+.status-dot {
+  display: inline-block;
+  width: 0.5rem; /* 8px */
+  height: 0.5rem;
+  border-radius: 9999px;
+  vertical-align: middle;
+  background-color: var(--accent-moss);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.2),
+    0 0 6px rgba(122, 143, 88, 0.55);
+}
+
+.status-dot-running {
+  background-color: var(--accent-moss);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.2),
+    0 0 6px rgba(122, 143, 88, 0.55);
+}
+.status-dot-draft {
+  background-color: var(--accent-gold);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.2),
+    0 0 6px rgba(197, 154, 61, 0.55);
+}
+.status-dot-blocked {
+  background-color: var(--accent-clay);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.2),
+    0 0 6px rgba(201, 126, 90, 0.55);
+}
+.status-dot-idle {
+  background-color: var(--accent-sky);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.2),
+    0 0 6px rgba(142, 167, 184, 0.45);
+}
+.status-dot-archived {
+  background-color: var(--accent-plum);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.2),
+    0 0 6px rgba(154, 124, 146, 0.45);
+}
+
+.dark .status-dot-running {
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.25),
+    0 0 8px rgba(142, 165, 107, 0.55);
+}
+.dark .status-dot-draft {
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.25),
+    0 0 8px rgba(215, 175, 88, 0.55);
+}
+.dark .status-dot-blocked {
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.25),
+    0 0 8px rgba(208, 139, 109, 0.55);
+}
+.dark .status-dot-idle {
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.25),
+    0 0 8px rgba(152, 179, 194, 0.45);
+}
+.dark .status-dot-archived {
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.25),
+    0 0 8px rgba(176, 148, 177, 0.45);
+}
+
+@keyframes status-dot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.75;
+  }
+}
+
+.status-dot-pulse {
+  animation: status-dot-pulse 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-dot-pulse {
+    animation: none;
+  }
+}
+
+/* ============================================
+   AGENT CHIP (cozy)
+   Avatar/initials + name + optional status dot.
+   Active chips get a subtle heartbeat underline.
+   ============================================ */
+
+.agent-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.6rem 0.25rem 0.3rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--bg-paper-2);
+  color: var(--ink-strong);
+  font-size: 0.85rem;
+  line-height: 1.2;
+  font-weight: 500;
+  position: relative;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.agent-chip:hover {
+  background: var(--bg-paper);
+  border-color: var(--accent-gold);
+}
+
+.agent-chip-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 9999px;
+  background: var(--bg-paper);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  flex: none;
+}
+
+.agent-chip-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.agent-chip-avatar-initials {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink-strong);
+  letter-spacing: 0;
+}
+
+.agent-chip-name {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+.agent-chip-status {
+  margin-left: 0.1rem;
+}
+
+/* Active heartbeat: small horizontal "spark" line under the chip.
+   Renders via ::after to avoid a wrapper element. */
+.agent-chip-active::after {
+  content: "";
+  position: absolute;
+  left: 0.6rem;
+  right: 0.6rem;
+  bottom: -3px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-moss) 30%,
+    var(--accent-moss) 70%,
+    transparent 100%
+  );
+  opacity: 0.85;
+  animation: agent-chip-heartbeat 1.6s ease-in-out infinite;
+}
+
+@keyframes agent-chip-heartbeat {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scaleX(0.6);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-chip-active::after {
+    animation: none;
+  }
+}
+
+/* ============================================
+   CONNECTOR (cozy)
+   Dotted/sketched path with optional arrowhead.
+   Animated dash-offset on active connections.
+   Color via CSS currentColor — set on a wrapper.
+   ============================================ */
+
+.connector {
+  position: absolute;
+  pointer-events: none;
+  /* Default ink color flows from the closest text color, but can be
+     overridden via the `color` prop or the parent. */
+  color: var(--ink-soft);
+  overflow: visible;
+}
+
+.connector-active {
+  color: var(--accent-moss);
+}
+
+@keyframes connector-dash-flow {
+  to {
+    stroke-dashoffset: -120;
+  }
+}
+
+.connector-active.connector-dotted path,
+.connector-active.connector-dashed path {
+  animation: connector-dash-flow 4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .connector-active.connector-dotted path,
+  .connector-active.connector-dashed path {
+    animation: none;
+  }
+}
+
+/* ============================================
+   THEME SWATCH PICKER (cozy)
+   Paper-tile swatches with double-border selection
+   and a pinned checkmark on the selected tile.
+   ============================================ */
+
+.theme-swatch-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.theme-swatch {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease;
+}
+
+.theme-swatch:hover .theme-swatch-tile {
+  transform: translateY(-1px);
+}
+
+.theme-swatch:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+.theme-swatch-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.45rem;
+  border: 1px solid var(--border);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 1px 2px rgba(64, 54, 41, 0.15);
+  position: relative;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.dark .theme-swatch-tile {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.theme-swatch-selected .theme-swatch-tile {
+  /* Double-border selection: outer ring + inner border */
+  box-shadow:
+    0 0 0 2px var(--accent-gold),
+    0 0 0 4px var(--bg-paper),
+    0 1px 2px rgba(64, 54, 41, 0.18);
+}
+
+.dark .theme-swatch-selected .theme-swatch-tile {
+  box-shadow:
+    0 0 0 2px var(--accent-gold),
+    0 0 0 4px var(--bg-paper),
+    0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.theme-swatch-check {
+  color: var(--ink-strong);
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.6));
+}
+
+.dark .theme-swatch-check {
+  color: var(--ink-strong);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+}
+
+.theme-swatch-label {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.theme-swatch-selected .theme-swatch-label {
+  color: var(--ink-strong);
+}
+
+/* ============================================
+   TOOL TRACE PANEL (cozy)
+   Dense monospace log for agent activity.
+   Subtle row dividers, mono font, status dot.
+   ============================================ */
+
+.tool-trace {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--bg-paper-2);
+  color: var(--ink);
+  font-family: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.dark .tool-trace {
+  background: var(--bg-paper-2);
+}
+
+.tool-trace-title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border-bottom: 1px dotted var(--border);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.1rem;
+}
+
+.tool-trace-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tool-trace-entry {
+  display: grid;
+  grid-template-columns: 0.9rem 5.4rem 7rem 1fr;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0;
+  border-bottom: 1px dotted rgba(120, 90, 40, 0.12);
+}
+
+.dark .tool-trace-entry {
+  border-bottom-color: rgba(255, 248, 220, 0.07);
+}
+
+.tool-trace-entry:last-child {
+  border-bottom: none;
+}
+
+.tool-trace-leading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-trace-bullet {
+  display: inline-block;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 9999px;
+  background: var(--ink-soft);
+  opacity: 0.6;
+}
+
+.tool-trace-time {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.tool-trace-actor {
+  color: var(--accent-gold);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tool-trace-action {
+  color: var(--ink-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tool-trace-output {
+  grid-column: 2 / -1;
+  margin: 0.25rem 0 0.4rem;
+  padding: 0.4rem 0.55rem;
+  background: var(--bg-paper);
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  font-size: 0.74rem;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 8rem;
+  overflow: auto;
+}
+
+.tool-trace-empty {
+  padding: 0.75rem 0;
+  color: var(--ink-soft);
+  font-style: italic;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ============================================
+   CORKBOARD CARD (cosmetic)
+   Wraps the project card on the home grid with a
+   slight slug-deterministic tilt and a decorative
+   pushpin. Pure visual — no behavior change.
+   ============================================ */
+
+.corkboard-card {
+  position: relative;
+  display: block;
+  /* The tilt and pin color are written by the consumer as inline
+     custom properties (--corkboard-tilt, --corkboard-pin-color). */
+  transform: rotate(var(--corkboard-tilt, 0deg));
+  transform-origin: center 12px;
+  transition: transform 220ms ease;
+  /* Reserve space at the top so the pin can extend above the card. */
+  padding-top: 6px;
+}
+
+.corkboard-card:hover {
+  transform: rotate(0deg) translateY(-2px);
+}
+
+.corkboard-pin {
+  position: absolute;
+  top: -2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background:
+    radial-gradient(
+      circle at 30% 28%,
+      rgba(255, 255, 255, 0.6),
+      transparent 55%
+    ),
+    var(--corkboard-pin-color, var(--accent-clay));
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(64, 54, 41, 0.25),
+    /* Faint shadow under the pin head on the card surface */ 0 4px 4px -2px
+      rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.corkboard-pin-left .corkboard-pin {
+  left: 18px;
+}
+.corkboard-pin-center .corkboard-pin {
+  left: 50%;
+  transform: translateX(-50%);
+}
+.corkboard-pin-right .corkboard-pin {
+  right: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .corkboard-card {
+    transform: rotate(0deg);
+    transition: none;
+  }
+  .corkboard-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* ============================================
+   PROJECT CANVAS (cozy)
+   Scrollable freeform surface for drag-positioned
+   project cards. Subtle dot-grid background to
+   suggest a desk.
+   ============================================ */
+
+.canvas-scroll {
+  width: 100%;
+  height: calc(100vh - 220px);
+  min-height: 480px;
+  overflow: auto;
+  border: 1px dotted var(--border);
+  border-radius: 0.6rem;
+  background: var(--bg-canvas);
+  /* Subtle dot grid — pinpricks every 24px */
+  background-image: radial-gradient(
+    circle,
+    rgba(120, 90, 40, 0.12) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+}
+
+.dark .canvas-scroll {
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 248, 220, 0.06) 1px,
+    transparent 1px
+  );
+}
+
+.canvas-surface {
+  position: relative;
+  /* Width and height set inline based on card extent */
+}
+
+.canvas-card {
+  user-select: none;
+  -webkit-user-select: none;
+  /* Subtle drop shadow that lifts when grabbed */
+  filter: drop-shadow(0 4px 8px rgba(64, 54, 41, 0.15));
+  transition: filter 160ms ease;
+}
+
+.canvas-card:hover {
+  filter: drop-shadow(0 8px 16px rgba(64, 54, 41, 0.22));
+}
+
+.dark .canvas-card {
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45));
+}
+
+.dark .canvas-card:hover {
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.55));
+}
+
+/* ============================================
+   COZY MOTION UTILITIES
+   Shared paper-soft transitions and idle animations.
+   Use these instead of one-off transform tweaks.
+   ============================================ */
+
+/* Subtle hover lift — translateY without rotation. */
+.lift {
+  transition:
+    transform var(--motion-base, 220ms) var(--ease-cozy, ease),
+    box-shadow var(--motion-base, 220ms) var(--ease-cozy, ease);
+}
+
+.lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Drag/release settle — slight overshoot bounce on grab. */
+.settle {
+  transition: transform var(--motion-base, 220ms) var(--ease-settle, ease);
+}
+
+.settle:active {
+  transform: scale(1.02);
+}
+
+/* Soft pulse — for active/heartbeat indicators that aren't a status dot. */
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.65;
+  }
+}
+
+.pulse-soft {
+  animation: pulse-soft var(--motion-pulse, 1800ms) ease-in-out infinite;
+}
+
+/* Flutter — gentle rotation breathe, for sticky notes pinned to a board. */
+@keyframes flutter {
+  0%,
+  100% {
+    transform: rotate(var(--flutter-base, 0deg));
+  }
+  50% {
+    transform: rotate(calc(var(--flutter-base, 0deg) + 0.4deg));
+  }
+}
+
+.flutter {
+  animation: flutter calc(var(--motion-pulse, 1800ms) * 2) ease-in-out infinite;
+}
+
+/* Reveal — fade-in with slight upward drift, for new-content reveals. */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal {
+  animation: reveal var(--motion-base, 220ms) var(--ease-cozy, ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift,
+  .settle,
+  .pulse-soft,
+  .flutter,
+  .reveal {
+    animation: none;
+    transition: none;
+  }
+  .lift:hover,
+  .settle:active {
+    transform: none;
+  }
+}
+
+/* ============================================
+   COZY TEXTURE UTILITIES
+   Compose these on top of a solid bg-color for
+   paper grain, fiber, or dot-grid feel. Use as
+   add-on classes (className="bg-card tex-grain tex-fibers").
+   ============================================ */
+
+.tex-grain {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.32  0 0 0 0 0.22  0 0 0 0 0.10  0 0 0 0.32 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 200px 200px;
+  background-blend-mode: multiply;
+}
+
+.tex-grain-dense {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.32  0 0 0 0 0.22  0 0 0 0 0.10  0 0 0 0.42 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 220px 220px;
+  background-blend-mode: multiply;
+}
+
+.tex-grain-dark {
+  /* Dense dark grain for sidebar/leather surfaces */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.45 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 240px 240px;
+  background-blend-mode: soft-light;
+}
+
+.tex-fibers {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(120, 90, 40, 0.025) 0px,
+      rgba(120, 90, 40, 0.025) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(120, 90, 40, 0.018) 0px,
+      rgba(120, 90, 40, 0.018) 1px,
+      transparent 1px,
+      transparent 5px
+    );
+}
+
+.dark .tex-fibers {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 248, 220, 0.022) 0px,
+      rgba(255, 248, 220, 0.022) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 248, 220, 0.015) 0px,
+      rgba(255, 248, 220, 0.015) 1px,
+      transparent 1px,
+      transparent 5px
+    );
+}
+
+.tex-dotgrid {
+  background-image: radial-gradient(
+    circle,
+    rgba(120, 90, 40, 0.14) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+}
+
+.dark .tex-dotgrid {
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 248, 220, 0.07) 1px,
+    transparent 1px
+  );
+}
+
+/* Aged stains — subtle radial gradients suggesting tea/coffee marks. */
+.tex-stains {
+  background-image:
+    radial-gradient(
+      ellipse 60% 40% at 18% 22%,
+      rgba(166, 116, 40, 0.07),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 50% 35% at 82% 78%,
+      rgba(120, 88, 40, 0.06),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 30% 25% at 55% 45%,
+      rgba(90, 122, 74, 0.04),
+      transparent 70%
+    );
+}
+
+.dark .tex-stains {
+  background-image: none;
+}
+
+/* ============================================
+   BOTTOM UTILITY DOCK (cozy)
+   Slips peeking above the bottom edge that expand
+   to a panel of tool-trace / most-active / quick filters.
+   ============================================ */
+
+.bottom-dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  flex: none;
+  border-top: 1px solid var(--border);
+  background: var(--bg-paper-2);
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(120, 90, 40, 0.02) 0px,
+    rgba(120, 90, 40, 0.02) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  box-shadow: 0 -2px 6px rgba(64, 54, 41, 0.06);
+  /* So the dock visually merges with the bottom edge instead of having a
+     gap when content scrolls above it. */
+  margin-top: auto;
+}
+
+.dark .bottom-dock {
+  background-image: none;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.45);
+}
+
+.bottom-dock-rail {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem 0;
+  min-height: 36px;
+}
+
+.bottom-dock-tabs {
+  align-items: flex-end;
+}
+
+.bottom-dock-tabs .folder-tab {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem 0.4rem;
+}
+
+.bottom-dock-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 0.45rem;
+  background: var(--bg-paper);
+  border: 1px solid var(--border);
+  color: var(--ink-soft);
+  cursor: pointer;
+  align-self: center;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.bottom-dock-toggle:hover {
+  background: var(--bg-paper-2);
+  color: var(--ink-strong);
+}
+
+.bottom-dock-body {
+  padding: 0.65rem 0.85rem 0.85rem;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.bottom-dock-trace {
+  background: var(--bg-paper);
+  border-color: var(--border);
+}
+
+.bottom-dock-active-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.bottom-dock-active-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.bottom-dock-active-link {
+  text-decoration: none;
+}
+
+.bottom-dock-active-meta {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.bottom-dock-empty {
+  padding: 0.5rem 0;
+  font-style: italic;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.bottom-dock-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.bottom-dock-filters-group {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.bottom-dock-filters-label {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  width: 4rem;
+  flex: none;
 }

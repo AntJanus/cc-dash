@@ -60,6 +60,8 @@ export interface ProjectCardData {
   portfolioStatus: ProjectStatus;
   /** Portfolio priority order (lower = higher priority) */
   portfolioOrder: number | undefined;
+  /** Saved canvas position from .cc-dash/portfolio.json, if any */
+  canvasPosition: { x: number; y: number } | undefined;
 }
 
 /**
@@ -243,6 +245,7 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
         status: deriveStatus(roadmap, sessionMeta),
         portfolioStatus: (meta?.status as ProjectStatus) ?? "active",
         portfolioOrder: meta?.order,
+        canvasPosition: meta?.canvas,
       } satisfies ProjectCardData;
     }),
   );

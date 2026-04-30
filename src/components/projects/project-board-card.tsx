@@ -28,18 +28,21 @@ export function ProjectBoardCard({ project }: ProjectBoardCardProps) {
     <Link href={`/project/${project.slug}/roadmap`} className="block">
       <Card
         size="sm"
-        className="interactive-card hover:ring-2 hover:ring-foreground/10"
+        className="interactive-card paper-card paper-card-aged ring-0 shadow-none hover:ring-2 hover:ring-[var(--accent-amber)]/40"
       >
         <CardHeader>
           <div className="flex items-center gap-2">
             <span
               className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT_COLORS[project.status] ?? STATUS_DOT_COLORS.inactive}`}
             />
-            <CardTitle>{project.name}</CardTitle>
+            <CardTitle className="font-serif text-base font-semibold">
+              {project.name}
+            </CardTitle>
             {project.hasActiveSession && (
               <span
                 data-testid="active-session-dot"
-                className="h-2 w-2 shrink-0 rounded-full bg-green-500"
+                className="h-2 w-2 shrink-0 rounded-full pulse-dot"
+                style={{ background: "var(--accent-emerald)" }}
                 aria-label="Active session"
               />
             )}

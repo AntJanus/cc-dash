@@ -10,9 +10,16 @@ import { ArchiveButton } from "@/components/projects/archive-button";
 import { PortfolioStatusMenu } from "@/components/projects/portfolio-status-menu";
 import type { ProjectCardData } from "@/lib/projects/get-projects";
 import { cn } from "@/lib/utils";
+import {
+  tiltFromSlug,
+  pinColorFromSlug,
+  pinPositionFromSlug,
+} from "@/lib/utils/corkboard";
 
 interface ProjectCardProps {
   project: ProjectCardData;
+  /** When true, render with corkboard tilt + pin. Defaults to true on grid view. */
+  corkboard?: boolean;
 }
 
 const STATUS_RING_COLORS: Record<
@@ -32,7 +39,7 @@ const ICON_COLORS: Record<string, string> = {
   inactive: "var(--accent-violet-light)",
 };
 
-export function ProjectCard({ project }: ProjectCardProps) {
+export function ProjectCard({ project, corkboard = true }: ProjectCardProps) {
   const progressValue =
     project.totalCount > 0
       ? Math.round((project.doneCount / project.totalCount) * 100)
@@ -41,27 +48,49 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const ringColor = STATUS_RING_COLORS[project.status] || "teal";
   const iconBg = ICON_COLORS[project.status] || "var(--accent-teal-light)";
 
+  const tilt = corkboard ? tiltFromSlug(project.slug) : 0;
+  const pinColor = corkboard ? pinColorFromSlug(project.slug) : null;
+  const pinPosition = corkboard ? pinPositionFromSlug(project.slug) : "center";
+
   return (
-    <Link href={`/project/${project.slug}/roadmap`} className="block group">
+    <Link
+      href={`/project/${project.slug}/roadmap`}
+      className={cn(
+        "block group corkboard-card",
+        corkboard && `corkboard-pin-${pinPosition}`,
+      )}
+      style={
+        corkboard
+          ? ({
+              "--corkboard-tilt": `${tilt}deg`,
+              "--corkboard-pin-color": pinColor ?? "var(--accent-clay)",
+            } as React.CSSProperties)
+          : undefined
+      }
+    >
+      {corkboard && <span aria-hidden className="corkboard-pin" />}
       <div
         className={cn(
-          "relative overflow-hidden rounded-xl border border-border bg-card p-5",
+          "paper-card paper-card-aged relative overflow-hidden p-5",
           "interactive-card",
           "dark:card-glow dark:gradient-border-top",
-          "hover:border-[var(--accent-teal)] dark:hover:border-[var(--accent-cyan)]",
+          "hover:border-[var(--accent-amber)] dark:hover:border-[var(--accent-cyan)]",
         )}
       >
         {/* Header with icon and badge */}
-        <div className="flex items-start justify-between mb-3">
-          <div>
+        <div className="flex items-start justify-between mb-3 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-lg mb-2"
-              style={{ background: iconBg }}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg"
+              style={{
+                background: iconBg,
+                border: "1px solid var(--border-light)",
+              }}
             >
               {getProjectEmoji(project.name)}
             </div>
             <h3
-              className="text-base font-semibold"
+              className="font-serif text-lg font-semibold truncate"
               style={{ color: "var(--text-primary)" }}
             >
               {project.name}

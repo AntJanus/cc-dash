@@ -1,24 +1,44 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  Cormorant_Garamond,
+  Fraunces,
+  Instrument_Sans,
+  JetBrains_Mono,
+} from "next/font/google";
 import "./globals.css";
 
 import { SidebarProvider } from "@/components/layout/sidebar-context";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { TopBar } from "@/components/layout/top-bar";
+import { BottomDockServer } from "@/components/layout/bottom-dock-server";
 import { CommandPalette } from "@/components/command-palette/command-palette";
 import { AutoRefreshProvider } from "@/components/shared/auto-refresh-provider";
 import { getProjectNav } from "@/lib/projects/get-project-nav";
 import { getProjectCards } from "@/lib/projects/get-projects";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const instrumentSans = Instrument_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
+const fraunces = Fraunces({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const cormorant = Cormorant_Garamond({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -49,7 +69,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${instrumentSans.variable} ${jetbrainsMono.variable} ${fraunces.variable} ${cormorant.variable} antialiased`}
       >
         <script
           dangerouslySetInnerHTML={{
@@ -86,6 +106,7 @@ export default async function RootLayout({
                   <main className="flex-1 flex flex-col overflow-hidden">
                     {children}
                   </main>
+                  <BottomDockServer />
                 </div>
               </div>
             </div>

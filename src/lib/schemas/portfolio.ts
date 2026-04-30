@@ -10,10 +10,20 @@ import { z } from "zod";
 export const ProjectStatus = z.enum(["active", "inactive", "maintenance"]);
 export type ProjectStatus = z.infer<typeof ProjectStatus>;
 
+/** Position on the canvas-mode home view, in CSS pixels. */
+export const CanvasPositionSchema = z.object({
+  x: z.number().finite(),
+  y: z.number().finite(),
+});
+
+export type CanvasPosition = z.infer<typeof CanvasPositionSchema>;
+
 export const ProjectEntrySchema = z.object({
   status: ProjectStatus.default("active"),
   /** Sort order within active projects. Lower = higher priority. */
   order: z.number().int().min(0).optional(),
+  /** Position when rendered on the canvas-mode home view. */
+  canvas: CanvasPositionSchema.optional(),
 });
 
 export type ProjectEntry = z.infer<typeof ProjectEntrySchema>;

@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { ProjectBoard } from "./project-board";
 import { ProjectList } from "./project-list";
 import { ProjectCard } from "./project-card";
+import { ProjectCanvas } from "./project-canvas";
 import { ProjectSort } from "./project-sort";
 import { HomeSearchInput } from "./home-search-input";
 import { CrossProjectPromptButton } from "@/components/prompt/cross-project-prompt-button";
@@ -14,7 +15,7 @@ import { sortProjects } from "@/lib/projects/sort-projects";
 import type { SortState } from "@/lib/projects/sort-projects";
 import type { ProjectCardData } from "@/lib/projects/get-projects";
 
-type ViewMode = "grid" | "list" | "board";
+type ViewMode = "grid" | "list" | "board" | "canvas";
 type StatusFilter = "all" | "active" | "stalled" | "complete";
 
 const STATUS_FILTER_LABELS: Record<StatusFilter, string> = {
@@ -102,7 +103,7 @@ export function ProjectHome({ projects }: ProjectHomeProps) {
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1
-            className="text-xl font-semibold"
+            className="font-serif text-3xl font-semibold"
             style={{ color: "var(--text-primary)" }}
           >
             Projects
@@ -157,6 +158,8 @@ export function ProjectHome({ projects }: ProjectHomeProps) {
       {viewMode === "board" && (
         <ProjectBoard projects={filteredProjects} searchQuery={searchQuery} />
       )}
+
+      {viewMode === "canvas" && <ProjectCanvas projects={filteredProjects} />}
     </>
   );
 }
@@ -171,11 +174,12 @@ function ViewTabs({ value, onChange }: ViewTabsProps) {
     { mode: "grid", label: "Grid" },
     { mode: "list", label: "List" },
     { mode: "board", label: "Board" },
+    { mode: "canvas", label: "Canvas" },
   ];
 
   return (
     <div
-      className="flex gap-1 rounded-lg border p-1"
+      className="flex gap-1 rounded-full border p-1"
       style={{
         background: "var(--bg-panel)",
         borderColor: "var(--border)",
@@ -187,18 +191,18 @@ function ViewTabs({ value, onChange }: ViewTabsProps) {
           type="button"
           onClick={() => onChange(tab.mode)}
           className={cn(
-            "rounded-md px-3.5 py-1.5 text-sm font-medium transition-all",
+            "rounded-full px-4 py-1 text-sm font-medium transition-all",
             value === tab.mode
               ? "text-white dark:text-[var(--bg-space)]"
               : "hover:text-[var(--text-secondary)]",
           )}
           style={{
             background:
-              value === tab.mode ? "var(--accent-teal)" : "transparent",
+              value === tab.mode ? "var(--accent-amber)" : "transparent",
             color: value === tab.mode ? undefined : "var(--text-muted)",
             boxShadow:
               value === tab.mode
-                ? "0 0 15px var(--accent-teal-light)"
+                ? "inset 0 1px 2px rgba(90,66,29,0.15)"
                 : undefined,
           }}
         >

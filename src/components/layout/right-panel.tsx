@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   BarChart3,
@@ -11,6 +12,14 @@ import {
   Bell,
 } from "lucide-react";
 import type { ActivityEvent } from "@/lib/activity/types";
+import { FolderTab, FolderTabs } from "@/components/ui/folder-tab";
+import { AgentChip } from "@/components/ui/agent-chip";
+import {
+  ToolTracePanel,
+  type ToolTraceEntry,
+} from "@/components/ui/tool-trace";
+
+type RightPanelTab = "overview" | "activity" | "chat";
 
 interface RightPanelProps {
   stats: {
@@ -24,116 +33,249 @@ interface RightPanelProps {
 }
 
 export function RightPanel({ stats, recentActivity, alerts }: RightPanelProps) {
+  const [tab, setTab] = useState<RightPanelTab>("overview");
+
   return (
-    <aside className="hidden xl:flex flex-col border-l border-border bg-card w-[340px] overflow-y-auto">
-      {/* Overview section */}
-      <section className="border-b border-[var(--border-light)] p-5">
-        <div className="mb-4 flex items-center gap-2">
-          <div
-            className="flex h-6 w-6 items-center justify-center rounded-md"
-            style={{
-              background: "var(--accent-teal-light)",
-              color: "var(--accent-teal)",
-            }}
-          >
-            <BarChart3 className="h-3.5 w-3.5" />
-          </div>
-          <span
-            className="text-sm font-semibold"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Overview
-          </span>
-        </div>
+    <aside
+      className="hidden xl:flex flex-col w-[340px] overflow-y-auto p-4 gap-3"
+      style={{ background: "var(--bg-canvas)" }}
+    >
+      <FolderTabs>
+        <FolderTab
+          active={tab === "overview"}
+          onClick={() => setTab("overview")}
+        >
+          Overview
+        </FolderTab>
+        <FolderTab
+          active={tab === "activity"}
+          onClick={() => setTab("activity")}
+        >
+          Activity
+        </FolderTab>
+        <FolderTab active={tab === "chat"} onClick={() => setTab("chat")}>
+          Chat
+        </FolderTab>
+      </FolderTabs>
 
-        <div className="grid grid-cols-2 gap-2.5">
-          <ResourceCard
-            icon={Zap}
-            value={stats.active}
-            label="Active"
-            color="emerald"
-            href="/?status=active"
-          />
-          <ResourceCard
-            icon={AlertCircle}
-            value={stats.stalled}
-            label="Stalled"
-            color="amber"
-            href="/?status=stalled"
-          />
-          <ResourceCard
-            icon={CheckCircle}
-            value={stats.complete}
-            label="Complete"
-            color="blue"
-            href="/?status=complete"
-          />
-          <ResourceCard
-            icon={BarChart3}
-            value={stats.totalTasks}
-            label="Tasks"
-            color="violet"
-          />
-        </div>
-      </section>
+      {tab === "overview" && (
+        <>
+          <section className="paper-card paper-card-aged p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <div
+                className="flex h-6 w-6 items-center justify-center rounded-md"
+                style={{
+                  background: "var(--accent-teal-light)",
+                  color: "var(--accent-teal)",
+                }}
+              >
+                <BarChart3 className="h-3.5 w-3.5" />
+              </div>
+              <span
+                className="font-serif text-base font-semibold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Overview
+              </span>
+            </div>
 
-      {/* Recent Activity section */}
-      <section className="border-b border-[var(--border-light)] p-5">
-        <div className="mb-4 flex items-center gap-2">
-          <div
-            className="flex h-6 w-6 items-center justify-center rounded-md"
-            style={{
-              background: "var(--accent-blue-light)",
-              color: "var(--accent-blue)",
-            }}
-          >
-            <Clock className="h-3.5 w-3.5" />
-          </div>
-          <span
-            className="text-sm font-semibold"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Recent Activity
-          </span>
-        </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              <ResourceCard
+                icon={Zap}
+                value={stats.active}
+                label="Active"
+                color="emerald"
+                href="/?status=active"
+              />
+              <ResourceCard
+                icon={AlertCircle}
+                value={stats.stalled}
+                label="Stalled"
+                color="amber"
+                href="/?status=stalled"
+              />
+              <ResourceCard
+                icon={CheckCircle}
+                value={stats.complete}
+                label="Complete"
+                color="blue"
+                href="/?status=complete"
+              />
+              <ResourceCard
+                icon={BarChart3}
+                value={stats.totalTasks}
+                label="Tasks"
+                color="violet"
+              />
+            </div>
+          </section>
 
-        <div className="space-y-0">
-          {recentActivity.slice(0, 3).map((event, i) => (
-            <TimelineItem key={i} event={event} isLast={i === 2} />
-          ))}
-        </div>
-      </section>
+          {alerts.length > 0 && (
+            <section className="paper-card paper-card-aged p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <div
+                  className="flex h-6 w-6 items-center justify-center rounded-md"
+                  style={{
+                    background: "var(--accent-amber-light)",
+                    color: "var(--accent-amber)",
+                  }}
+                >
+                  <Bell className="h-3.5 w-3.5" />
+                </div>
+                <span
+                  className="font-serif text-base font-semibold"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Alerts
+                </span>
+              </div>
+              <div className="space-y-2.5">
+                {alerts.map((alert, i) => (
+                  <AlertItem key={i} {...alert} />
+                ))}
+              </div>
+            </section>
+          )}
+        </>
+      )}
 
-      {/* Alerts section */}
-      {alerts.length > 0 && (
-        <section className="flex-1 p-5">
+      {tab === "activity" && (
+        <section className="paper-card paper-card-aged p-5">
           <div className="mb-4 flex items-center gap-2">
             <div
               className="flex h-6 w-6 items-center justify-center rounded-md"
               style={{
-                background: "var(--accent-amber-light)",
-                color: "var(--accent-amber)",
+                background: "var(--accent-blue-light)",
+                color: "var(--accent-blue)",
               }}
             >
-              <Bell className="h-3.5 w-3.5" />
+              <Clock className="h-3.5 w-3.5" />
             </div>
             <span
-              className="text-sm font-semibold"
+              className="font-serif text-base font-semibold"
               style={{ color: "var(--text-primary)" }}
             >
-              Alerts
+              Recent Activity
             </span>
           </div>
-
-          <div className="space-y-2.5">
-            {alerts.map((alert, i) => (
-              <AlertItem key={i} {...alert} />
-            ))}
+          <div className="space-y-0">
+            {recentActivity.length === 0 ? (
+              <p
+                className="py-4 text-center text-sm"
+                style={{ color: "var(--ink-soft)" }}
+              >
+                No recent activity.
+              </p>
+            ) : (
+              recentActivity
+                .slice(0, 8)
+                .map((event, i) => (
+                  <TimelineItem
+                    key={i}
+                    event={event}
+                    isLast={i === Math.min(recentActivity.length - 1, 7)}
+                  />
+                ))
+            )}
           </div>
         </section>
       )}
+
+      {tab === "chat" && <ChatTab activity={recentActivity} />}
     </aside>
   );
+}
+
+/** Visual-only agent chat surface — no backend, just decoration. */
+function ChatTab({ activity }: { activity: ActivityEvent[] }) {
+  const traceEntries: ToolTraceEntry[] = activity.slice(0, 6).map((e, i) => ({
+    id: `${i}-${e.timestamp}`,
+    timestamp: relativeTime(e.timestamp),
+    actor: "claude",
+    action: `${e.projectName}: ${e.title}`,
+    state: e.type.includes("completed") ? "draft" : "running",
+  }));
+
+  return (
+    <>
+      <section className="paper-card paper-card-aged p-5">
+        <div
+          className="mb-3 font-serif text-base font-semibold"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Agents on duty
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <AgentChip name="Sage" state="running" />
+          <AgentChip name="Moss" state="draft" />
+          <AgentChip name="Archivist" state="idle" />
+          <AgentChip name="Sprout" state="archived" />
+        </div>
+        <p className="mt-4 text-sm" style={{ color: "var(--ink-soft)" }}>
+          A small council of helpers, watching the field-book.
+        </p>
+      </section>
+
+      <section className="paper-card paper-card-aged p-5">
+        <div
+          className="mb-3 font-serif text-base font-semibold"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Whispers from the trail
+        </div>
+        <ToolTracePanel
+          title=""
+          entries={traceEntries}
+          emptyMessage="The trail is quiet."
+        />
+      </section>
+
+      <section className="paper-card paper-card-aged p-5">
+        <label
+          className="mb-2 block font-serif text-sm font-semibold"
+          style={{ color: "var(--text-primary)" }}
+          htmlFor="chat-compose"
+        >
+          Send a note
+        </label>
+        <textarea
+          id="chat-compose"
+          rows={3}
+          placeholder="(visual only — chat backend not yet wired)"
+          className="w-full rounded-lg border p-2 text-sm"
+          style={{
+            background: "var(--bg-paper)",
+            borderColor: "var(--border)",
+            color: "var(--ink-strong)",
+            fontFamily: "var(--font-sans)",
+            resize: "vertical",
+          }}
+          disabled
+        />
+        <button
+          type="button"
+          className="cottage-pill mt-2"
+          disabled
+          aria-disabled="true"
+          style={{ opacity: 0.6 }}
+        >
+          Send
+        </button>
+      </section>
+    </>
+  );
+}
+
+function relativeTime(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  if (Number.isNaN(ms)) return iso;
+  const min = Math.floor(ms / 60_000);
+  if (min < 1) return "now";
+  if (min < 60) return `${min}m`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h`;
+  const d = Math.floor(hr / 24);
+  return `${d}d`;
 }
 
 interface ResourceCardProps {

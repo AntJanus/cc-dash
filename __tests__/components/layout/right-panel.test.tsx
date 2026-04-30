@@ -90,4 +90,93 @@ describe("RightPanel", () => {
       expect(screen.getByText("42")).toBeInTheDocument();
     });
   });
+
+  describe("tab navigation", () => {
+    it("renders three folder tabs (Overview, Activity, Chat)", () => {
+      render(
+        <RightPanel
+          stats={defaultStats}
+          recentActivity={defaultActivity}
+          alerts={defaultAlerts}
+        />,
+      );
+      expect(screen.getByRole("tab", { name: "Overview" })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: "Activity" })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: "Chat" })).toBeInTheDocument();
+    });
+
+    it("starts on the Overview tab", () => {
+      render(
+        <RightPanel
+          stats={defaultStats}
+          recentActivity={defaultActivity}
+          alerts={defaultAlerts}
+        />,
+      );
+      expect(screen.getByRole("tab", { name: "Overview" })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      expect(screen.getByText("5")).toBeInTheDocument(); // active stat visible
+    });
+
+    it("switches to Activity pane and shows recent activity heading", async () => {
+      const { fireEvent } = await import("@testing-library/react");
+      render(
+        <RightPanel
+          stats={defaultStats}
+          recentActivity={defaultActivity}
+          alerts={defaultAlerts}
+        />,
+      );
+      fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
+      expect(screen.getByText("Recent Activity")).toBeInTheDocument();
+      expect(screen.getByText("No recent activity.")).toBeInTheDocument();
+    });
+
+    it("switches to Chat pane and shows the agent council + compose box", async () => {
+      const { fireEvent } = await import("@testing-library/react");
+      render(
+        <RightPanel
+          stats={defaultStats}
+          recentActivity={defaultActivity}
+          alerts={defaultAlerts}
+        />,
+      );
+      fireEvent.click(screen.getByRole("tab", { name: "Chat" }));
+      expect(screen.getByText("Agents on duty")).toBeInTheDocument();
+      expect(screen.getByText("Sage")).toBeInTheDocument();
+      expect(screen.getByText("Moss")).toBeInTheDocument();
+      expect(screen.getByText("Send a note")).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(
+          "(visual only — chat backend not yet wired)",
+        ),
+      ).toBeDisabled();
+    });
+
+    it("Chat pane displays whisper trace when activity is provided", async () => {
+      const { fireEvent } = await import("@testing-library/react");
+      render(
+        <RightPanel
+          stats={defaultStats}
+          recentActivity={[
+            {
+              type: "session_started",
+              title: "Started cozy refactor",
+              projectName: "prd-board",
+              projectSlug: "prd-board",
+              timestamp: new Date().toISOString(),
+            },
+          ]}
+          alerts={defaultAlerts}
+        />,
+      );
+      fireEvent.click(screen.getByRole("tab", { name: "Chat" }));
+      expect(screen.getByText("Whispers from the trail")).toBeInTheDocument();
+      expect(
+        screen.getByText("prd-board: Started cozy refactor"),
+      ).toBeInTheDocument();
+    });
+  });
 });

@@ -21,19 +21,24 @@ export function ProjectColumn({
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl bg-muted/40 p-4">
+    <div
+      className="cottage-paper flex flex-col gap-3 rounded-xl p-4"
+      style={{
+        border: "1px solid var(--border-light)",
+      }}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span
             className="h-2.5 w-2.5 rounded-full"
             style={{ backgroundColor: color }}
           />
-          <h3 className="text-base font-semibold">{label}</h3>
+          <h3 className="font-serif text-lg font-semibold">{label}</h3>
         </div>
         <button
           type="button"
           onClick={() => setCollapsed((c) => !c)}
-          className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+          className="cottage-pill !py-0.5 !px-2.5 text-sm"
         >
           {items.length}
           {collapsed ? (

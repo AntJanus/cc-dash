@@ -14,7 +14,12 @@ export function TopBar({
   completionPercent,
 }: TopBarProps) {
   return (
-    <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
+    <header
+      className="cottage-topbar flex items-center justify-between px-6 py-3"
+      style={{
+        borderBottom: "1px solid var(--border-light)",
+      }}
+    >
       {/* Logo section */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2.5">
@@ -22,23 +27,24 @@ export function TopBar({
             className="flex h-8 w-8 items-center justify-center rounded-lg text-white"
             style={{
               background:
-                "linear-gradient(135deg, var(--accent-teal), var(--accent-violet))",
+                "linear-gradient(135deg, var(--accent-amber), #8a6a2a)",
+              boxShadow: "0 1px 3px rgba(90,66,29,0.2)",
             }}
           >
             <Zap className="h-4 w-4" />
           </div>
-          <span className="text-lg font-semibold dark:gradient-text">
+          <span className="font-serif text-xl font-semibold dark:gradient-text">
             cc-dash
           </span>
         </div>
       </div>
 
       {/* Status pills */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <StatusPill
           value={projectCount}
           label="Projects"
-          dotColor="var(--accent-teal)"
+          dotColor="var(--accent-amber)"
         />
         <StatusPill
           value={activeSessionCount}
@@ -63,7 +69,7 @@ interface StatusPillProps {
 
 function StatusPill({ value, label, dotColor }: StatusPillProps) {
   return (
-    <div className="flex items-center gap-2 rounded-full bg-[var(--bg-accent)] px-3 py-1.5">
+    <div className="cottage-pill">
       <span
         className="h-2 w-2 rounded-full"
         style={{ backgroundColor: dotColor }}

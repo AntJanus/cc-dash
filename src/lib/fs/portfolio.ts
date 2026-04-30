@@ -52,12 +52,25 @@ export async function savePortfolio(
  * Load and merge portfolio data from all scan directories.
  * Returns a flat map of slug -> entry, with the scan dir path tracked.
  */
-export async function loadAllPortfolios(
-  scanDirs: string[],
-): Promise<Map<string, { scanDir: string; status: string; order?: number }>> {
+export async function loadAllPortfolios(scanDirs: string[]): Promise<
+  Map<
+    string,
+    {
+      scanDir: string;
+      status: string;
+      order?: number;
+      canvas?: { x: number; y: number };
+    }
+  >
+> {
   const merged = new Map<
     string,
-    { scanDir: string; status: string; order?: number }
+    {
+      scanDir: string;
+      status: string;
+      order?: number;
+      canvas?: { x: number; y: number };
+    }
   >();
 
   await Promise.all(
@@ -68,6 +81,7 @@ export async function loadAllPortfolios(
           scanDir: dir,
           status: entry.status,
           order: entry.order,
+          canvas: entry.canvas,
         });
       }
     }),

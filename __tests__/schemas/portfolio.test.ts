@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  CanvasPositionSchema,
   PortfolioFileSchema,
   ProjectEntrySchema,
   ProjectStatus,
@@ -62,6 +63,70 @@ describe("ProjectEntrySchema", () => {
       order: 1.5,
     });
     expect(result.success).toBe(false);
+  });
+
+  it("parses entry with canvas position", () => {
+    const result = ProjectEntrySchema.safeParse({
+      status: "active",
+      canvas: { x: 120.5, y: -42 },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.canvas).toEqual({ x: 120.5, y: -42 });
+    }
+  });
+
+  it("allows canvas to be omitted", () => {
+    const result = ProjectEntrySchema.safeParse({ status: "active" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.canvas).toBeUndefined();
+    }
+  });
+
+  it("rejects canvas with NaN or Infinity coords", () => {
+    const nan = ProjectEntrySchema.safeParse({
+      status: "active",
+      canvas: { x: NaN, y: 0 },
+    });
+    expect(nan.success).toBe(false);
+    const inf = ProjectEntrySchema.safeParse({
+      status: "active",
+      canvas: { x: 0, y: Infinity },
+    });
+    expect(inf.success).toBe(false);
+  });
+
+  it("rejects canvas missing a coord", () => {
+    const result = ProjectEntrySchema.safeParse({
+      status: "active",
+      canvas: { x: 0 },
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("CanvasPositionSchema", () => {
+  it("accepts integer and float coords", () => {
+    expect(CanvasPositionSchema.safeParse({ x: 0, y: 0 }).success).toBe(true);
+    expect(CanvasPositionSchema.safeParse({ x: 1.5, y: -2.25 }).success).toBe(
+      true,
+    );
+    expect(CanvasPositionSchema.safeParse({ x: -1000, y: 99999 }).success).toBe(
+      true,
+    );
+  });
+
+  it("rejects non-finite values", () => {
+    expect(CanvasPositionSchema.safeParse({ x: NaN, y: 0 }).success).toBe(
+      false,
+    );
+    expect(CanvasPositionSchema.safeParse({ x: 0, y: Infinity }).success).toBe(
+      false,
+    );
+    expect(CanvasPositionSchema.safeParse({ x: -Infinity, y: 0 }).success).toBe(
+      false,
+    );
   });
 });
 

@@ -7,18 +7,28 @@
  * ProjectCardData suitable for Server Component -> Client Component boundary.
  */
 
+import { cache } from "react";
 import { readFile, stat } from "node:fs/promises";
 import matter from "gray-matter";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects, parseRoadmap, parseSession } from "@/lib/fs";
 import { loadAllPortfolios } from "@/lib/fs/portfolio";
 import { expandTilde } from "@/lib/fs/discovery";
+import { getNextAction, type NextAction } from "@/lib/projects/get-next-action";
 import type { RoadmapFile } from "@/lib/schemas/roadmap";
 import type { SessionFile } from "@/lib/schemas/session";
 import type { ProjectStatus } from "@/lib/schemas/portfolio";
 
 /** 7 days in milliseconds */
 const STALE_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** Completion percent (0-100) for a project. Returns 0 when totalCount is 0. */
+export function getCompletionPercent(p: {
+  doneCount: number;
+  totalCount: number;
+}): number {
+  return p.totalCount > 0 ? (p.doneCount / p.totalCount) * 100 : 0;
+}
 
 /** Session metadata used by deriveStatus to determine project status. */
 export interface SessionMeta {
@@ -62,6 +72,8 @@ export interface ProjectCardData {
   portfolioOrder: number | undefined;
   /** Saved canvas position from .cc-dash/portfolio.json, if any */
   canvasPosition: { x: number; y: number } | undefined;
+  /** The single recommended "next action" for this project, or null if none */
+  nextAction: NextAction | null;
 }
 
 /**
@@ -115,12 +127,11 @@ export function deriveStatus(
 /**
  * Load all project data and compute derived view-model objects.
  *
- * 1. Loads config and discovers projects
- * 2. Reads and parses roadmap/session files in parallel
- * 3. Computes progress counts, staleness, session status
- * 4. Returns sorted array (most recently updated first, nulls last)
+ * Wrapped in React.cache so multiple callers in the same request (root
+ * layout + page) share one filesystem scan instead of duplicating ~80
+ * fs syscalls.
  */
-export async function getProjectCards(): Promise<ProjectCardData[]> {
+export const getProjectCards = cache(async (): Promise<ProjectCardData[]> => {
   const config = await loadConfig();
   const discovered = await discoverProjects(config);
   const resolvedDirs = config.scan_dirs.map((d) => expandTilde(d));
@@ -246,6 +257,7 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
         portfolioStatus: (meta?.status as ProjectStatus) ?? "active",
         portfolioOrder: meta?.order,
         canvasPosition: meta?.canvas,
+        nextAction: getNextAction(roadmap, session),
       } satisfies ProjectCardData;
     }),
   );
@@ -265,4 +277,4 @@ export async function getProjectCards(): Promise<ProjectCardData[]> {
         new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
       );
     });
-}
+});

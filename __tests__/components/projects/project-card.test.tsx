@@ -23,6 +23,8 @@ function makeProject(
     status: "inactive",
     portfolioStatus: "active",
     portfolioOrder: undefined,
+    canvasPosition: undefined,
+    nextAction: null,
     ...overrides,
   };
 }
@@ -154,5 +156,26 @@ describe("ProjectCard", () => {
   it("shows 'No activity' when lastUpdated is null", () => {
     render(<ProjectCard project={makeProject({ lastUpdated: null })} />);
     expect(screen.getByText("No activity")).toBeInTheDocument();
+  });
+
+  it("renders Next: action when nextAction is set", () => {
+    render(
+      <ProjectCard
+        project={makeProject({
+          nextAction: {
+            id: "r_aaaaa",
+            name: "Wire up payments",
+            source: "roadmap-planned",
+          },
+        })}
+      />,
+    );
+    expect(screen.getByText("Next:")).toBeInTheDocument();
+    expect(screen.getByText("Wire up payments")).toBeInTheDocument();
+  });
+
+  it("does not render Next: when nextAction is null", () => {
+    render(<ProjectCard project={makeProject({ nextAction: null })} />);
+    expect(screen.queryByText("Next:")).not.toBeInTheDocument();
   });
 });

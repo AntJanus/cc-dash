@@ -7,6 +7,7 @@ import { StaleBadge } from "@/components/shared/stale-badge";
 import { RelativeTime } from "@/components/shared/relative-time";
 import { PromptButton } from "@/components/prompt/prompt-button";
 import { ArchiveButton } from "@/components/projects/archive-button";
+import { NextActionLine } from "@/components/projects/next-action-line";
 import { PortfolioStatusMenu } from "@/components/projects/portfolio-status-menu";
 import type { ProjectCardData } from "@/lib/projects/get-projects";
 import { cn } from "@/lib/utils";
@@ -143,6 +144,12 @@ export function ProjectCard({ project, corkboard = true }: ProjectCardProps) {
           >
             {project.sessionStatusText}
           </p>
+        )}
+
+        {project.nextAction && (
+          <div className="mb-3">
+            <NextActionLine action={project.nextAction} variant="boxed" />
+          </div>
         )}
 
         {/* Footer */}

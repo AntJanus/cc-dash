@@ -19,6 +19,7 @@ import {
   Moon,
   Sun,
   Terminal,
+  Sunrise,
 } from "lucide-react";
 import { useSidebar } from "./sidebar-context";
 import { RefreshButton } from "@/components/shared/refresh-button";
@@ -30,6 +31,7 @@ interface AppSidebarProps {
 }
 
 const NAV_ITEMS = [
+  { href: "/today", label: "Today", icon: Sunrise, color: "amber" },
   { href: "/", label: "All Projects", icon: BookOpen, color: "teal" },
   { href: "/search", label: "Search", icon: Search, color: "blue" },
   { href: "/ideas", label: "Ideas", icon: Lightbulb, color: "violet" },

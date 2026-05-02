@@ -32,6 +32,8 @@ const testProjects: ProjectCardData[] = [
     isStale: false,
     portfolioStatus: "active",
     portfolioOrder: undefined,
+    canvasPosition: undefined,
+    nextAction: null,
   },
   {
     slug: "project-b",
@@ -47,6 +49,8 @@ const testProjects: ProjectCardData[] = [
     isStale: false,
     portfolioStatus: "active",
     portfolioOrder: undefined,
+    canvasPosition: undefined,
+    nextAction: null,
   },
   {
     slug: "project-c",
@@ -62,6 +66,8 @@ const testProjects: ProjectCardData[] = [
     isStale: false,
     portfolioStatus: "active",
     portfolioOrder: undefined,
+    canvasPosition: undefined,
+    nextAction: null,
   },
 ];
 

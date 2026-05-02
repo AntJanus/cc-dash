@@ -16,6 +16,7 @@ import {
   Settings,
   FolderOpen,
   Sun,
+  Sunrise,
   Moon,
   RefreshCw,
   type LucideIcon,
@@ -44,6 +45,13 @@ interface CommandPaletteProps {
 }
 
 const NAV_COMMANDS: Omit<Command, "action">[] = [
+  {
+    id: "nav-today",
+    label: "Today",
+    icon: Sunrise,
+    section: "Navigation",
+    keywords: ["pulse", "next", "stalled", "nearly done", "what to work on"],
+  },
   {
     id: "nav-home",
     label: "Home",
@@ -82,6 +90,7 @@ const NAV_COMMANDS: Omit<Command, "action">[] = [
 ];
 
 const NAV_HREFS: Record<string, string> = {
+  "nav-today": "/today",
   "nav-home": "/",
   "nav-search": "/search",
   "nav-ideas": "/ideas",

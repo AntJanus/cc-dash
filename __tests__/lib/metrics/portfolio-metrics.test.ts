@@ -29,6 +29,8 @@ function makeProject(
     status: "inactive",
     portfolioStatus: "active",
     portfolioOrder: undefined,
+    canvasPosition: undefined,
+    nextAction: null,
     ...overrides,
   };
 }

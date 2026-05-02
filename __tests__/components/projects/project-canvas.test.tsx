@@ -42,6 +42,7 @@ function makeProject(overrides: Partial<ProjectCardData>): ProjectCardData {
     portfolioStatus: "active",
     portfolioOrder: undefined,
     canvasPosition: undefined,
+    nextAction: null,
     ...overrides,
   };
 }

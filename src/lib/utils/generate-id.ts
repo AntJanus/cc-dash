@@ -42,6 +42,17 @@ export function generateIdeaId(): string {
 }
 
 /**
+ * Generate a unique manual-QA item ID.
+ * Format: q_ + 5 lowercase alphanumeric characters.
+ * Uses crypto.getRandomValues for secure randomness.
+ */
+export function generateQaId(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(5));
+  const chars = Array.from(bytes, (b) => CHARSET[b % CHARSET.length]);
+  return `q_${chars.join("")}`;
+}
+
+/**
  * Convert a category title to a URL-safe slug.
  * - Lowercases the string
  * - Replaces non-alphanumeric runs with hyphens

@@ -52,6 +52,7 @@ export {
   writeRoadmapFile,
   writeSessionFile,
   writeIdeasFile,
+  writeQaFile,
 } from "./write-file";
 
 // Discovery (Phase 03-02)

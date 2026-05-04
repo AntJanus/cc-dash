@@ -13,16 +13,19 @@ import {
   serializeRoadmap,
   serializeSession,
   serializeIdeas,
+  serializeQa,
 } from "./serializer";
 import { mapFileError } from "./errors";
 import type { Result, ValidationError } from "@/lib/schemas/shared";
 import type { RoadmapFile } from "@/lib/schemas/roadmap";
 import type { SessionFile } from "@/lib/schemas/session";
 import type { IdeasFile } from "@/lib/schemas/ideas";
+import type { QaFile } from "@/lib/schemas/qa";
 import type {
   RoadmapParseResult,
   SessionParseResult,
   IdeasParseResult,
+  QaParseResult,
 } from "./types";
 
 /**
@@ -103,6 +106,39 @@ export async function writeSessionFile(
     // Write atomically
     await atomicWriteFile(filePath, markdown);
 
+    return { success: true, data: undefined };
+  } catch (error) {
+    const fileError = mapFileError(error, filePath);
+    return {
+      success: false,
+      errors: [
+        fileErrorToValidationError(
+          fileError.code,
+          fileError.message,
+          fileError.path,
+        ),
+      ],
+    };
+  }
+}
+
+/**
+ * Write a QA.md file with auto-updated last_updated timestamp.
+ *
+ * @param filePath - Target file path
+ * @param data - Validated QA data
+ * @param preserved - Preserved content from parsing (preamble, unknown sections, trailing)
+ * @returns Result<void> with success or typed error
+ */
+export async function writeQaFile(
+  filePath: string,
+  data: QaFile,
+  preserved: Partial<QaParseResult>,
+): Promise<Result<void>> {
+  try {
+    const updated = { ...data, last_updated: new Date().toISOString() };
+    const markdown = serializeQa({ ...updated, ...preserved });
+    await atomicWriteFile(filePath, markdown);
     return { success: true, data: undefined };
   } catch (error) {
     const fileError = mapFileError(error, filePath);

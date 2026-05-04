@@ -38,6 +38,20 @@ status: in-progress
 # Session Progress
 `;
 
+/** Fixture QA.md with valid cc-dash/qa@1 schema */
+const VALID_QA = `---
+schema: cc-dash/qa@1
+project: test-project
+last_updated: "2026-05-04T10:00:00Z"
+---
+
+# Manual QA — test-project
+
+## Setup
+
+## Checklist
+`;
+
 /** Markdown with wrong schema (not cc-dash) */
 const WRONG_SCHEMA = `---
 schema: other/schema@1
@@ -191,6 +205,47 @@ describe("discoverProjects", () => {
       expect(results[0].sessionPath).toBe(
         join(projectDir, "SESSION_PROGRESS.md"),
       );
+    });
+
+    it("finds a project with only QA.md and exposes qaPath", async () => {
+      const projectDir = join(tempDir, "project-qa");
+      await mkdir(projectDir, { recursive: true });
+      await writeFile(join(projectDir, "QA.md"), VALID_QA);
+
+      const config = makeConfig({ scan_dirs: [tempDir] });
+      const results = await discoverProjects(config);
+      expect(results).toHaveLength(1);
+      expect(results[0].qaPath).toBe(join(projectDir, "QA.md"));
+      expect(results[0].roadmapPath).toBeNull();
+      expect(results[0].sessionPath).toBeNull();
+    });
+
+    it("includes qaPath alongside roadmap and session paths when all three exist", async () => {
+      const projectDir = join(tempDir, "project-all");
+      await mkdir(projectDir, { recursive: true });
+      await writeFile(join(projectDir, "ROADMAP.md"), VALID_ROADMAP);
+      await writeFile(join(projectDir, "SESSION_PROGRESS.md"), VALID_SESSION);
+      await writeFile(join(projectDir, "QA.md"), VALID_QA);
+
+      const config = makeConfig({ scan_dirs: [tempDir] });
+      const results = await discoverProjects(config);
+      expect(results).toHaveLength(1);
+      expect(results[0].roadmapPath).toBe(join(projectDir, "ROADMAP.md"));
+      expect(results[0].sessionPath).toBe(
+        join(projectDir, "SESSION_PROGRESS.md"),
+      );
+      expect(results[0].qaPath).toBe(join(projectDir, "QA.md"));
+    });
+
+    it("leaves qaPath null when QA.md is absent", async () => {
+      const projectDir = join(tempDir, "project-no-qa");
+      await mkdir(projectDir, { recursive: true });
+      await writeFile(join(projectDir, "ROADMAP.md"), VALID_ROADMAP);
+
+      const config = makeConfig({ scan_dirs: [tempDir] });
+      const results = await discoverProjects(config);
+      expect(results).toHaveLength(1);
+      expect(results[0].qaPath).toBeNull();
     });
 
     it("skips markdown files without valid cc-dash schema frontmatter", async () => {

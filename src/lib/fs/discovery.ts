@@ -26,6 +26,8 @@ export interface DiscoveredProject {
   roadmapPath: string | null;
   /** Absolute path to SESSION_PROGRESS.md if found with valid schema */
   sessionPath: string | null;
+  /** Absolute path to QA.md if found with valid schema */
+  qaPath: string | null;
   /** Whether from explicit_projects config */
   isExplicit: boolean;
 }
@@ -43,7 +45,11 @@ export function slugify(input: string): string {
 }
 
 /** Valid cc-dash schema identifiers */
-const VALID_SCHEMAS = new Set(["cc-dash/roadmap@1", "cc-dash/session@1"]);
+const VALID_SCHEMAS = new Set([
+  "cc-dash/roadmap@1",
+  "cc-dash/session@1",
+  "cc-dash/qa@1",
+]);
 
 /**
  * Expand ~ or ~/ prefix to the user's home directory.
@@ -104,11 +110,13 @@ async function scanDirectory(
 
   const candidates: string[] = [];
 
-  // Check if THIS directory has ROADMAP.md or SESSION_PROGRESS.md
+  // Check if THIS directory has ROADMAP.md, SESSION_PROGRESS.md, or QA.md
   const hasTargetFile = entries.some(
     (e) =>
       e.isFile() &&
-      (e.name === "ROADMAP.md" || e.name === "SESSION_PROGRESS.md"),
+      (e.name === "ROADMAP.md" ||
+        e.name === "SESSION_PROGRESS.md" ||
+        e.name === "QA.md"),
   );
   if (hasTargetFile) {
     candidates.push(dir);
@@ -176,16 +184,21 @@ export async function discoverProjects(
 
       const roadmapFile = join(candidateDir, "ROADMAP.md");
       const sessionFile = join(candidateDir, "SESSION_PROGRESS.md");
+      const qaFile = join(candidateDir, "QA.md");
 
       const roadmapInfo = await checkSchemaFrontmatter(roadmapFile);
       const sessionInfo = await checkSchemaFrontmatter(sessionFile);
+      const qaInfo = await checkSchemaFrontmatter(qaFile);
 
       // Only include if at least one file has valid schema
-      if (!roadmapInfo && !sessionInfo) continue;
+      if (!roadmapInfo && !sessionInfo && !qaInfo) continue;
 
       // Determine project name: prefer frontmatter `project` field, fall back to dir name
       const name =
-        roadmapInfo?.project ?? sessionInfo?.project ?? basename(candidateDir);
+        roadmapInfo?.project ??
+        sessionInfo?.project ??
+        qaInfo?.project ??
+        basename(candidateDir);
 
       projects.set(candidateDir, {
         name,
@@ -193,6 +206,7 @@ export async function discoverProjects(
         path: candidateDir,
         roadmapPath: roadmapInfo ? roadmapFile : null,
         sessionPath: sessionInfo ? sessionFile : null,
+        qaPath: qaInfo ? qaFile : null,
         isExplicit: false,
       });
     }
@@ -212,9 +226,11 @@ export async function discoverProjects(
     // Check for actual files even in explicit projects
     const roadmapFile = join(resolvedPath, "ROADMAP.md");
     const sessionFile = join(resolvedPath, "SESSION_PROGRESS.md");
+    const qaFile = join(resolvedPath, "QA.md");
 
     const roadmapInfo = await checkSchemaFrontmatter(roadmapFile);
     const sessionInfo = await checkSchemaFrontmatter(sessionFile);
+    const qaInfo = await checkSchemaFrontmatter(qaFile);
 
     projects.set(resolvedPath, {
       name: explicit.name,
@@ -222,6 +238,7 @@ export async function discoverProjects(
       path: resolvedPath,
       roadmapPath: roadmapInfo ? roadmapFile : null,
       sessionPath: sessionInfo ? sessionFile : null,
+      qaPath: qaInfo ? qaFile : null,
       isExplicit: true,
     });
   }

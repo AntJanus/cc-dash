@@ -69,6 +69,7 @@ function makeDiscoveredProject(overrides: Record<string, unknown> = {}) {
     path: "/projects/my-project",
     roadmapPath: "/projects/my-project/ROADMAP.md",
     sessionPath: "/projects/my-project/SESSION_PROGRESS.md",
+    qaPath: null,
     isExplicit: false,
     ...overrides,
   };

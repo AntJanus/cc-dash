@@ -42,6 +42,7 @@ const SAMPLE_PROJECTS: DiscoveredProject[] = [
     path: "/tmp/project-a",
     roadmapPath: "/tmp/project-a/ROADMAP.md",
     sessionPath: null,
+    qaPath: null,
     isExplicit: false,
   },
   {
@@ -50,6 +51,7 @@ const SAMPLE_PROJECTS: DiscoveredProject[] = [
     path: "/tmp/project-b",
     roadmapPath: null,
     sessionPath: "/tmp/project-b/SESSION_PROGRESS.md",
+    qaPath: null,
     isExplicit: true,
   },
 ];

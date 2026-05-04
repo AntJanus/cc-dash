@@ -7,9 +7,24 @@ import { revalidatePath } from "next/cache";
  */
 export function revalidateProjectPaths(
   slug: string,
-  type: "roadmap" | "session",
+  type: "roadmap" | "session" | "qa",
 ) {
   revalidatePath("/");
   revalidatePath("/activity");
   revalidatePath(`/project/${slug}/${type}`);
+}
+
+/**
+ * Revalidate paths affected by a QA mutation. Failed QA items also
+ * mutate ROADMAP.md (auto-filed issue), so both the qa and roadmap
+ * surfaces need to refresh, plus the top-level /qa portfolio queue.
+ */
+export function revalidateQaPaths(slug: string, alsoRoadmap = false) {
+  revalidatePath("/");
+  revalidatePath("/qa");
+  revalidatePath("/activity");
+  revalidatePath(`/project/${slug}/qa`);
+  if (alsoRoadmap) {
+    revalidatePath(`/project/${slug}/roadmap`);
+  }
 }

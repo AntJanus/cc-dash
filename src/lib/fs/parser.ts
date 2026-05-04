@@ -30,12 +30,19 @@ import {
   type IdeasFile,
   type IdeaItem,
 } from "@/lib/schemas/ideas";
+import {
+  validateQaFrontmatter,
+  validateQaFile,
+  type QaFile,
+  type QaItem,
+} from "@/lib/schemas/qa";
 import type {
   Section,
   UnknownSection,
   RoadmapParseResult,
   SessionParseResult,
   IdeasParseResult,
+  QaParseResult,
 } from "./types";
 
 // --- Return types ---
@@ -51,6 +58,7 @@ export type ParseResult<T, P> =
 export type RoadmapResult = ParseResult<RoadmapFile, RoadmapParseResult>;
 export type SessionResult = ParseResult<SessionFile, SessionParseResult>;
 export type IdeasResult = ParseResult<IdeasFile, IdeasParseResult>;
+export type QaResult = ParseResult<QaFile, QaParseResult>;
 
 // --- Regex patterns ---
 
@@ -654,6 +662,171 @@ export function parseIdeas(raw: string, filePath: string): IdeasResult {
     preserved: {
       preamble,
       trailingContent,
+    },
+  };
+}
+
+// --- QA parsing ---
+
+/**
+ * Known QA section headings. Anything else is preserved as an unknown section.
+ */
+const KNOWN_QA_SECTIONS = new Set(["Setup", "Checklist"]);
+
+/**
+ * Parse a single QA item line into a QaItem (without the note, which the
+ * caller attaches by looking at subsequent blockquote lines).
+ *
+ * Format: - <!-- id:q_xxxxx status:pending [at:ISO] [ref:r_xxxxx] --> Description text
+ */
+function parseQaItemLine(line: string): QaItem | null {
+  const match = line.match(ITEM_META_RE);
+  if (!match) return null;
+
+  const [, metaStr, description] = match;
+  const meta = parseMetaPairs(metaStr);
+
+  if (!meta.id?.startsWith("q_")) return null;
+
+  const item: Record<string, unknown> = {
+    id: meta.id,
+    status: meta.status,
+    description: description.trim(),
+  };
+
+  if (meta.at) item.at = meta.at;
+  if (meta.ref) item.roadmapRef = meta.ref;
+
+  return item as unknown as QaItem;
+}
+
+/**
+ * Parse the body of a ## Checklist section into items, attaching any
+ * blockquote lines that immediately follow an item as that item's `note`.
+ *
+ * Blockquote rules:
+ *   - A blockquote is a contiguous run of lines whose first non-whitespace
+ *     character is `>`.
+ *   - Indentation before `>` is ignored (so notes can sit under the item bullet).
+ *   - The leading `> ` (or `>`) is stripped from each line; the joined
+ *     remainder becomes the note (trimmed at both ends).
+ */
+function parseQaChecklist(lines: string[]): QaItem[] {
+  const items: QaItem[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const trimmed = lines[i].trim();
+    if (trimmed === "") {
+      i++;
+      continue;
+    }
+
+    const item = parseQaItemLine(trimmed);
+    if (!item) {
+      i++;
+      continue;
+    }
+
+    // Look ahead for a contiguous blockquote that becomes this item's note.
+    const noteLines: string[] = [];
+    let j = i + 1;
+    while (j < lines.length) {
+      const next = lines[j];
+      const nextTrimmed = next.trim();
+      if (nextTrimmed.startsWith(">")) {
+        // Strip the leading '>' and an optional single space after it.
+        noteLines.push(nextTrimmed.replace(/^>\s?/, ""));
+        j++;
+      } else if (nextTrimmed === "") {
+        // Blank line ends the blockquote.
+        break;
+      } else {
+        break;
+      }
+    }
+
+    if (noteLines.length > 0) {
+      item.note = noteLines.join("\n").trim();
+    }
+
+    items.push(item);
+    i = j;
+  }
+  return items;
+}
+
+/**
+ * Parse a QA.md file from raw markdown text.
+ *
+ * Extracts YAML frontmatter via gray-matter, validates against Zod schema,
+ * splits body into ## sections, captures `## Setup` raw text, parses
+ * `## Checklist` items (with any trailing blockquote becoming the item's note),
+ * and preserves every other section for round-trip fidelity.
+ *
+ * @param raw - Raw markdown text of the QA.md file
+ * @param filePath - Path to the source file (stored in parsed data)
+ * @returns QaResult with validated data and preserved content on success, or errors on failure
+ */
+export function parseQa(raw: string, filePath: string): QaResult {
+  // Normalize line endings
+  const normalized = raw.replace(/\r\n/g, "\n");
+
+  // Phase 1: Extract frontmatter
+  const { data, content } = matter(normalized);
+  const processed = postProcessFrontmatter(data as Record<string, unknown>);
+
+  // Validate frontmatter
+  const fmResult = validateQaFrontmatter(processed);
+  if (!fmResult.success) return fmResult;
+
+  // Phase 2: Parse body content
+  const { preamble: preambleLines, sections } = splitSections(content);
+
+  let setup = "";
+  let items: QaItem[] = [];
+  const unknownSections: UnknownSection[] = [];
+
+  for (const section of sections) {
+    if (!KNOWN_QA_SECTIONS.has(section.heading)) {
+      unknownSections.push({
+        heading: section.heading,
+        raw: section.lines.join("\n"),
+      });
+      continue;
+    }
+
+    switch (section.heading) {
+      case "Setup":
+        setup = section.lines.join("\n").trim();
+        break;
+
+      case "Checklist":
+        items = parseQaChecklist(section.lines);
+        break;
+    }
+  }
+
+  // Build preamble string
+  const preamble = preambleLines.join("\n");
+
+  // Assemble and validate full file
+  const fileData = {
+    ...fmResult.data,
+    setup,
+    items,
+    filePath,
+  };
+
+  const fileResult = validateQaFile(fileData);
+  if (!fileResult.success) return fileResult;
+
+  return {
+    success: true,
+    data: fileResult.data,
+    preserved: {
+      preamble,
+      unknownSections,
+      trailingContent: "",
     },
   };
 }

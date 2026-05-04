@@ -10,10 +10,12 @@ export {
   parseRoadmap,
   parseSession,
   parseIdeas,
+  parseQa,
   type ParseResult,
   type RoadmapResult,
   type SessionResult,
   type IdeasResult,
+  type QaResult,
 } from "./parser";
 
 // Serializer (Phase 02-02, Phase 13-01)
@@ -21,6 +23,7 @@ export {
   serializeRoadmap,
   serializeSession,
   serializeIdeas,
+  serializeQa,
 } from "./serializer";
 
 // Types (Phase 02-01, Phase 13-01)
@@ -28,6 +31,7 @@ export type {
   RoadmapParseResult,
   SessionParseResult,
   IdeasParseResult,
+  QaParseResult,
   UnknownSection,
   Section,
 } from "./types";

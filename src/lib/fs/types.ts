@@ -58,3 +58,19 @@ export interface IdeasParseResult {
   /** Content after the last idea within ## Project ideas */
   trailingContent: string;
 }
+
+/**
+ * Preserved content from a QA.md parse.
+ * Attached alongside the validated QaFile data for serializer use.
+ *
+ * Note: the `setup` block is not preserved here -- it is part of the validated
+ * QaFile data itself, since it round-trips as a typed string.
+ */
+export interface QaParseResult {
+  /** Content between frontmatter and first ## heading (e.g., "# Manual QA — project") */
+  preamble: string;
+  /** Sections other than ## Setup and ## Checklist */
+  unknownSections: UnknownSection[];
+  /** Content after the last section */
+  trailingContent: string;
+}

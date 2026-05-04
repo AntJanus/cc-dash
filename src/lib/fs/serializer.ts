@@ -11,10 +11,12 @@ import yaml from "js-yaml";
 import type { RoadmapFile, RoadmapItem } from "@/lib/schemas/roadmap";
 import type { SessionFile } from "@/lib/schemas/session";
 import type { IdeasFile, IdeaItem } from "@/lib/schemas/ideas";
+import type { QaFile, QaItem } from "@/lib/schemas/qa";
 import type {
   RoadmapParseResult,
   SessionParseResult,
   IdeasParseResult,
+  QaParseResult,
 } from "./types";
 
 // --- Shared helpers ---
@@ -232,6 +234,78 @@ export function serializeIdeas(
   // Append trailing content
   if (data.trailingContent) {
     body += `${data.trailingContent}\n`;
+  }
+
+  return stringifyWithFrontmatter(body, frontmatterData);
+}
+
+// --- QA serialization ---
+
+/**
+ * Serialize a single QA item plus its optional note as a markdown bullet
+ * (and indented blockquote on subsequent lines).
+ *
+ * Note format: each line of the note becomes `  > {line}` (two-space indent
+ * matches the parser's leniency around blockquote indentation). Empty lines
+ * inside the note become `  >` so the parser keeps treating it as one block.
+ */
+function serializeQaItem(item: QaItem): string {
+  // Build metadata comment parts in canonical order: id, status, [at], [ref]
+  const parts: string[] = [`id:${item.id}`, `status:${item.status}`];
+  if (item.at) parts.push(`at:${item.at}`);
+  if (item.roadmapRef) parts.push(`ref:${item.roadmapRef}`);
+  const meta = parts.join(" ");
+
+  let result = `- <!-- ${meta} --> ${item.description}\n`;
+
+  if (item.note) {
+    const noteLines = item.note.split("\n");
+    for (const line of noteLines) {
+      result += line.length > 0 ? `  > ${line}\n` : `  >\n`;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Serialize structured QA data back to valid cc-dash/qa@1 markdown.
+ *
+ * @param data - QaFile data with optional preserved content from parsing
+ * @returns Complete markdown string with YAML frontmatter
+ */
+export function serializeQa(data: QaFile & Partial<QaParseResult>): string {
+  const frontmatterData: Record<string, unknown> = {
+    schema: data.schema,
+    project: data.project,
+    last_updated: data.last_updated,
+  };
+
+  // Build body content
+  let body = data.preamble ?? `\n# Manual QA — ${data.project}\n`;
+
+  // Setup section
+  body += "\n## Setup\n\n";
+  if (data.setup) {
+    body += `${data.setup}\n`;
+  }
+
+  // Checklist section
+  body += "\n## Checklist\n\n";
+  for (const item of data.items) {
+    body += serializeQaItem(item);
+  }
+
+  // Append unknown sections
+  if (data.unknownSections) {
+    for (const section of data.unknownSections) {
+      body += `\n## ${section.heading}\n${section.raw}`;
+    }
+  }
+
+  // Append trailing content
+  if (data.trailingContent) {
+    body += `\n${data.trailingContent}\n`;
   }
 
   return stringifyWithFrontmatter(body, frontmatterData);

@@ -17,6 +17,12 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+// Stub the client-side actions row so QaView's structural tests do not
+// transitively pull in next/navigation or the server-action wiring.
+vi.mock("@/components/qa/qa-actions-row", () => ({
+  QaActionsRow: () => <span data-testid="qa-actions-row" />,
+}));
+
 import { QaView } from "@/components/qa/qa-view";
 import type { QaFile, QaItem } from "@/lib/schemas/qa";
 

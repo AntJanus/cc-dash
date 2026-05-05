@@ -1,4 +1,5 @@
 import { QaItemRow } from "@/components/qa/qa-item-row";
+import { QaActionsRow } from "@/components/qa/qa-actions-row";
 import type { QaFile } from "@/lib/schemas/qa";
 
 interface QaViewProps {
@@ -119,7 +120,19 @@ export function QaView({ qa, slug, hasRoadmap }: QaViewProps) {
         ) : (
           <ol className="space-y-2">
             {qa.items.map((item) => (
-              <QaItemRow key={item.id} item={item} slug={slug} />
+              <QaItemRow
+                key={item.id}
+                item={item}
+                slug={slug}
+                actions={
+                  <QaActionsRow
+                    slug={slug}
+                    itemId={item.id}
+                    status={item.status}
+                    hasRoadmap={hasRoadmap}
+                  />
+                }
+              />
             ))}
           </ol>
         )}

@@ -11,6 +11,7 @@ interface ProjectTabsProps {
 const TABS = [
   { label: "Roadmap", segment: "roadmap" },
   { label: "Session", segment: "session" },
+  { label: "QA", segment: "qa" },
 ];
 
 export function ProjectTabs({ slug }: ProjectTabsProps) {

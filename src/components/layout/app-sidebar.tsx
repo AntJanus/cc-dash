@@ -20,6 +20,7 @@ import {
   Sun,
   Terminal,
   Sunrise,
+  ClipboardCheck,
 } from "lucide-react";
 import { useSidebar } from "./sidebar-context";
 import { RefreshButton } from "@/components/shared/refresh-button";
@@ -34,6 +35,7 @@ const NAV_ITEMS = [
   { href: "/today", label: "Today", icon: Sunrise, color: "amber" },
   { href: "/", label: "All Projects", icon: BookOpen, color: "teal" },
   { href: "/search", label: "Search", icon: Search, color: "blue" },
+  { href: "/qa", label: "QA", icon: ClipboardCheck, color: "emerald" },
   { href: "/ideas", label: "Ideas", icon: Lightbulb, color: "violet" },
   { href: "/activity", label: "Activity", icon: Activity, color: "blue" },
   { href: "/metrics", label: "Metrics", icon: BarChart3, color: "emerald" },

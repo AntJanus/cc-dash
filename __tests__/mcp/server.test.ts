@@ -13,8 +13,10 @@ const {
   mockParseRoadmap,
   mockParseSession,
   mockParseIdeas,
+  mockParseQa,
   mockWriteRoadmapFile,
   mockWriteSessionFile,
+  mockWriteQaFile,
   mockReadFile,
   mockExpandTilde,
   mockGenerateRoadmapId,
@@ -29,8 +31,10 @@ const {
   mockParseRoadmap: vi.fn(),
   mockParseSession: vi.fn(),
   mockParseIdeas: vi.fn(),
+  mockParseQa: vi.fn(),
   mockWriteRoadmapFile: vi.fn(),
   mockWriteSessionFile: vi.fn(),
+  mockWriteQaFile: vi.fn(),
   mockReadFile: vi.fn(),
   mockExpandTilde: vi.fn(),
   mockGenerateRoadmapId: vi.fn(),
@@ -51,8 +55,10 @@ vi.mock("@/lib/fs", () => ({
   parseRoadmap: mockParseRoadmap,
   parseSession: mockParseSession,
   parseIdeas: mockParseIdeas,
+  parseQa: mockParseQa,
   writeRoadmapFile: mockWriteRoadmapFile,
   writeSessionFile: mockWriteSessionFile,
+  writeQaFile: mockWriteQaFile,
 }));
 
 vi.mock("@/lib/fs/discovery", () => ({
@@ -186,9 +192,45 @@ const defaultProjects = [
     path: "/projects/test-project",
     roadmapPath: "/projects/test-project/ROADMAP.md",
     sessionPath: "/projects/test-project/SESSION_PROGRESS.md",
+    qaPath: "/projects/test-project/QA.md",
     isExplicit: false,
   },
 ];
+
+import type { QaFile } from "@/lib/schemas/qa";
+import type { QaParseResult } from "@/lib/fs/types";
+
+function makeQa(overrides: Partial<QaFile> = {}): QaFile {
+  return {
+    schema: "cc-dash/qa@1",
+    project: "test-project",
+    last_updated: "2026-05-04T10:00:00Z",
+    setup: "Run: `make test`",
+    items: [
+      { id: "q_aaaaa", status: "pending", description: "First check" },
+      {
+        id: "q_bbbbb",
+        status: "passed",
+        description: "Second check",
+        at: "2026-05-04T10:00:00Z",
+      },
+      {
+        id: "q_ccccc",
+        status: "failed",
+        description: "Third check",
+        at: "2026-05-04T10:00:00Z",
+        roadmapRef: "r_xyz12",
+        note: "Earlier failure",
+      },
+    ],
+    filePath: "/projects/test-project/QA.md",
+    ...overrides,
+  };
+}
+
+function makeQaPreserved(): QaParseResult {
+  return { preamble: "", unknownSections: [], trailingContent: "" };
+}
 
 function setupDefaultMocks() {
   mockLoadConfig.mockResolvedValue(defaultConfig);
@@ -207,6 +249,12 @@ function setupDefaultMocks() {
   });
   mockWriteRoadmapFile.mockResolvedValue({ success: true, data: undefined });
   mockWriteSessionFile.mockResolvedValue({ success: true, data: undefined });
+  mockWriteQaFile.mockResolvedValue({ success: true, data: undefined });
+  mockParseQa.mockReturnValue({
+    success: true,
+    data: makeQa(),
+    preserved: makeQaPreserved(),
+  });
   mockGenerateRoadmapId.mockReturnValue("r_new01");
   mockGenerateCategorySlug.mockImplementation((title: string) =>
     title
@@ -278,22 +326,30 @@ describe("MCP Server", () => {
   // -----------------------------------------------------------------------
 
   describe("tools/list", () => {
-    it("registers all 14 tools", async () => {
+    it("registers all 22 tools", async () => {
       const result = await client.listTools();
       const names = result.tools.map((t) => t.name).sort();
       expect(names).toEqual([
         "add_roadmap_category",
         "add_roadmap_item",
+        "approve_qa_item",
         "bulk_update_status",
+        "fail_qa_item",
         "get_config",
         "get_portfolio",
         "get_project",
+        "get_qa_for_project",
         "get_session",
         "list_ideas",
         "list_projects",
+        "list_qa_pending",
+        "mark_qa_needs_decision",
+        "next_qa_item",
         "reorder_projects",
+        "reset_qa_item",
         "search",
         "set_project_status",
+        "skip_qa_item",
         "update_roadmap_item",
         "update_session_status",
       ]);
@@ -1004,6 +1060,388 @@ describe("MCP Server", () => {
         "maintenance",
       );
       expect(savedPortfolio.projects["test-project"].order).toBe(0);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // QA tools
+  // -----------------------------------------------------------------------
+
+  describe("list_qa_pending", () => {
+    it("returns one summary per project with QA.md, with counts and roadmap flag", async () => {
+      const { json } = await callTool("list_qa_pending");
+      expect(json).toHaveLength(1);
+      expect(json[0]).toMatchObject({
+        slug: "test-project",
+        total: 3,
+        pending: 1,
+        passed: 1,
+        failed: 1,
+        needsDecision: 0,
+        skipped: 0,
+        hasRoadmap: true,
+      });
+    });
+
+    it("excludes projects without a QA.md", async () => {
+      mockDiscoverProjects.mockResolvedValue([
+        { ...defaultProjects[0], qaPath: null },
+      ]);
+      const { json } = await callTool("list_qa_pending");
+      expect(json).toEqual([]);
+    });
+
+    it("sorts most-pending first then most-recent updated", async () => {
+      mockDiscoverProjects.mockResolvedValue([
+        {
+          ...defaultProjects[0],
+          slug: "old-busy",
+          qaPath: "/p/old/QA.md",
+        },
+        {
+          ...defaultProjects[0],
+          slug: "new-quiet",
+          qaPath: "/p/new/QA.md",
+        },
+      ]);
+      let call = 0;
+      const oldBusy = makeQa({
+        project: "old-busy",
+        last_updated: "2026-04-01T10:00:00Z",
+        items: [
+          { id: "q_aaaaa", status: "pending", description: "a" },
+          { id: "q_bbbbb", status: "pending", description: "b" },
+          { id: "q_ccccc", status: "pending", description: "c" },
+        ],
+      });
+      const newQuiet = makeQa({
+        project: "new-quiet",
+        last_updated: "2026-05-04T10:00:00Z",
+        items: [{ id: "q_zzzzz", status: "pending", description: "z" }],
+      });
+      mockParseQa.mockImplementation(() => ({
+        success: true,
+        data: call++ === 0 ? oldBusy : newQuiet,
+        preserved: makeQaPreserved(),
+      }));
+
+      const { json } = await callTool("list_qa_pending");
+      expect(json.map((c: { slug: string }) => c.slug)).toEqual([
+        "old-busy",
+        "new-quiet",
+      ]);
+    });
+  });
+
+  describe("get_qa_for_project", () => {
+    it("returns the parsed QA.md content with items", async () => {
+      const { json } = await callTool("get_qa_for_project", {
+        slug: "test-project",
+      });
+      expect(json.project).toBe("test-project");
+      expect(json.setup).toContain("make test");
+      expect(json.items).toHaveLength(3);
+      expect(json.hasRoadmap).toBe(true);
+    });
+
+    it("errors when the project has no QA.md", async () => {
+      mockDiscoverProjects.mockResolvedValue([
+        { ...defaultProjects[0], qaPath: null },
+      ]);
+      const { isError, text } = await callToolText("get_qa_for_project", {
+        slug: "test-project",
+      });
+      expect(isError).toBe(true);
+      expect(text).toContain("no QA.md");
+    });
+
+    it("errors when QA.md fails to parse", async () => {
+      mockParseQa.mockReturnValue({
+        success: false,
+        errors: [{ field: "schema", message: "Invalid", received: null }],
+      });
+      const { isError, text } = await callToolText("get_qa_for_project", {
+        slug: "test-project",
+      });
+      expect(isError).toBe(true);
+      expect(text).toContain("Failed to parse");
+    });
+  });
+
+  describe("next_qa_item", () => {
+    it("returns the first pending item with description and setup", async () => {
+      const { json } = await callTool("next_qa_item", {
+        slug: "test-project",
+      });
+      expect(json).toMatchObject({
+        id: "q_aaaaa",
+        description: "First check",
+      });
+      expect(json.setup).toContain("make test");
+    });
+
+    it("returns null when no pending items remain", async () => {
+      mockParseQa.mockReturnValue({
+        success: true,
+        data: makeQa({
+          items: [
+            {
+              id: "q_aaaaa",
+              status: "passed",
+              description: "x",
+              at: "2026-05-04T10:00:00Z",
+            },
+          ],
+        }),
+        preserved: makeQaPreserved(),
+      });
+      const { json } = await callTool("next_qa_item", {
+        slug: "test-project",
+      });
+      expect(json).toBeNull();
+    });
+  });
+
+  describe("approve_qa_item", () => {
+    it("flips a pending item to passed and stamps `at`", async () => {
+      const { isError } = await callToolText("approve_qa_item", {
+        slug: "test-project",
+        itemId: "q_aaaaa",
+      });
+      expect(isError).toBeFalsy();
+
+      const written = mockWriteQaFile.mock.calls[0][1] as QaFile;
+      const item = written.items.find((qa) => qa.id === "q_aaaaa")!;
+      expect(item.status).toBe("passed");
+      expect(item.at).toBeDefined();
+    });
+
+    it("errors when itemId does not exist", async () => {
+      const { isError, text } = await callToolText("approve_qa_item", {
+        slug: "test-project",
+        itemId: "q_zzzzz",
+      });
+      expect(isError).toBe(true);
+      expect(text).toContain("not found");
+    });
+
+    it("errors when item is not pending", async () => {
+      const { isError, text } = await callToolText("approve_qa_item", {
+        slug: "test-project",
+        itemId: "q_bbbbb",
+      });
+      expect(isError).toBe(true);
+      expect(text).toContain("not pending");
+    });
+
+    it("errors when project has no QA.md", async () => {
+      mockDiscoverProjects.mockResolvedValue([
+        { ...defaultProjects[0], qaPath: null },
+      ]);
+      const { isError } = await callToolText("approve_qa_item", {
+        slug: "test-project",
+        itemId: "q_aaaaa",
+      });
+      expect(isError).toBe(true);
+    });
+  });
+
+  describe("fail_qa_item", () => {
+    it("flips item to failed, files a roadmap issue, and cross-links via roadmapRef", async () => {
+      const { json, isError } = await callTool("fail_qa_item", {
+        slug: "test-project",
+        itemId: "q_aaaaa",
+        note: "Saw error X",
+      });
+      expect(isError).toBeFalsy();
+      expect(json.qaItemId).toBe("q_aaaaa");
+      expect(json.roadmapItemId).toBe("r_new01");
+
+      // QA file mutation
+      const writtenQa = mockWriteQaFile.mock.calls[0][1] as QaFile;
+      const item = writtenQa.items.find((qa) => qa.id === "q_aaaaa")!;
+      expect(item.status).toBe("failed");
+      expect(item.roadmapRef).toBe("r_new01");
+      expect(item.note).toBe("Saw error X");
+
+      // Roadmap mutation
+      const writtenRoadmap = mockWriteRoadmapFile.mock
+        .calls[0][1] as RoadmapFile;
+      const qaCategory = writtenRoadmap.categories.find(
+        (cat) => cat.slug === "qa-issues",
+      );
+      expect(qaCategory).toBeDefined();
+      expect(qaCategory!.title).toBe("QA Issues");
+      const newItem = qaCategory!.items.find((it) => it.id === "r_new01");
+      expect(newItem).toBeDefined();
+      expect(newItem!.name).toBe("First check");
+      expect(newItem!.description).toContain("Saw error X");
+      expect(newItem!.description).toContain(
+        "*From QA item: q_aaaaa in test-project*",
+      );
+    });
+
+    it("appends to an existing QA Issues category instead of duplicating", async () => {
+      mockParseRoadmap.mockReturnValue({
+        success: true,
+        data: makeRoadmap({
+          categories: [
+            {
+              title: "QA Issues",
+              slug: "qa-issues",
+              items: [
+                {
+                  id: "r_existing",
+                  status: "planned",
+                  name: "Existing",
+                  description: "old",
+                },
+              ],
+            },
+          ],
+        }),
+        preserved: makePreserved(),
+      });
+
+      await callTool("fail_qa_item", {
+        slug: "test-project",
+        itemId: "q_aaaaa",
+        note: "another problem",
+      });
+
+      const writtenRoadmap = mockWriteRoadmapFile.mock
+        .calls[0][1] as RoadmapFile;
+      const qaCategories = writtenRoadmap.categories.filter(
+        (cat) => cat.slug === "qa-issues",
+      );
+      expect(qaCategories).toHaveLength(1);
+      expect(qaCategories[0].items.map((it) => it.id)).toContain("r_existing");
+      expect(qaCategories[0].items.map((it) => it.id)).toContain("r_new01");
+    });
+
+    it("rejects empty notes", async () => {
+      const { isError, text } = await callToolText("fail_qa_item", {
+        slug: "test-project",
+        itemId: "q_aaaaa",
+        note: "   ",
+      });
+      expect(isError).toBe(true);
+      expect(text?.toLowerCase()).toContain("note");
+      expect(mockWriteQaFile).not.toHaveBeenCalled();
+      expect(mockWriteRoadmapFile).not.toHaveBeenCalled();
+    });
+
+    it("errors when the project has no ROADMAP.md", async () => {
+      mockDiscoverProjects.mockResolvedValue([
+        { ...defaultProjects[0], roadmapPath: null },
+      ]);
+      const { isError, text } = await callToolText("fail_qa_item", {
+        slug: "test-project",
+        itemId: "q_aaaaa",
+        note: "broken",
+      });
+      expect(isError).toBe(true);
+      expect(text).toContain("no ROADMAP.md");
+    });
+
+    it("errors when item is already non-pending", async () => {
+      const { isError, text } = await callToolText("fail_qa_item", {
+        slug: "test-project",
+        itemId: "q_bbbbb",
+        note: "broken",
+      });
+      expect(isError).toBe(true);
+      expect(text).toContain("not pending");
+    });
+  });
+
+  describe("skip_qa_item", () => {
+    it("flips pending to skipped without requiring a note", async () => {
+      const { isError } = await callToolText("skip_qa_item", {
+        slug: "test-project",
+        itemId: "q_aaaaa",
+      });
+      expect(isError).toBeFalsy();
+
+      const written = mockWriteQaFile.mock.calls[0][1] as QaFile;
+      const item = written.items.find((qa) => qa.id === "q_aaaaa")!;
+      expect(item.status).toBe("skipped");
+      expect(item.at).toBeDefined();
+      expect(item.note).toBeUndefined();
+    });
+
+    it("stores an optional note when supplied", async () => {
+      await callToolText("skip_qa_item", {
+        slug: "test-project",
+        itemId: "q_aaaaa",
+        note: "RAWG_API_KEY not set",
+      });
+
+      const written = mockWriteQaFile.mock.calls[0][1] as QaFile;
+      const item = written.items.find((qa) => qa.id === "q_aaaaa")!;
+      expect(item.note).toBe("RAWG_API_KEY not set");
+    });
+  });
+
+  describe("mark_qa_needs_decision", () => {
+    it("flips pending to needs-decision with a note", async () => {
+      const { isError } = await callToolText("mark_qa_needs_decision", {
+        slug: "test-project",
+        itemId: "q_aaaaa",
+        note: "Design conversation needed",
+      });
+      expect(isError).toBeFalsy();
+
+      const written = mockWriteQaFile.mock.calls[0][1] as QaFile;
+      const item = written.items.find((qa) => qa.id === "q_aaaaa")!;
+      expect(item.status).toBe("needs-decision");
+      expect(item.note).toBe("Design conversation needed");
+    });
+
+    it("rejects empty notes", async () => {
+      const { isError, text } = await callToolText("mark_qa_needs_decision", {
+        slug: "test-project",
+        itemId: "q_aaaaa",
+        note: "",
+      });
+      // The MCP SDK may reject this at parameter-validation time (note has min(1))
+      // or pass through to the handler which then errors. Either way, it should fail.
+      expect(isError || (text ?? "").length > 0).toBeTruthy();
+      expect(mockWriteQaFile).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("reset_qa_item", () => {
+    it("clears at, roadmapRef, and note when resetting a failed item", async () => {
+      const { isError } = await callToolText("reset_qa_item", {
+        slug: "test-project",
+        itemId: "q_ccccc",
+      });
+      expect(isError).toBeFalsy();
+
+      const written = mockWriteQaFile.mock.calls[0][1] as QaFile;
+      const item = written.items.find((qa) => qa.id === "q_ccccc")!;
+      expect(item.status).toBe("pending");
+      expect(item.at).toBeUndefined();
+      expect(item.roadmapRef).toBeUndefined();
+      expect(item.note).toBeUndefined();
+    });
+
+    it("is a no-op on already-pending items (no write)", async () => {
+      const { isError } = await callToolText("reset_qa_item", {
+        slug: "test-project",
+        itemId: "q_aaaaa",
+      });
+      expect(isError).toBeFalsy();
+      expect(mockWriteQaFile).not.toHaveBeenCalled();
+    });
+
+    it("does NOT delete the linked roadmap item", async () => {
+      await callToolText("reset_qa_item", {
+        slug: "test-project",
+        itemId: "q_ccccc",
+      });
+      expect(mockWriteRoadmapFile).not.toHaveBeenCalled();
     });
   });
 

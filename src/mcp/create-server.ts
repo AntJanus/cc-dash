@@ -15,14 +15,17 @@ import {
   parseRoadmap,
   parseSession,
   parseIdeas,
+  parseQa,
   writeRoadmapFile,
   writeSessionFile,
+  writeQaFile,
 } from "@/lib/fs";
 import { expandTilde } from "@/lib/fs/discovery";
 import {
   generateRoadmapId,
   generateCategorySlug,
 } from "@/lib/utils/generate-id";
+import type { QaItem } from "@/lib/schemas/qa";
 import {
   loadPortfolio,
   savePortfolio,
@@ -53,10 +56,17 @@ function today(): string {
   return new Date().toISOString().split("T")[0];
 }
 
+const QA_ISSUE_CATEGORY_TITLE = "QA Issues";
+const QA_ISSUE_CATEGORY_SLUG = "qa-issues";
+
+function nowIso(): string {
+  return new Date().toISOString();
+}
+
 function createServer(): McpServer {
   const server = new McpServer({
     name: "cc-dash",
-    version: "3.0.0",
+    version: "3.1.0",
   });
 
   // -------------------------------------------------------------------------
@@ -1042,6 +1052,615 @@ function createServer(): McpServer {
             text: `Reordered ${slugs.length} projects`,
           },
         ],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // QA tools
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "list_qa_pending",
+    "List all projects' QA queues with pending/passed/failed/needs-decision/skipped counts. Sorted: most pending first, then most recently updated.",
+    {},
+    async () => {
+      const config = await loadConfig();
+      const projects = await discoverProjects(config);
+      const summaries: Record<string, unknown>[] = [];
+
+      for (const project of projects) {
+        if (!project.qaPath) continue;
+        let raw: string;
+        try {
+          raw = await readFile(project.qaPath, "utf-8");
+        } catch {
+          continue;
+        }
+        const parsed = parseQa(raw, project.qaPath);
+        if (!parsed.success) continue;
+
+        const counts = {
+          pending: 0,
+          passed: 0,
+          failed: 0,
+          needsDecision: 0,
+          skipped: 0,
+        };
+        for (const item of parsed.data.items) {
+          if (item.status === "pending") counts.pending++;
+          else if (item.status === "passed") counts.passed++;
+          else if (item.status === "failed") counts.failed++;
+          else if (item.status === "needs-decision") counts.needsDecision++;
+          else if (item.status === "skipped") counts.skipped++;
+        }
+
+        summaries.push({
+          slug: project.slug,
+          name: project.name,
+          lastUpdated: parsed.data.last_updated,
+          hasRoadmap: project.roadmapPath !== null,
+          total: parsed.data.items.length,
+          ...counts,
+        });
+      }
+
+      summaries.sort((left, right) => {
+        const leftPending = (left.pending as number) ?? 0;
+        const rightPending = (right.pending as number) ?? 0;
+        if (leftPending !== rightPending) return rightPending - leftPending;
+        const leftLU = (left.lastUpdated as string) ?? "";
+        const rightLU = (right.lastUpdated as string) ?? "";
+        return rightLU.localeCompare(leftLU);
+      });
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(summaries, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "get_qa_for_project",
+    "Get the full QA.md content for a single project, including setup block and all items with their status, timestamps, roadmap refs, and notes.",
+    { slug: z.string().describe("Project slug") },
+    async ({ slug }) => {
+      const project = await resolveProject(slug);
+      if (!project?.qaPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no QA.md`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const raw = await readFile(project.qaPath, "utf-8");
+      const parsed = parseQa(raw, project.qaPath);
+      if (!parsed.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse QA.md" }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                project: parsed.data.project,
+                lastUpdated: parsed.data.last_updated,
+                hasRoadmap: project.roadmapPath !== null,
+                setup: parsed.data.setup,
+                items: parsed.data.items,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
+  );
+
+  server.tool(
+    "next_qa_item",
+    "Return the next pending QA item for a project (the one a focus-mode session should land on). Returns null when no pending items remain.",
+    { slug: z.string().describe("Project slug") },
+    async ({ slug }) => {
+      const project = await resolveProject(slug);
+      if (!project?.qaPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no QA.md`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const raw = await readFile(project.qaPath, "utf-8");
+      const parsed = parseQa(raw, project.qaPath);
+      if (!parsed.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse QA.md" }],
+          isError: true,
+        };
+      }
+
+      const next = parsed.data.items.find((item) => item.status === "pending");
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              next
+                ? {
+                    id: next.id,
+                    description: next.description,
+                    setup: parsed.data.setup,
+                  }
+                : null,
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
+  );
+
+  server.tool(
+    "approve_qa_item",
+    "Approve a pending QA item (pending -> passed). Stamps the current timestamp.",
+    {
+      slug: z.string().describe("Project slug"),
+      itemId: z.string().describe("QA item ID (q_xxxxx)"),
+    },
+    async ({ slug, itemId }) => {
+      const project = await resolveProject(slug);
+      if (!project?.qaPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no QA.md`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const raw = await readFile(project.qaPath, "utf-8");
+      const parsed = parseQa(raw, project.qaPath);
+      if (!parsed.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse QA.md" }],
+          isError: true,
+        };
+      }
+
+      const item = parsed.data.items.find((qaItem) => qaItem.id === itemId);
+      if (!item) {
+        return {
+          content: [{ type: "text", text: `QA item "${itemId}" not found` }],
+          isError: true,
+        };
+      }
+      if (item.status !== "pending") {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `QA item "${itemId}" is ${item.status}, not pending`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      item.status = "passed";
+      item.at = nowIso();
+
+      const writeResult = await writeQaFile(
+        project.qaPath,
+        parsed.data,
+        parsed.preserved,
+      );
+      if (!writeResult.success) {
+        return {
+          content: [{ type: "text", text: "Failed to write QA.md" }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [{ type: "text", text: `Approved ${itemId}` }],
+      };
+    },
+  );
+
+  server.tool(
+    "fail_qa_item",
+    "Fail a pending QA item (pending -> failed). Files a roadmap issue in the 'QA Issues' category (auto-created if missing) and links the new r_xxxxx back to this QA item via roadmapRef. Note becomes both the QA blockquote and the roadmap issue body.",
+    {
+      slug: z.string().describe("Project slug"),
+      itemId: z.string().describe("QA item ID (q_xxxxx)"),
+      note: z
+        .string()
+        .min(1)
+        .describe("Required note describing what went wrong"),
+    },
+    async ({ slug, itemId, note }) => {
+      const trimmedNote = note.trim();
+      if (!trimmedNote) {
+        return {
+          content: [{ type: "text", text: "Note is required and non-empty" }],
+          isError: true,
+        };
+      }
+
+      const project = await resolveProject(slug);
+      if (!project?.qaPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no QA.md`,
+            },
+          ],
+          isError: true,
+        };
+      }
+      if (!project.roadmapPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" has no ROADMAP.md to record the issue`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const qaRaw = await readFile(project.qaPath, "utf-8");
+      const qaParsed = parseQa(qaRaw, project.qaPath);
+      if (!qaParsed.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse QA.md" }],
+          isError: true,
+        };
+      }
+
+      const item = qaParsed.data.items.find((qaItem) => qaItem.id === itemId);
+      if (!item) {
+        return {
+          content: [{ type: "text", text: `QA item "${itemId}" not found` }],
+          isError: true,
+        };
+      }
+      if (item.status !== "pending") {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `QA item "${itemId}" is ${item.status}, not pending`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      // 1. File the roadmap issue
+      const roadmapRaw = await readFile(project.roadmapPath, "utf-8");
+      const roadmapParsed = parseRoadmap(roadmapRaw, project.roadmapPath);
+      if (!roadmapParsed.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse ROADMAP.md" }],
+          isError: true,
+        };
+      }
+
+      let qaCategory = roadmapParsed.data.categories.find(
+        (cat) => cat.slug === QA_ISSUE_CATEGORY_SLUG,
+      );
+      if (!qaCategory) {
+        qaCategory = {
+          title: QA_ISSUE_CATEGORY_TITLE,
+          slug: generateCategorySlug(QA_ISSUE_CATEGORY_TITLE),
+          items: [],
+        };
+        roadmapParsed.data.categories.push(qaCategory);
+      }
+
+      const roadmapItemId = generateRoadmapId();
+      qaCategory.items.push({
+        id: roadmapItemId,
+        status: "planned",
+        name: item.description,
+        description: `${trimmedNote}\n\n*From QA item: ${item.id} in ${qaParsed.data.project}*`,
+      });
+
+      const roadmapWrite = await writeRoadmapFile(
+        project.roadmapPath,
+        roadmapParsed.data,
+        roadmapParsed.preserved,
+      );
+      if (!roadmapWrite.success) {
+        return {
+          content: [{ type: "text", text: "Failed to write ROADMAP.md" }],
+          isError: true,
+        };
+      }
+
+      // 2. Update the QA item
+      item.status = "failed";
+      item.at = nowIso();
+      item.roadmapRef = roadmapItemId;
+      item.note = trimmedNote;
+
+      const qaWrite = await writeQaFile(
+        project.qaPath,
+        qaParsed.data,
+        qaParsed.preserved,
+      );
+      if (!qaWrite.success) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Roadmap issue ${roadmapItemId} filed but failed to update QA.md`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({ qaItemId: itemId, roadmapItemId }, null, 2),
+          },
+        ],
+      };
+    },
+  );
+
+  server.tool(
+    "skip_qa_item",
+    "Skip a pending QA item (pending -> skipped). Note is optional.",
+    {
+      slug: z.string().describe("Project slug"),
+      itemId: z.string().describe("QA item ID (q_xxxxx)"),
+      note: z
+        .string()
+        .optional()
+        .describe("Optional note about why the item was skipped"),
+    },
+    async ({ slug, itemId, note }) => {
+      const project = await resolveProject(slug);
+      if (!project?.qaPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no QA.md`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const raw = await readFile(project.qaPath, "utf-8");
+      const parsed = parseQa(raw, project.qaPath);
+      if (!parsed.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse QA.md" }],
+          isError: true,
+        };
+      }
+
+      const item = parsed.data.items.find((qaItem) => qaItem.id === itemId);
+      if (!item) {
+        return {
+          content: [{ type: "text", text: `QA item "${itemId}" not found` }],
+          isError: true,
+        };
+      }
+      if (item.status !== "pending") {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `QA item "${itemId}" is ${item.status}, not pending`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      item.status = "skipped";
+      item.at = nowIso();
+      if (note?.trim()) item.note = note.trim();
+
+      const writeResult = await writeQaFile(
+        project.qaPath,
+        parsed.data,
+        parsed.preserved,
+      );
+      if (!writeResult.success) {
+        return {
+          content: [{ type: "text", text: "Failed to write QA.md" }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [{ type: "text", text: `Skipped ${itemId}` }],
+      };
+    },
+  );
+
+  server.tool(
+    "mark_qa_needs_decision",
+    "Mark a pending QA item as needs-decision (pending -> needs-decision). Note is required and explains what design conversation is needed.",
+    {
+      slug: z.string().describe("Project slug"),
+      itemId: z.string().describe("QA item ID (q_xxxxx)"),
+      note: z
+        .string()
+        .min(1)
+        .describe("Required note explaining what decision is needed"),
+    },
+    async ({ slug, itemId, note }) => {
+      const trimmedNote = note.trim();
+      if (!trimmedNote) {
+        return {
+          content: [{ type: "text", text: "Note is required and non-empty" }],
+          isError: true,
+        };
+      }
+
+      const project = await resolveProject(slug);
+      if (!project?.qaPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no QA.md`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const raw = await readFile(project.qaPath, "utf-8");
+      const parsed = parseQa(raw, project.qaPath);
+      if (!parsed.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse QA.md" }],
+          isError: true,
+        };
+      }
+
+      const item = parsed.data.items.find((qaItem) => qaItem.id === itemId);
+      if (!item) {
+        return {
+          content: [{ type: "text", text: `QA item "${itemId}" not found` }],
+          isError: true,
+        };
+      }
+      if (item.status !== "pending") {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `QA item "${itemId}" is ${item.status}, not pending`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      item.status = "needs-decision";
+      item.at = nowIso();
+      item.note = trimmedNote;
+
+      const writeResult = await writeQaFile(
+        project.qaPath,
+        parsed.data,
+        parsed.preserved,
+      );
+      if (!writeResult.success) {
+        return {
+          content: [{ type: "text", text: "Failed to write QA.md" }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [{ type: "text", text: `Marked ${itemId} as needs-decision` }],
+      };
+    },
+  );
+
+  server.tool(
+    "reset_qa_item",
+    "Reset a non-pending QA item back to pending. Clears at, roadmapRef, and note. Idempotent: a no-op on already-pending items. The linked roadmap issue (if any) is NOT deleted -- handle that separately.",
+    {
+      slug: z.string().describe("Project slug"),
+      itemId: z.string().describe("QA item ID (q_xxxxx)"),
+    },
+    async ({ slug, itemId }) => {
+      const project = await resolveProject(slug);
+      if (!project?.qaPath) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Project "${slug}" not found or has no QA.md`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const raw = await readFile(project.qaPath, "utf-8");
+      const parsed = parseQa(raw, project.qaPath);
+      if (!parsed.success) {
+        return {
+          content: [{ type: "text", text: "Failed to parse QA.md" }],
+          isError: true,
+        };
+      }
+
+      const item: QaItem | undefined = parsed.data.items.find(
+        (qaItem) => qaItem.id === itemId,
+      );
+      if (!item) {
+        return {
+          content: [{ type: "text", text: `QA item "${itemId}" not found` }],
+          isError: true,
+        };
+      }
+
+      if (item.status === "pending") {
+        return {
+          content: [
+            { type: "text", text: `QA item "${itemId}" is already pending` },
+          ],
+        };
+      }
+
+      item.status = "pending";
+      delete item.at;
+      delete item.roadmapRef;
+      delete item.note;
+
+      const writeResult = await writeQaFile(
+        project.qaPath,
+        parsed.data,
+        parsed.preserved,
+      );
+      if (!writeResult.success) {
+        return {
+          content: [{ type: "text", text: "Failed to write QA.md" }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [{ type: "text", text: `Reset ${itemId} to pending` }],
       };
     },
   );

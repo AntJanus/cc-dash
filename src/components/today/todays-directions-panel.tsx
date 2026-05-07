@@ -5,6 +5,7 @@ import type { ProjectCardData } from "@/lib/projects/get-projects";
 import type { TopPendingQaItem } from "@/lib/projects/get-qa-portfolio";
 import { QaCheckboxRow } from "@/components/today/qa-checkbox-row";
 import { TodayDirectionsPromptButton } from "@/components/today/todays-directions-prompt-button";
+import { DirectionsBody } from "@/components/today/directions-body";
 import { RelativeTime } from "@/components/shared/relative-time";
 
 interface TodaysDirectionsPanelProps {
@@ -113,26 +114,7 @@ export function TodaysDirectionsPanel({
         </div>
       ) : null}
 
-      <details>
-        <summary
-          className="cursor-pointer text-sm font-semibold"
-          style={{ color: "var(--text-muted)" }}
-        >
-          Full directions (markdown source)
-        </summary>
-        <pre
-          className="mt-3 overflow-x-auto rounded-md p-4 text-sm leading-relaxed whitespace-pre-wrap"
-          style={{
-            background: "var(--bg-subtle, var(--bg-card))",
-            border: "1px solid var(--border-light)",
-            color: "var(--text-primary)",
-            fontFamily:
-              "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-          }}
-        >
-          {directions.body}
-        </pre>
-      </details>
+      <DirectionsBody body={directions.body} />
     </section>
   );
 }

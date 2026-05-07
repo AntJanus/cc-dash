@@ -6,9 +6,13 @@ import {
 } from "@/lib/projects/get-portfolio-pulse";
 import { pickRecommendedProjects } from "@/lib/projects/pick-recommended";
 import { getTodayDirections } from "@/lib/projects/get-today-directions";
+import { pickSessionsTouchedToday } from "@/lib/projects/sessions-today";
+import { getTopPendingQa } from "@/lib/projects/get-qa-portfolio";
 import { PulseLane } from "@/components/today/pulse-lane";
 import { RecommendedLane } from "@/components/today/recommended-lane";
 import { TodaysDirectionsPanel } from "@/components/today/todays-directions-panel";
+
+const FALLBACK_QA_LIMIT = 5;
 
 type LaneAccent = "emerald" | "blue" | "amber";
 
@@ -49,10 +53,15 @@ const LANES: LaneSpec[] = [
 ];
 
 export default async function TodayPage() {
+  const now = new Date();
   const projects = await getProjectCards();
-  const pulse = getPortfolioPulse(projects);
-  const recommended = pickRecommendedProjects(projects);
+  const pulse = getPortfolioPulse(projects, { now });
+  const recommended = pickRecommendedProjects(projects, { now });
   const directions = await getTodayDirections();
+  const sessionsToday = pickSessionsTouchedToday(projects, now);
+  const topPendingQa = directions
+    ? []
+    : await getTopPendingQa(FALLBACK_QA_LIMIT);
 
   const projectNames = new Map(projects.map((p) => [p.slug, p.name]));
 
@@ -73,6 +82,8 @@ export default async function TodayPage() {
       <TodaysDirectionsPanel
         directions={directions}
         projectNames={projectNames}
+        sessionsToday={sessionsToday}
+        topPendingQa={topPendingQa}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

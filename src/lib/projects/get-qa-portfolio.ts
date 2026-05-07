@@ -105,3 +105,35 @@ export async function getQaPortfolio(): Promise<QaPortfolioCard[]> {
 
   return cards;
 }
+
+/** A flat, project-tagged QA preview entry for the /today fallback view. */
+export interface TopPendingQaItem {
+  slug: string;
+  projectName: string;
+  description: string;
+}
+
+/**
+ * Flatten the portfolio-sorted QA cards into a small list of pending
+ * items for empty-state previews. Returns at most `limit` entries,
+ * walking projects in priority order (most pending → fewest).
+ */
+export async function getTopPendingQa(
+  limit: number,
+): Promise<TopPendingQaItem[]> {
+  const cards = await getQaPortfolio();
+  const out: TopPendingQaItem[] = [];
+
+  for (const card of cards) {
+    if (card.pending === 0) continue;
+    for (const description of card.upcomingPreview) {
+      out.push({
+        slug: card.slug,
+        projectName: card.name,
+        description,
+      });
+      if (out.length >= limit) return out;
+    }
+  }
+  return out;
+}

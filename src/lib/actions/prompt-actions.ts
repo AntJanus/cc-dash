@@ -17,6 +17,7 @@ import {
 } from "@/lib/fs";
 import { getProjectCards } from "@/lib/projects/get-projects";
 import { pickRecommendedProjects } from "@/lib/projects/pick-recommended";
+import { pickSessionsTouchedToday } from "@/lib/projects/sessions-today";
 import {
   assembleProjectPrompt,
   pickBestProject,
@@ -25,7 +26,6 @@ import {
   assembleTodayDirectionsPrompt,
   type TodayQaSummary,
 } from "@/lib/prompt/today-directions-prompt";
-import type { ProjectCardData } from "@/lib/projects/get-projects";
 import type { RoadmapFile } from "@/lib/schemas/roadmap";
 import type { SessionFile } from "@/lib/schemas/session";
 
@@ -116,25 +116,6 @@ export async function generateCrossProjectPrompt(): Promise<PromptResult> {
 }
 
 const DEFAULT_TOP_QA_LIMIT = 6;
-
-function isToday(timestamp: string | null, now: Date): boolean {
-  if (!timestamp) return false;
-  const then = new Date(timestamp);
-  return (
-    then.getFullYear() === now.getFullYear() &&
-    then.getMonth() === now.getMonth() &&
-    then.getDate() === now.getDate()
-  );
-}
-
-function pickSessionsTouchedToday(
-  projects: ProjectCardData[],
-  now: Date,
-): ProjectCardData[] {
-  return projects.filter(
-    (project) => project.hasActiveSession && isToday(project.lastUpdated, now),
-  );
-}
 
 async function gatherTopQaItems(limit: number): Promise<TodayQaSummary[]> {
   const config = await loadConfig();

@@ -326,7 +326,7 @@ describe("MCP Server", () => {
   // -----------------------------------------------------------------------
 
   describe("tools/list", () => {
-    it("registers all 22 tools", async () => {
+    it("registers all 25 tools", async () => {
       const result = await client.listTools();
       const names = result.tools.map((t) => t.name).sort();
       expect(names).toEqual([
@@ -340,9 +340,12 @@ describe("MCP Server", () => {
         "get_project",
         "get_qa_for_project",
         "get_session",
+        "get_today_directions",
         "list_ideas",
         "list_projects",
         "list_qa_pending",
+        "list_sessions_today",
+        "list_top_pending_qa",
         "mark_qa_needs_decision",
         "next_qa_item",
         "reorder_projects",
@@ -1491,6 +1494,226 @@ describe("MCP Server", () => {
       });
       expect(isError).toBe(true);
       expect(text).toContain("Failed to write");
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // get_today_directions
+  // -----------------------------------------------------------------------
+
+  describe("get_today_directions", () => {
+    it("returns null when the directions file is unreadable", async () => {
+      mockReadFile.mockImplementation((path: string) => {
+        if (path.endsWith("TODAYS_DIRECTIONS.md")) {
+          return Promise.reject(
+            Object.assign(new Error("ENOENT"), { code: "ENOENT" }),
+          );
+        }
+        return Promise.resolve("raw-file-content");
+      });
+      const { json } = await callTool("get_today_directions");
+      expect(json).toBeNull();
+    });
+
+    it("returns parsed content when the file is valid", async () => {
+      const validFile = `---
+schema: cc-dash/today-directions@1
+generated: 2026-05-07T08:30:00-06:00
+for_date: 2026-05-07
+---
+
+# Today's Directions
+
+## QA items today
+- [ ] <!-- ref:q_aaaaa slug:project-beta --> Validate skill loads`;
+
+      mockReadFile.mockImplementation((path: string) => {
+        if (path.endsWith("TODAYS_DIRECTIONS.md")) {
+          return Promise.resolve(validFile);
+        }
+        return Promise.resolve("raw-file-content");
+      });
+
+      const { json } = await callTool("get_today_directions");
+      expect(json).not.toBeNull();
+      expect(json.frontmatter.schema).toBe("cc-dash/today-directions@1");
+      expect(json.frontmatter.for_date).toBe("2026-05-07");
+      expect(json.qaRefs).toEqual([
+        {
+          qaId: "q_aaaaa",
+          slug: "project-beta",
+          checked: false,
+          description: "Validate skill loads",
+        },
+      ]);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // list_sessions_today
+  // -----------------------------------------------------------------------
+
+  describe("list_sessions_today", () => {
+    it("returns only projects whose session lastUpdated is today (local-tz)", async () => {
+      const todayIso = new Date().toISOString();
+
+      mockDiscoverProjects.mockResolvedValue([
+        {
+          ...defaultProjects[0],
+          slug: "today",
+          sessionPath: "/p/today/SESSION_PROGRESS.md",
+        },
+        {
+          ...defaultProjects[0],
+          slug: "old",
+          sessionPath: "/p/old/SESSION_PROGRESS.md",
+        },
+      ]);
+
+      let call = 0;
+      mockParseSession.mockImplementation(() => {
+        const session =
+          call++ === 0
+            ? makeSession({
+                project: "today",
+                last_updated: todayIso,
+                currentStatus: "**Working on:** writing tests",
+              })
+            : makeSession({
+                project: "old",
+                last_updated: "2026-01-01T10:00:00Z",
+              });
+        return {
+          success: true,
+          data: session,
+          preserved: makeSessionPreserved(),
+        };
+      });
+
+      const { json } = await callTool("list_sessions_today");
+      expect(json).toHaveLength(1);
+      expect(json[0].slug).toBe("today");
+      expect(json[0].workingOn).toBe("writing tests");
+    });
+
+    it("returns null workingOn when the session has no Working-on line", async () => {
+      const todayIso = new Date().toISOString();
+      mockParseSession.mockReturnValue({
+        success: true,
+        data: makeSession({
+          last_updated: todayIso,
+          currentStatus: "Some other status text",
+        }),
+        preserved: makeSessionPreserved(),
+      });
+
+      const { json } = await callTool("list_sessions_today");
+      expect(json).toHaveLength(1);
+      expect(json[0].workingOn).toBeNull();
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // list_top_pending_qa
+  // -----------------------------------------------------------------------
+
+  describe("list_top_pending_qa", () => {
+    it("flattens pending items across projects with qaId, slug, projectName, description", async () => {
+      const { json } = await callTool("list_top_pending_qa");
+      // Default mock has one project with one pending item (q_aaaaa).
+      expect(json).toEqual([
+        {
+          qaId: "q_aaaaa",
+          slug: "test-project",
+          projectName: "Test Project",
+          description: "First check",
+        },
+      ]);
+    });
+
+    it("respects the limit param", async () => {
+      mockDiscoverProjects.mockResolvedValue([
+        {
+          ...defaultProjects[0],
+          slug: "many",
+          qaPath: "/p/many/QA.md",
+        },
+      ]);
+      mockParseQa.mockReturnValue({
+        success: true,
+        data: makeQa({
+          project: "many",
+          items: [
+            { id: "q_11111", status: "pending", description: "one" },
+            { id: "q_22222", status: "pending", description: "two" },
+            { id: "q_33333", status: "pending", description: "three" },
+          ],
+        }),
+        preserved: makeQaPreserved(),
+      });
+      const { json } = await callTool("list_top_pending_qa", { limit: 2 });
+      expect(json).toHaveLength(2);
+      expect(json.map((item: { qaId: string }) => item.qaId)).toEqual([
+        "q_11111",
+        "q_22222",
+      ]);
+    });
+
+    it("excludes projects with no pending items", async () => {
+      mockParseQa.mockReturnValue({
+        success: true,
+        data: makeQa({
+          items: [
+            {
+              id: "q_aaaaa",
+              status: "passed",
+              description: "done",
+              at: "2026-05-04T10:00:00Z",
+            },
+          ],
+        }),
+        preserved: makeQaPreserved(),
+      });
+      const { json } = await callTool("list_top_pending_qa");
+      expect(json).toEqual([]);
+    });
+
+    it("orders by per-project pending-count desc", async () => {
+      mockDiscoverProjects.mockResolvedValue([
+        {
+          ...defaultProjects[0],
+          slug: "few",
+          qaPath: "/p/few/QA.md",
+        },
+        {
+          ...defaultProjects[0],
+          slug: "many",
+          qaPath: "/p/many/QA.md",
+        },
+      ]);
+      let call = 0;
+      const fewQa = makeQa({
+        project: "few",
+        items: [{ id: "q_zzzzz", status: "pending", description: "lonely" }],
+      });
+      const manyQa = makeQa({
+        project: "many",
+        items: [
+          { id: "q_11111", status: "pending", description: "one" },
+          { id: "q_22222", status: "pending", description: "two" },
+          { id: "q_33333", status: "pending", description: "three" },
+        ],
+      });
+      mockParseQa.mockImplementation(() => ({
+        success: true,
+        data: call++ === 0 ? fewQa : manyQa,
+        preserved: makeQaPreserved(),
+      }));
+
+      const { json } = await callTool("list_top_pending_qa");
+      // many (3 pending) should come before few (1 pending)
+      expect(json[0].slug).toBe("many");
+      expect(json[json.length - 1].slug).toBe("few");
     });
   });
 });

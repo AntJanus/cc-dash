@@ -31,6 +31,7 @@ import {
   savePortfolio,
   loadAllPortfolios,
 } from "@/lib/fs/portfolio";
+import { getTodayDirections } from "@/lib/projects/get-today-directions";
 
 async function resolveProject(slug: string) {
   const config = await loadConfig();
@@ -66,7 +67,7 @@ function nowIso(): string {
 function createServer(): McpServer {
   const server = new McpServer({
     name: "cc-dash",
-    version: "3.1.0",
+    version: "3.2.0",
   });
 
   // -------------------------------------------------------------------------
@@ -1661,6 +1662,150 @@ function createServer(): McpServer {
 
       return {
         content: [{ type: "text", text: `Reset ${itemId} to pending` }],
+      };
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // Today's Directions tools
+  // -------------------------------------------------------------------------
+
+  server.tool(
+    "get_today_directions",
+    "Read the portfolio-level TODAYS_DIRECTIONS.md file. Returns the parsed frontmatter (schema, generated, for_date), the raw body markdown, the resolved file path, and the list of QA checkbox refs found in the body (each with qaId, slug, checked, description). Returns null when the file does not exist.",
+    {},
+    async () => {
+      const directions = await getTodayDirections();
+      return {
+        content: [{ type: "text", text: JSON.stringify(directions, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "list_sessions_today",
+    "List projects with an in-progress session whose last_updated falls on the local calendar date today. Each entry includes slug, name, sessionId, status, lastUpdated, and a workingOn line extracted from the session's currentStatus. Used by the Today's Directions agent to know which sessions to surface.",
+    {},
+    async () => {
+      const config = await loadConfig();
+      const projects = await discoverProjects(config);
+      const now = new Date();
+      const out: Record<string, unknown>[] = [];
+
+      for (const project of projects) {
+        if (!project.sessionPath) continue;
+        let raw: string;
+        try {
+          raw = await readFile(project.sessionPath, "utf-8");
+        } catch {
+          continue;
+        }
+        const parsed = parseSession(raw, project.sessionPath);
+        if (!parsed.success) continue;
+
+        const session = parsed.data;
+        const updated = new Date(session.last_updated);
+        const sameDay =
+          updated.getFullYear() === now.getFullYear() &&
+          updated.getMonth() === now.getMonth() &&
+          updated.getDate() === now.getDate();
+        if (!sameDay) continue;
+
+        const workingOnMatch = session.currentStatus.match(
+          /\*{0,2}Working on:\*{0,2}\s*(.+)/i,
+        );
+        const workingOn = workingOnMatch ? workingOnMatch[1].trim() : null;
+
+        out.push({
+          slug: project.slug,
+          name: project.name,
+          sessionId: session.session_id,
+          status: session.status,
+          lastUpdated: session.last_updated,
+          workingOn,
+        });
+      }
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(out, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
+    "list_top_pending_qa",
+    "List pending QA items across the portfolio as a flat array, ordered by per-project pending-count desc then most-recent updated. Each item exposes qaId, slug, projectName, description — the exact fields needed to build a TODAYS_DIRECTIONS.md QA section's `<!-- ref:q_xxxxx slug:project -->` markers verbatim.",
+    {
+      limit: z
+        .number()
+        .int()
+        .positive()
+        .max(50)
+        .optional()
+        .describe("Maximum items to return (default 10, max 50)"),
+    },
+    async ({ limit }) => {
+      const max = limit ?? 10;
+      const config = await loadConfig();
+      const projects = await discoverProjects(config);
+
+      type Card = {
+        slug: string;
+        projectName: string;
+        lastUpdated: string;
+        pending: { id: string; description: string }[];
+      };
+      const cards: Card[] = [];
+      for (const project of projects) {
+        if (!project.qaPath) continue;
+        let raw: string;
+        try {
+          raw = await readFile(project.qaPath, "utf-8");
+        } catch {
+          continue;
+        }
+        const parsed = parseQa(raw, project.qaPath);
+        if (!parsed.success) continue;
+
+        const pending = parsed.data.items
+          .filter((item) => item.status === "pending")
+          .map((item) => ({ id: item.id, description: item.description }));
+        if (pending.length === 0) continue;
+
+        cards.push({
+          slug: project.slug,
+          projectName: project.name,
+          lastUpdated: parsed.data.last_updated,
+          pending,
+        });
+      }
+
+      cards.sort((left, right) => {
+        if (left.pending.length !== right.pending.length) {
+          return right.pending.length - left.pending.length;
+        }
+        return right.lastUpdated.localeCompare(left.lastUpdated);
+      });
+
+      const out: Record<string, unknown>[] = [];
+      for (const card of cards) {
+        for (const item of card.pending) {
+          out.push({
+            qaId: item.id,
+            slug: card.slug,
+            projectName: card.projectName,
+            description: item.description,
+          });
+          if (out.length >= max) {
+            return {
+              content: [{ type: "text", text: JSON.stringify(out, null, 2) }],
+            };
+          }
+        }
+      }
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(out, null, 2) }],
       };
     },
   );

@@ -79,16 +79,19 @@ body`);
       qaId: "q_aaaaa",
       slug: "project-beta",
       checked: false,
+      description: "Validate skill loads in Claude Code",
     });
     expect(result.qaRefs[1]).toEqual({
       qaId: "q_bbbbb",
       slug: "project-gamma",
       checked: true,
+      description: "Compile a sample agent",
     });
     expect(result.qaRefs[2]).toEqual({
       qaId: "q_ccccc",
       slug: "theta-blog",
       checked: false,
+      description: "Spot-check homepage rendering",
     });
   });
 });
@@ -106,9 +109,9 @@ describe("extractQaRefs", () => {
 `;
     const refs = extractQaRefs(body);
     expect(refs).toEqual([
-      { qaId: "q_11111", slug: "foo", checked: false },
-      { qaId: "q_22222", slug: "bar", checked: true },
-      { qaId: "q_33333", slug: "baz", checked: false },
+      { qaId: "q_11111", slug: "foo", checked: false, description: "One" },
+      { qaId: "q_22222", slug: "bar", checked: true, description: "Two" },
+      { qaId: "q_33333", slug: "baz", checked: false, description: "Three" },
     ]);
   });
 
@@ -118,12 +121,21 @@ describe("extractQaRefs", () => {
 - [ ] <!-- ref:q_aaaaa slug:proj --> Real one
 `;
     const refs = extractQaRefs(body);
-    expect(refs).toEqual([{ qaId: "q_aaaaa", slug: "proj", checked: false }]);
+    expect(refs).toEqual([
+      {
+        qaId: "q_aaaaa",
+        slug: "proj",
+        checked: false,
+        description: "Real one",
+      },
+    ]);
   });
 
   it("accepts uppercase X for checked", () => {
     const refs = extractQaRefs("- [X] <!-- ref:q_xxxxx slug:p --> X");
-    expect(refs).toEqual([{ qaId: "q_xxxxx", slug: "p", checked: true }]);
+    expect(refs).toEqual([
+      { qaId: "q_xxxxx", slug: "p", checked: true, description: "X" },
+    ]);
   });
 
   it("ignores malformed ref ids", () => {
@@ -133,6 +145,13 @@ describe("extractQaRefs", () => {
 - [ ] <!-- ref:q_AAAAA slug:proj --> uppercase id rejected
 `;
     const refs = extractQaRefs(body);
-    expect(refs).toEqual([{ qaId: "q_aaaaa", slug: "proj", checked: false }]);
+    expect(refs).toEqual([
+      {
+        qaId: "q_aaaaa",
+        slug: "proj",
+        checked: false,
+        description: "ok",
+      },
+    ]);
   });
 });

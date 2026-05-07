@@ -5,8 +5,10 @@ import {
   type PulseLanes,
 } from "@/lib/projects/get-portfolio-pulse";
 import { pickRecommendedProjects } from "@/lib/projects/pick-recommended";
+import { getTodayDirections } from "@/lib/projects/get-today-directions";
 import { PulseLane } from "@/components/today/pulse-lane";
 import { RecommendedLane } from "@/components/today/recommended-lane";
+import { TodaysDirectionsPanel } from "@/components/today/todays-directions-panel";
 
 type LaneAccent = "emerald" | "blue" | "amber";
 
@@ -50,6 +52,9 @@ export default async function TodayPage() {
   const projects = await getProjectCards();
   const pulse = getPortfolioPulse(projects);
   const recommended = pickRecommendedProjects(projects);
+  const directions = await getTodayDirections();
+
+  const projectNames = new Map(projects.map((p) => [p.slug, p.name]));
 
   return (
     <main className="p-8 lg:p-10">
@@ -64,6 +69,11 @@ export default async function TodayPage() {
           What to work on, what&apos;s nearly shipped, and what&apos;s stalling.
         </p>
       </header>
+
+      <TodaysDirectionsPanel
+        directions={directions}
+        projectNames={projectNames}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RecommendedLane picks={recommended} />

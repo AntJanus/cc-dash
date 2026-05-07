@@ -30,6 +30,8 @@ export interface TodayDirectionsQaRef {
   qaId: string;
   slug: string;
   checked: boolean;
+  /** Display text after the comment marker on the same checkbox line. */
+  description: string;
 }
 
 export interface TodayDirections {
@@ -51,10 +53,10 @@ interface GetTodayDirectionsOptions {
  * Match a checkbox line carrying a QA reference comment marker.
  * Permissive on leading whitespace so nested lists still match.
  *
- * Capture groups: 1=checkmark char ("x" / "X" / " "), 2=QA id, 3=project slug
+ * Capture groups: 1=checkmark char, 2=QA id, 3=project slug, 4=description
  */
 const QA_REF_LINE_RE =
-  /^\s*[-*]\s+\[([ xX])\]\s+<!--\s*ref:(q_[a-z0-9]{5})\s+slug:([^\s-]+(?:[a-z0-9-_]+)?)\s*-->/;
+  /^\s*[-*]\s+\[([ xX])\]\s+<!--\s*ref:(q_[a-z0-9]{5})\s+slug:([^\s-]+(?:[a-z0-9-_]+)?)\s*-->\s*(.*)$/;
 
 /** Strict QA-id format check: `q_` followed by exactly 5 [a-z0-9]. */
 const QA_ID_RE = /^q_[a-z0-9]{5}$/;
@@ -68,12 +70,13 @@ export function extractQaRefs(body: string): TodayDirectionsQaRef[] {
   for (const line of body.split(/\r?\n/)) {
     const match = line.match(QA_REF_LINE_RE);
     if (!match) continue;
-    const [, checkChar, qaId, slug] = match;
+    const [, checkChar, qaId, slug, description] = match;
     if (!QA_ID_RE.test(qaId)) continue;
     refs.push({
       qaId,
       slug,
       checked: checkChar === "x" || checkChar === "X",
+      description: description.trim(),
     });
   }
   return refs;

@@ -33,6 +33,7 @@ src/
 │   ├── ideas/                   # Ideas system pages
 │   ├── metrics/page.tsx         # Portfolio metrics dashboard
 │   ├── settings/page.tsx        # Settings page
+│   ├── today/page.tsx           # Today screen (directions panel + Up Next + pulse lanes)
 │   └── project/[slug]/
 │       ├── layout.tsx           # Project layout with tabs
 │       ├── roadmap/page.tsx     # Roadmap board/list view
@@ -45,6 +46,7 @@ src/
 │   ├── prompt/                  # Prompt generation modal/buttons
 │   ├── roadmap/                 # Board columns, cards, list view, editor
 │   ├── session/                 # Task list, status, decisions, verification
+│   ├── today/                   # Directions panel, recommended lane, QA checkboxes, copyable commands
 │   ├── shared/                  # Status badges, refresh button, auto-refresh provider
 │   └── ui/                      # Base UI primitives (accordion, button, etc.)
 └── lib/
@@ -68,9 +70,9 @@ src/
 ## Key Patterns
 
 - **Files are the only state** — no database, markdown files are source of truth
-- **Two custom schemas**: `cc-dash/roadmap@1` and `cc-dash/session@1`
+- **Four custom schemas**: `cc-dash/roadmap@1`, `cc-dash/session@1`, `cc-dash/qa@1`, `cc-dash/today-directions@1`
 - **YAML frontmatter** for file-level metadata, **HTML comments** for item-level metadata
-- **ID format**: `r_` (roadmap), `t_` (task), `f_` (failed attempt), `s_` (session)
+- **ID format**: `r_` (roadmap), `t_` (task), `f_` (failed attempt), `s_` (session), `q_` (qa)
 - **Atomic file writes**: write to `.tmp` then rename
 - **Round-trip invariant**: `parse(serialize(parse(file)))` must equal `parse(file)`
 - **Project slugs**: derived from project name via `slugify()`, collision-safe
@@ -101,6 +103,7 @@ Dashboard config lives at `~/.config/cc-dash/config.json`:
 
 - **No text-xs in dashboard UI** — `text-xs` (12px) must never be used for any content. Minimum is `text-sm` (14px). Card titles need `text-base` (16px)+. Page headings need `text-3xl` (30px)+. When user says "bigger", go 2 steps up, not 1. _(captured 2026-03-21)_
 - **Use CSS utility classes for interactive states** — Define shared interaction patterns (hover lift, active press) as CSS utility classes (`interactive-card`, `interactive-btn` in globals.css) rather than repeating `transition` and `transform` styles inline on each component. Ensures consistent UX and simplifies timing/effect adjustments. _(captured 2026-03-23)_
+- **Today's Directions lives outside any project** — `~/projects/TODAYS_DIRECTIONS.md` is the portfolio-level scratchpad rendered on `/today`. Auto-refresh fingerprint includes its mtime so the page reloads when the orchestrator agent writes the file. The QA `<!-- ref:q_xxxxx slug:project -->` markers on its checkbox lines are load-bearing — ticking a checkbox calls `approveQaItem` against the project's canonical `QA.md` and rewrites the directions checkbox to `[x]`. _(captured 2026-05-07)_
 
 ## Do Not
 

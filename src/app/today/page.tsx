@@ -1,12 +1,14 @@
-import { ArrowRight, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Clock, AlertTriangle } from "lucide-react";
 import { getProjectCards } from "@/lib/projects/get-projects";
 import {
   getPortfolioPulse,
   type PulseLanes,
 } from "@/lib/projects/get-portfolio-pulse";
+import { pickRecommendedProjects } from "@/lib/projects/pick-recommended";
 import { PulseLane } from "@/components/today/pulse-lane";
+import { RecommendedLane } from "@/components/today/recommended-lane";
 
-type LaneAccent = "teal" | "emerald" | "blue" | "amber";
+type LaneAccent = "emerald" | "blue" | "amber";
 
 interface LaneSpec {
   key: keyof PulseLanes;
@@ -15,20 +17,9 @@ interface LaneSpec {
   icon: React.ElementType;
   accent: LaneAccent;
   emptyMessage: string;
-  showNextAction?: boolean;
 }
 
 const LANES: LaneSpec[] = [
-  {
-    key: "upNext",
-    title: "Up Next",
-    subtitle: "One next action per project, most recently touched first",
-    icon: ArrowRight,
-    accent: "teal",
-    emptyMessage:
-      "Nothing planned across the portfolio. Add roadmap items to surface them here.",
-    showNextAction: true,
-  },
   {
     key: "nearlyDone",
     title: "Nearly Done",
@@ -58,6 +49,7 @@ const LANES: LaneSpec[] = [
 export default async function TodayPage() {
   const projects = await getProjectCards();
   const pulse = getPortfolioPulse(projects);
+  const recommended = pickRecommendedProjects(projects);
 
   return (
     <main className="p-8 lg:p-10">
@@ -74,6 +66,7 @@ export default async function TodayPage() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RecommendedLane picks={recommended} />
         {LANES.map((lane) => (
           <PulseLane
             key={lane.key}
@@ -83,7 +76,6 @@ export default async function TodayPage() {
             accent={lane.accent}
             projects={pulse[lane.key]}
             emptyMessage={lane.emptyMessage}
-            showNextAction={lane.showNextAction}
           />
         ))}
       </div>

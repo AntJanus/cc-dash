@@ -31,57 +31,6 @@ function makeProject(
   };
 }
 
-const action = (name = "Do thing") => ({
-  id: "r_aaaaa",
-  name,
-  source: "roadmap-planned" as const,
-});
-
-describe("getPortfolioPulse — upNext lane", () => {
-  it("includes only projects with a nextAction", () => {
-    const projects = [
-      makeProject({ slug: "with", nextAction: action() }),
-      makeProject({ slug: "without", nextAction: null }),
-    ];
-    const { upNext } = getPortfolioPulse(projects, { now: NOW });
-    expect(upNext.map((p) => p.slug)).toEqual(["with"]);
-  });
-
-  it("ranks by lastUpdated, most recent first", () => {
-    const projects = [
-      makeProject({
-        slug: "old",
-        lastUpdated: daysAgo(30),
-        nextAction: action(),
-      }),
-      makeProject({
-        slug: "fresh",
-        lastUpdated: daysAgo(1),
-        nextAction: action(),
-      }),
-      makeProject({
-        slug: "mid",
-        lastUpdated: daysAgo(10),
-        nextAction: action(),
-      }),
-    ];
-    const { upNext } = getPortfolioPulse(projects, { now: NOW });
-    expect(upNext.map((p) => p.slug)).toEqual(["fresh", "mid", "old"]);
-  });
-
-  it("respects the limit option", () => {
-    const projects = Array.from({ length: 10 }, (_, i) =>
-      makeProject({
-        slug: `p${i}`,
-        nextAction: action(),
-        lastUpdated: daysAgo(i),
-      }),
-    );
-    const { upNext } = getPortfolioPulse(projects, { now: NOW, limit: 3 });
-    expect(upNext).toHaveLength(3);
-  });
-});
-
 describe("getPortfolioPulse — nearlyDone lane", () => {
   it("includes projects at 80%+ but not 100%", () => {
     const projects = [
@@ -236,10 +185,24 @@ describe("getPortfolioPulse — defaults", () => {
   it("returns empty lanes when given no projects", () => {
     const lanes = getPortfolioPulse([], { now: NOW });
     expect(lanes).toEqual({
-      upNext: [],
       nearlyDone: [],
       recentlyActive: [],
       stalled: [],
     });
+  });
+
+  it("caps each lane at 5 by default", () => {
+    const projects = Array.from({ length: 10 }, (_, i) =>
+      makeProject({
+        slug: `p${i}`,
+        lastUpdated: daysAgo(i % 5),
+        doneCount: 9,
+        totalCount: 10,
+      }),
+    );
+    const lanes = getPortfolioPulse(projects, { now: NOW });
+    expect(lanes.nearlyDone.length).toBeLessThanOrEqual(5);
+    expect(lanes.recentlyActive.length).toBeLessThanOrEqual(5);
+    expect(lanes.stalled.length).toBeLessThanOrEqual(5);
   });
 });

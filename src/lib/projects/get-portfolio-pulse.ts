@@ -2,7 +2,6 @@ import type { ProjectCardData } from "@/lib/projects/get-projects";
 import { getCompletionPercent } from "@/lib/projects/get-projects";
 
 export interface PulseLanes {
-  upNext: ProjectCardData[];
   nearlyDone: ProjectCardData[];
   recentlyActive: ProjectCardData[];
   stalled: ProjectCardData[];
@@ -36,7 +35,7 @@ export function getPortfolioPulse(
   options: PulseOptions = {},
 ): PulseLanes {
   const {
-    limit = 6,
+    limit = 5,
     now = new Date(),
     recentDays = 7,
     staleDays = 14,
@@ -46,11 +45,6 @@ export function getPortfolioPulse(
   const nowMs = now.getTime();
   const recentThreshold = recentDays * MS_PER_DAY;
   const staleThreshold = staleDays * MS_PER_DAY;
-
-  const upNext = projects
-    .filter((p) => p.nextAction !== null)
-    .sort(byMostRecent)
-    .slice(0, limit);
 
   const nearlyDone = projects
     .filter((p) => {
@@ -86,5 +80,5 @@ export function getPortfolioPulse(
     .sort((a, b) => (lastUpdatedMs(a) ?? 0) - (lastUpdatedMs(b) ?? 0))
     .slice(0, limit);
 
-  return { upNext, nearlyDone, recentlyActive, stalled };
+  return { nearlyDone, recentlyActive, stalled };
 }

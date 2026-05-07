@@ -3,8 +3,17 @@
 /**
  * cc-dash MCP Server — entry point
  *
- * Usage:
- *   claude mcp add cc-dash -- npx tsx src/mcp/server.ts
+ * Register at user scope so the tools are reachable from any cwd
+ * (e.g. ~/projects where the orchestrator agent runs):
+ *
+ *   claude mcp add --scope user cc-dash -- \
+ *     npx tsx \
+ *     --tsconfig /absolute/path/to/prd-board/tsconfig.json \
+ *     /absolute/path/to/prd-board/src/mcp/server.ts
+ *
+ * The `--tsconfig` flag is required: tsx walks up from cwd looking for
+ * tsconfig.json, and without it the `@/` path alias fails to resolve
+ * when claude is invoked from outside the prd-board directory.
  */
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";

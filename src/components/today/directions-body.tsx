@@ -2,6 +2,9 @@ import {
   parseDirectionsBody,
   type DirectionsBodyBlock,
 } from "@/lib/projects/parse-directions-body";
+import { CopyableCommandLine } from "@/components/today/copyable-command-line";
+
+const DISPATCH_LINE_RE = /^\s*cd\s+/;
 
 interface DirectionsBodyProps {
   body: string;
@@ -84,8 +87,9 @@ function Heading({ level, text }: { level: number; text: string }) {
 }
 
 function CodeBlock({ lang, lines }: { lang: string; lines: string[] }) {
+  const hasDispatch = lines.some((line) => DISPATCH_LINE_RE.test(line));
   return (
-    <pre
+    <div
       className="overflow-x-auto rounded-md p-3 text-sm leading-relaxed"
       style={{
         background: "var(--bg-subtle, var(--bg-card))",
@@ -96,8 +100,22 @@ function CodeBlock({ lang, lines }: { lang: string; lines: string[] }) {
       }}
       data-lang={lang || undefined}
     >
-      {lines.join("\n")}
-    </pre>
+      {hasDispatch ? (
+        <div className="space-y-1">
+          {lines.map((line, index) =>
+            DISPATCH_LINE_RE.test(line) ? (
+              <CopyableCommandLine key={index} command={line.trim()} />
+            ) : (
+              <div key={index} style={{ color: "var(--text-muted)" }}>
+                {line || " "}
+              </div>
+            ),
+          )}
+        </div>
+      ) : (
+        <pre className="m-0 whitespace-pre">{lines.join("\n")}</pre>
+      )}
+    </div>
   );
 }
 

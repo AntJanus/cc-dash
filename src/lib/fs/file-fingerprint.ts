@@ -9,10 +9,14 @@ import { createHash } from "node:crypto";
 import { stat } from "node:fs/promises";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects } from "@/lib/fs";
+import { expandTilde } from "@/lib/fs/discovery";
+import { DEFAULT_TODAY_DIRECTIONS_PATH } from "@/lib/projects/get-today-directions";
 
 /**
  * Compute a SHA-256 fingerprint from file mtimes of all discovered
- * ROADMAP.md and SESSION_PROGRESS.md files.
+ * ROADMAP.md and SESSION_PROGRESS.md files, plus the portfolio-level
+ * TODAYS_DIRECTIONS.md (so /today auto-refreshes when the agent
+ * writes the file).
  */
 export async function computeFileFingerprint(): Promise<string> {
   const config = await loadConfig();
@@ -35,6 +39,17 @@ export async function computeFileFingerprint(): Promise<string> {
       });
     }),
   );
+
+  // Stat the portfolio-level directions file too. Resolved against the
+  // user's home so the fingerprint changes when the orchestrator agent
+  // writes a new TODAYS_DIRECTIONS.md.
+  const directionsPath = expandTilde(DEFAULT_TODAY_DIRECTIONS_PATH);
+  try {
+    const s = await stat(directionsPath);
+    mtimes.push(`${directionsPath}:${s.mtimeMs}`);
+  } catch {
+    // file missing — skip; absence is itself a stable state
+  }
 
   // Sort for deterministic hashing
   mtimes.sort();

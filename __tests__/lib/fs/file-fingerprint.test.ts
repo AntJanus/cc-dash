@@ -79,13 +79,33 @@ describe("computeFileFingerprint", () => {
     expect(fp).toMatch(/^[a-f0-9]{16}$/);
   });
 
-  it("only stats roadmap and session paths that exist", async () => {
+  it("stats roadmap, session, and the portfolio TODAYS_DIRECTIONS.md", async () => {
     mockStat.mockResolvedValue({ mtimeMs: 1000 });
     await computeFileFingerprint();
-    // project-a has 2 files, project-b has 1 (sessionPath is null)
-    expect(mockStat).toHaveBeenCalledTimes(3);
+    // project-a has 2 files, project-b has 1 (sessionPath is null),
+    // plus the portfolio-level TODAYS_DIRECTIONS.md.
+    expect(mockStat).toHaveBeenCalledTimes(4);
     expect(mockStat).toHaveBeenCalledWith("/tmp/project-a/ROADMAP.md");
     expect(mockStat).toHaveBeenCalledWith("/tmp/project-a/SESSION_PROGRESS.md");
     expect(mockStat).toHaveBeenCalledWith("/tmp/project-b/ROADMAP.md");
+    expect(mockStat).toHaveBeenCalledWith(
+      expect.stringMatching(/\/projects\/TODAYS_DIRECTIONS\.md$/),
+    );
+  });
+
+  it("changes the fingerprint when only the directions file mtime changes", async () => {
+    let directionsMtime = 1000;
+    mockStat.mockImplementation((path: string) => {
+      if (path.endsWith("TODAYS_DIRECTIONS.md")) {
+        return Promise.resolve({ mtimeMs: directionsMtime });
+      }
+      return Promise.resolve({ mtimeMs: 5000 });
+    });
+
+    const before = await computeFileFingerprint();
+    directionsMtime = 9999;
+    const after = await computeFileFingerprint();
+
+    expect(before).not.toBe(after);
   });
 });

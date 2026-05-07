@@ -9,12 +9,23 @@
 
 import { readFile } from "node:fs/promises";
 import { loadConfig } from "@/lib/config";
-import { discoverProjects, parseRoadmap, parseSession } from "@/lib/fs";
+import {
+  discoverProjects,
+  parseQa,
+  parseRoadmap,
+  parseSession,
+} from "@/lib/fs";
 import { getProjectCards } from "@/lib/projects/get-projects";
+import { pickRecommendedProjects } from "@/lib/projects/pick-recommended";
 import {
   assembleProjectPrompt,
   pickBestProject,
 } from "@/lib/prompt/generate-prompt";
+import {
+  assembleTodayDirectionsPrompt,
+  type TodayQaSummary,
+} from "@/lib/prompt/today-directions-prompt";
+import type { ProjectCardData } from "@/lib/projects/get-projects";
 import type { RoadmapFile } from "@/lib/schemas/roadmap";
 import type { SessionFile } from "@/lib/schemas/session";
 
@@ -102,4 +113,77 @@ export async function generateCrossProjectPrompt(): Promise<PromptResult> {
   }
 
   return generateProjectPrompt(best.slug);
+}
+
+const DEFAULT_TOP_QA_LIMIT = 6;
+
+function isToday(timestamp: string | null, now: Date): boolean {
+  if (!timestamp) return false;
+  const then = new Date(timestamp);
+  return (
+    then.getFullYear() === now.getFullYear() &&
+    then.getMonth() === now.getMonth() &&
+    then.getDate() === now.getDate()
+  );
+}
+
+function pickSessionsTouchedToday(
+  projects: ProjectCardData[],
+  now: Date,
+): ProjectCardData[] {
+  return projects.filter(
+    (project) => project.hasActiveSession && isToday(project.lastUpdated, now),
+  );
+}
+
+async function gatherTopQaItems(limit: number): Promise<TodayQaSummary[]> {
+  const config = await loadConfig();
+  const projects = await discoverProjects(config);
+  const out: TodayQaSummary[] = [];
+
+  for (const project of projects) {
+    if (!project.qaPath) continue;
+    let raw: string;
+    try {
+      raw = await readFile(project.qaPath, "utf-8");
+    } catch {
+      continue;
+    }
+    const parsed = parseQa(raw, project.qaPath);
+    if (!parsed.success) continue;
+
+    for (const item of parsed.data.items) {
+      if (item.status !== "pending") continue;
+      out.push({
+        qaId: item.id,
+        slug: project.slug,
+        projectName: project.name,
+        description: item.description,
+      });
+      if (out.length >= limit) return out;
+    }
+  }
+  return out;
+}
+
+/**
+ * Generate the "Today's Directions" prompt. Re-reads portfolio state
+ * fresh, then assembles a context-rich prompt the user pastes to a
+ * Claude agent at `~/projects`.
+ */
+export async function generateTodayDirectionsPrompt(): Promise<PromptResult> {
+  const now = new Date();
+  const projects = await getProjectCards();
+  const sessionsToday = pickSessionsTouchedToday(projects, now);
+  const recommended = pickRecommendedProjects(projects, { now });
+  const topQa = await gatherTopQaItems(DEFAULT_TOP_QA_LIMIT);
+
+  const prompt = assembleTodayDirectionsPrompt({
+    now,
+    sessionsToday,
+    topQa,
+    recommended,
+  });
+
+  return { success: true, prompt };
 }

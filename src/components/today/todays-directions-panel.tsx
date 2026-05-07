@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ListChecks, FileText, Activity } from "lucide-react";
+import { ListChecks, FileText, Activity, AlertTriangle } from "lucide-react";
 import type { TodayDirections } from "@/lib/projects/get-today-directions";
 import type { ProjectCardData } from "@/lib/projects/get-projects";
 import type { TopPendingQaItem } from "@/lib/projects/get-qa-portfolio";
+import { isDirectionsStale } from "@/lib/projects/today-staleness";
 import { QaCheckboxRow } from "@/components/today/qa-checkbox-row";
 import { TodayDirectionsPromptButton } from "@/components/today/todays-directions-prompt-button";
 import { DirectionsBody } from "@/components/today/directions-body";
@@ -15,6 +16,8 @@ interface TodaysDirectionsPanelProps {
   /** Fallback live signal shown when directions is null. */
   sessionsToday: ProjectCardData[];
   topPendingQa: TopPendingQaItem[];
+  /** Reference time for staleness; defaults to wall-clock now. */
+  now?: Date;
 }
 
 export function TodaysDirectionsPanel({
@@ -22,6 +25,7 @@ export function TodaysDirectionsPanel({
   projectNames,
   sessionsToday,
   topPendingQa,
+  now = new Date(),
 }: TodaysDirectionsPanelProps) {
   if (!directions) {
     return (
@@ -31,6 +35,7 @@ export function TodaysDirectionsPanel({
 
   const pendingRefs = directions.qaRefs.filter((ref) => !ref.checked);
   const completedCount = directions.qaRefs.length - pendingRefs.length;
+  const stale = isDirectionsStale(directions.frontmatter.for_date, now);
 
   return (
     <section
@@ -78,6 +83,8 @@ export function TodaysDirectionsPanel({
         </div>
         <TodayDirectionsPromptButton variant="ghost" label="Regenerate" />
       </header>
+
+      {stale ? <StaleBanner forDate={directions.frontmatter.for_date} /> : null}
 
       {directions.qaRefs.length > 0 ? (
         <div
@@ -213,6 +220,28 @@ function SessionsTodayCard({ projects }: { projects: ProjectCardData[] }) {
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+function StaleBanner({ forDate }: { forDate: string }) {
+  return (
+    <div
+      className="mb-4 flex items-start gap-2.5 rounded-lg p-3"
+      style={{
+        background: "var(--accent-amber-light)",
+        border: "1px solid var(--accent-amber)",
+        color: "var(--accent-amber)",
+      }}
+    >
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+      <div className="flex-1 text-sm">
+        <p className="font-semibold">Directions are stale</p>
+        <p className="mt-0.5" style={{ color: "var(--text-primary)" }}>
+          This file is for <code>{forDate}</code>. Regenerate to refresh
+          today&apos;s plan.
+        </p>
+      </div>
     </div>
   );
 }

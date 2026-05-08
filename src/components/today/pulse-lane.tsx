@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { ProjectCardData } from "@/lib/projects/get-projects";
@@ -11,7 +12,10 @@ type LaneAccent = "teal" | "emerald" | "blue" | "amber" | "violet";
 interface PulseLaneProps {
   title: string;
   subtitle: string;
+  /** Lucide icon — used as fallback when glyphSrc is not provided. */
   icon: React.ElementType;
+  /** Almanac glyph image — preferred over icon when present. */
+  glyphSrc?: string;
   accent: LaneAccent;
   projects: ProjectCardData[];
   emptyMessage: string;
@@ -22,62 +26,81 @@ export function PulseLane({
   title,
   subtitle,
   icon: Icon,
+  glyphSrc,
   accent,
   projects,
   emptyMessage,
   showNextAction = false,
 }: PulseLaneProps) {
   return (
-    <section
-      className="rounded-xl p-5"
-      style={{
-        background: "var(--bg-card)",
-        border: "1px solid var(--border-light)",
-      }}
-    >
-      <header className="flex items-center gap-2 mb-4">
-        <div
-          className="flex h-7 w-7 items-center justify-center rounded-lg"
-          style={{
-            background: `var(--accent-${accent}-light)`,
-            color: `var(--accent-${accent})`,
-          }}
-        >
-          <Icon className="h-4 w-4" />
-        </div>
-        <div className="min-w-0">
-          <h2
-            className="text-base font-semibold leading-tight"
-            style={{ color: "var(--text-primary)" }}
+    <section className="flex flex-col">
+      <div
+        className="self-start rounded-t-lg border border-b-0 px-4 py-2"
+        style={{
+          background: "var(--bg-paper-2)",
+          borderColor: "var(--border)",
+          boxShadow: "inset 0 -2px 0 var(--accent-gold)",
+        }}
+      >
+        <h3 className="almanac-lane-title">{title}</h3>
+      </div>
+
+      <div
+        className="rounded-r-xl rounded-bl-xl p-5 flex-1"
+        style={{
+          background: "var(--bg-card)",
+          border: "1px solid var(--border-light)",
+        }}
+      >
+        <div className="mb-4 flex items-start gap-3">
+          {glyphSrc ? (
+            <Image
+              src={glyphSrc}
+              alt=""
+              width={200}
+              height={200}
+              className="ink-art h-12 w-12 shrink-0"
+            />
+          ) : (
+            <div
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+              style={{
+                background: `var(--accent-${accent}-light)`,
+                color: `var(--accent-${accent})`,
+              }}
+            >
+              <Icon className="h-4 w-4" />
+            </div>
+          )}
+          <p
+            className="pt-1 text-sm italic leading-snug"
+            style={{ color: "var(--text-muted)" }}
           >
-            {title}
-          </h2>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             {subtitle}
           </p>
         </div>
-      </header>
 
-      {projects.length === 0 ? (
-        <p
-          className="text-sm py-4 text-center italic"
-          style={{ color: "var(--text-muted)" }}
-        >
-          {emptyMessage}
-        </p>
-      ) : (
-        <ul className="space-y-2">
-          {projects.map((project) => (
-            <li key={project.slug}>
-              <PulseRow
-                project={project}
-                showNextAction={showNextAction}
-                accent={accent}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
+        {projects.length === 0 ? (
+          <p
+            className="text-sm py-4 text-center italic"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {emptyMessage}
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {projects.map((project) => (
+              <li key={project.slug}>
+                <PulseRow
+                  project={project}
+                  showNextAction={showNextAction}
+                  accent={accent}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   );
 }

@@ -11,6 +11,8 @@ interface QaCheckboxRowProps {
   description: string;
   checked: boolean;
   projectName?: string;
+  /** Wrapper element. Defaults to "li" for backward compatibility. */
+  as?: "li" | "div";
 }
 
 export function QaCheckboxRow({
@@ -19,6 +21,7 @@ export function QaCheckboxRow({
   description,
   checked: initialChecked,
   projectName,
+  as = "li",
 }: QaCheckboxRowProps) {
   const [checked, setChecked] = useState(initialChecked);
   const [pending, startTransition] = useTransition();
@@ -39,9 +42,10 @@ export function QaCheckboxRow({
   }
 
   const label = projectName ? `${projectName} — ${description}` : description;
+  const Wrapper = as;
 
   return (
-    <li className="flex items-start gap-2.5">
+    <Wrapper className="flex items-start gap-2.5" data-qa-id={qaId}>
       <button
         type="button"
         onClick={handleApprove}
@@ -90,6 +94,6 @@ export function QaCheckboxRow({
           </p>
         ) : null}
       </div>
-    </li>
+    </Wrapper>
   );
 }

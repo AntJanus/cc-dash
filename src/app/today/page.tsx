@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { CheckCircle2, Clock, AlertTriangle } from "lucide-react";
 import { getProjectCards } from "@/lib/projects/get-projects";
 import {
@@ -8,6 +9,7 @@ import { pickRecommendedProjects } from "@/lib/projects/pick-recommended";
 import { getTodayDirections } from "@/lib/projects/get-today-directions";
 import { pickSessionsTouchedToday } from "@/lib/projects/sessions-today";
 import { getTopPendingQa } from "@/lib/projects/get-qa-portfolio";
+import { MastheadBand } from "@/components/today/masthead-band";
 import { PulseLane } from "@/components/today/pulse-lane";
 import { RecommendedLane } from "@/components/today/recommended-lane";
 import { TodaysDirectionsPanel } from "@/components/today/todays-directions-panel";
@@ -21,6 +23,7 @@ interface LaneSpec {
   title: string;
   subtitle: string;
   icon: React.ElementType;
+  glyphSrc: string;
   accent: LaneAccent;
   emptyMessage: string;
 }
@@ -31,6 +34,7 @@ const LANES: LaneSpec[] = [
     title: "Nearly Done",
     subtitle: "80%+ complete — push these over the line",
     icon: CheckCircle2,
+    glyphSrc: "/today/glyph-nearly-done.png",
     accent: "emerald",
     emptyMessage: "No projects in the home stretch right now.",
   },
@@ -39,6 +43,7 @@ const LANES: LaneSpec[] = [
     title: "Recently Active",
     subtitle: "Touched in the last 7 days",
     icon: Clock,
+    glyphSrc: "/today/glyph-recently-active.png",
     accent: "blue",
     emptyMessage: "No activity this week.",
   },
@@ -47,6 +52,7 @@ const LANES: LaneSpec[] = [
     title: "Stalled",
     subtitle: "No movement in 14+ days — revive or shelve",
     icon: AlertTriangle,
+    glyphSrc: "/today/glyph-stalled.png",
     accent: "amber",
     emptyMessage: "Nothing stalled — everything's moving.",
   },
@@ -67,17 +73,10 @@ export default async function TodayPage() {
 
   return (
     <main className="p-8 lg:p-10">
-      <header className="mb-8">
-        <h1
-          className="font-serif text-3xl font-semibold mb-2"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Today
-        </h1>
-        <p className="text-base" style={{ color: "var(--text-secondary)" }}>
-          What to work on, what&apos;s nearly shipped, and what&apos;s stalling.
-        </p>
-      </header>
+      <MastheadBand
+        now={now}
+        tagline="What to work on, what's nearly shipped, and what's stalling."
+      />
 
       <TodaysDirectionsPanel
         directions={directions}
@@ -86,20 +85,45 @@ export default async function TodayPage() {
         topPendingQa={topPendingQa}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section className="mb-10">
+        <SectionHeader eyebrow="Field Survey" title="Portfolio Pulse" />
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+          {LANES.map((lane) => (
+            <PulseLane
+              key={lane.key}
+              title={lane.title}
+              subtitle={lane.subtitle}
+              icon={lane.icon}
+              glyphSrc={lane.glyphSrc}
+              accent={lane.accent}
+              projects={pulse[lane.key]}
+              emptyMessage={lane.emptyMessage}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-6">
         <RecommendedLane picks={recommended} />
-        {LANES.map((lane) => (
-          <PulseLane
-            key={lane.key}
-            title={lane.title}
-            subtitle={lane.subtitle}
-            icon={lane.icon}
-            accent={lane.accent}
-            projects={pulse[lane.key]}
-            emptyMessage={lane.emptyMessage}
-          />
-        ))}
-      </div>
+      </section>
     </main>
+  );
+}
+
+function SectionHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div className="mb-5 flex items-end justify-between gap-4 border-b border-[var(--border-light)] pb-3">
+      <div>
+        <p className="almanac-eyebrow-label mb-1">{eyebrow}</p>
+        <h2 className="almanac-section-title">{title}</h2>
+      </div>
+      <Image
+        src="/today/divider-sprig.png"
+        alt=""
+        width={1080}
+        height={72}
+        className="ink-art hidden h-10 w-auto opacity-70 sm:block"
+      />
+    </div>
   );
 }

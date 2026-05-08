@@ -1,8 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { ProgressRing } from "@/components/ui/progress-ring";
 import { NextActionLine } from "@/components/projects/next-action-line";
 import { getCompletionPercent } from "@/lib/projects/get-projects";
+import { StickyNote } from "@/components/ui/sticky-note";
 import type { RecommendedPick } from "@/lib/projects/pick-recommended";
 
 interface RecommendedLaneProps {
@@ -21,57 +23,62 @@ export function RecommendedLane({
   emptyMessage = "Nothing strongly recommended right now.",
 }: RecommendedLaneProps) {
   return (
-    <section
-      className="rounded-xl p-5"
-      style={{
-        background: "var(--bg-card)",
-        border: "1px solid var(--border-light)",
-      }}
-    >
-      <header className="flex items-center gap-2 mb-4">
-        <div
-          className="flex h-7 w-7 items-center justify-center rounded-lg"
-          style={{
-            background: "var(--accent-teal-light)",
-            color: "var(--accent-teal)",
-          }}
-        >
-          <Sparkles className="h-4 w-4" />
-        </div>
-        <div className="min-w-0">
-          <h2
-            className="text-base font-semibold leading-tight"
-            style={{ color: "var(--text-primary)" }}
+    <div className="flex flex-col gap-4 md:flex-row md:items-start">
+      <div className="flex shrink-0 items-center gap-3 md:w-56 md:flex-col md:items-start md:pt-3">
+        <Image
+          src="/today/glyph-up-next.png"
+          alt=""
+          width={200}
+          height={200}
+          className="ink-art h-16 w-16 shrink-0"
+        />
+        <div>
+          <p className="almanac-eyebrow-label mb-1">Recommended</p>
+          <h2 className="almanac-section-title">Up Next</h2>
+          <p
+            className="mt-1 text-sm italic"
+            style={{ color: "var(--text-muted)" }}
           >
-            Up Next
-          </h2>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             Two picks weighted by activity, actionability, and freshness.
           </p>
         </div>
-      </header>
+      </div>
 
-      {picks.length === 0 ? (
-        <p
-          className="text-sm py-4 text-center italic"
-          style={{ color: "var(--text-muted)" }}
-        >
-          {emptyMessage}
-        </p>
-      ) : (
-        <ul className="space-y-2">
-          {picks.map((pick) => (
-            <li key={pick.project.slug}>
-              <RecommendedRow pick={pick} />
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+      <StickyNote
+        color="butter"
+        tilt="right"
+        decoration="pin"
+        decorationPosition="top-left"
+        className="flex-1 max-w-2xl"
+      >
+        {picks.length === 0 ? (
+          <p
+            className="text-base py-6 text-center italic"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {emptyMessage}
+          </p>
+        ) : (
+          <ol className="m-0 list-none space-y-1 p-0">
+            {picks.map((pick, index) => (
+              <li key={pick.project.slug}>
+                <RecommendedRow pick={pick} ordinal={index + 1} />
+              </li>
+            ))}
+          </ol>
+        )}
+      </StickyNote>
+    </div>
   );
 }
 
-function RecommendedRow({ pick }: { pick: RecommendedPick }) {
+function RecommendedRow({
+  pick,
+  ordinal,
+}: {
+  pick: RecommendedPick;
+  ordinal: number;
+}) {
   const pct = Math.round(getCompletionPercent(pick.project));
   const labels = pick.whyTags
     .map((tag) => TAG_LABELS[tag] ?? tag)
@@ -80,10 +87,13 @@ function RecommendedRow({ pick }: { pick: RecommendedPick }) {
   return (
     <Link
       href={`/project/${pick.project.slug}/roadmap`}
-      className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-[var(--bg-hover,var(--bg-card))]"
-      style={{ border: "1px solid transparent" }}
+      className="group flex items-start gap-4 rounded-md px-2 py-3 transition-colors hover:bg-[rgba(64,54,41,0.04)]"
     >
-      <ProgressRing value={pct} size={36} strokeWidth={4} color="teal" />
+      <span className="almanac-marginalia-num pt-0.5 select-none">
+        {ordinal}.
+      </span>
+
+      <ProgressRing value={pct} size={40} strokeWidth={4} color="teal" />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
@@ -106,14 +116,14 @@ function RecommendedRow({ pick }: { pick: RecommendedPick }) {
         ) : null}
 
         {labels.length > 0 ? (
-          <div className="mt-1 flex flex-wrap gap-1.5">
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
             {labels.map((label) => (
               <span
                 key={label}
-                className="rounded-full px-2 py-0.5 text-sm"
+                className="rounded-full px-2 py-0.5 text-sm font-medium"
                 style={{
-                  background: "var(--accent-teal-light)",
-                  color: "var(--accent-teal)",
+                  background: "rgba(64, 54, 41, 0.08)",
+                  color: "var(--ink)",
                 }}
               >
                 {label}
@@ -124,7 +134,7 @@ function RecommendedRow({ pick }: { pick: RecommendedPick }) {
       </div>
 
       <ArrowRight
-        className="h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+        className="mt-1 h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
         style={{ color: "var(--text-muted)" }}
       />
     </Link>

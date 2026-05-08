@@ -2127,3 +2127,104 @@ button:disabled,
   width: 4rem;
   flex: none;
 }
+
+/* ============================================
+   ALMANAC FRONT-PAGE TYPOGRAPHY (today)
+   Display headline, eyebrow, tagline, section
+   titles, eyebrow labels, and ink-art filter
+   recipe for line-art glyphs in dark mode.
+   ============================================ */
+
+.almanac-eyebrow {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.almanac-headline {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2.5rem, 5.2vw, 3.5rem);
+  line-height: 1.04;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--ink-strong);
+}
+
+.almanac-headline em,
+.almanac-headline .month {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.almanac-tagline {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--ink);
+}
+
+.almanac-section-title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.75rem;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink-strong);
+}
+
+.almanac-lane-title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.125rem;
+  line-height: 1.35;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.almanac-eyebrow-label {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.almanac-marginalia-num {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--accent-gold);
+}
+
+/* Ink-art glyphs — warm-brown line art on transparent.
+   In dark mode, invert tonally so they read on forest paper. */
+.ink-art {
+  display: inline-block;
+}
+
+.dark .ink-art {
+  filter: invert(0.92) hue-rotate(180deg) brightness(1.05) saturate(0.6);
+}
+
+/* Decorative divider — paired centered ornament between sections. */
+.almanac-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.almanac-divider img {
+  max-width: min(28rem, 100%);
+  height: auto;
+  opacity: 0.85;
+}

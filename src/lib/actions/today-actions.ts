@@ -18,7 +18,7 @@ import { revalidatePath } from "next/cache";
 import { approveQaItem } from "@/lib/actions/qa-actions";
 import { atomicWriteFile } from "@/lib/fs/atomic-write";
 import { expandTilde } from "@/lib/fs/discovery";
-import { DEFAULT_TODAY_DIRECTIONS_PATH } from "@/lib/projects/get-today-directions";
+import { resolveTodayDirectionsPath } from "@/lib/projects/get-today-directions";
 import type { Result } from "@/lib/schemas/shared";
 
 interface ApproveOptions {
@@ -64,7 +64,7 @@ export async function approveQaFromDirections(
   }
 
   const filePath = expandTilde(
-    options.pathOverride ?? DEFAULT_TODAY_DIRECTIONS_PATH,
+    options.pathOverride ?? (await resolveTodayDirectionsPath()),
   );
 
   let raw: string | null = null;

@@ -15,6 +15,7 @@ vi.mock("@/lib/config", () => ({
     exclude_dirs: ["node_modules"],
     explicit_projects: [],
     scan_depth: 2,
+    orchestrator_dir: "~/portfolio",
   }),
 }));
 
@@ -89,7 +90,7 @@ describe("computeFileFingerprint", () => {
     expect(mockStat).toHaveBeenCalledWith("/tmp/project-a/SESSION_PROGRESS.md");
     expect(mockStat).toHaveBeenCalledWith("/tmp/project-b/ROADMAP.md");
     expect(mockStat).toHaveBeenCalledWith(
-      expect.stringMatching(/\/projects\/TODAYS_DIRECTIONS\.md$/),
+      expect.stringMatching(/\/portfolio\/TODAYS_DIRECTIONS\.md$/),
     );
   });
 

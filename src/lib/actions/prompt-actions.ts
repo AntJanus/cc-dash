@@ -150,10 +150,11 @@ async function gatherTopQaItems(limit: number): Promise<TodayQaSummary[]> {
 /**
  * Generate the "Today's Directions" prompt. Re-reads portfolio state
  * fresh, then assembles a context-rich prompt the user pastes to a
- * Claude agent at `~/projects`.
+ * Claude agent running in the configured orchestrator directory.
  */
 export async function generateTodayDirectionsPrompt(): Promise<PromptResult> {
   const now = new Date();
+  const config = await loadConfig();
   const projects = await getProjectCards();
   const sessionsToday = pickSessionsTouchedToday(projects, now);
   const recommended = pickRecommendedProjects(projects, { now });
@@ -164,6 +165,7 @@ export async function generateTodayDirectionsPrompt(): Promise<PromptResult> {
     sessionsToday,
     topQa,
     recommended,
+    orchestratorDir: config.orchestrator_dir,
   });
 
   return { success: true, prompt };

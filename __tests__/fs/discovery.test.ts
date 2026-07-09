@@ -11,7 +11,7 @@ import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { discoverProjects, slugify } from "@/lib/fs/discovery";
-import type { Config } from "@/lib/schemas/config";
+import { ConfigSchema, type Config } from "@/lib/schemas/config";
 
 /** Fixture ROADMAP.md with valid cc-dash/roadmap@1 schema */
 const VALID_ROADMAP = `---
@@ -69,14 +69,14 @@ No frontmatter here.
 
 /** Helper: create a default config with overrides */
 function makeConfig(overrides: Partial<Config> = {}): Config {
-  return {
+  return ConfigSchema.parse({
     scan_dirs: [],
     exclude_dirs: ["node_modules", ".git", "vendor"],
     explicit_projects: [],
     scan_depth: 2,
     port: 3000,
     ...overrides,
-  };
+  });
 }
 
 describe("discoverProjects", () => {

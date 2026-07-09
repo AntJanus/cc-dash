@@ -77,9 +77,14 @@ Create `~/.config/cc-dash/config.json`:
   "exclude_dirs": ["node_modules", ".git", "vendor"],
   "explicit_projects": [],
   "scan_depth": 2,
-  "port": 3000
+  "port": 3000,
+  "orchestrator_dir": "~/projects"
 }
 ```
+
+`orchestrator_dir` is the portfolio-level directory your orchestrator agent runs from,
+and where `TODAYS_DIRECTIONS.md` is written. Every machine-specific path lives in this
+file, outside the repository, so nothing personal is ever committed.
 
 A project is discovered when it contains a schema file:
 

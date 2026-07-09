@@ -10,7 +10,7 @@ import { stat } from "node:fs/promises";
 import { loadConfig } from "@/lib/config";
 import { discoverProjects } from "@/lib/fs";
 import { expandTilde } from "@/lib/fs/discovery";
-import { DEFAULT_TODAY_DIRECTIONS_PATH } from "@/lib/projects/get-today-directions";
+import { resolveTodayDirectionsPath } from "@/lib/projects/get-today-directions";
 
 /**
  * Compute a SHA-256 fingerprint from file mtimes of all discovered
@@ -43,7 +43,7 @@ export async function computeFileFingerprint(): Promise<string> {
   // Stat the portfolio-level directions file too. Resolved against the
   // user's home so the fingerprint changes when the orchestrator agent
   // writes a new TODAYS_DIRECTIONS.md.
-  const directionsPath = expandTilde(DEFAULT_TODAY_DIRECTIONS_PATH);
+  const directionsPath = expandTilde(await resolveTodayDirectionsPath());
   try {
     const s = await stat(directionsPath);
     mtimes.push(`${directionsPath}:${s.mtimeMs}`);

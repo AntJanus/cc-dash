@@ -4,7 +4,7 @@
  * cc-dash MCP Server — entry point
  *
  * Register at user scope so the tools are reachable from any cwd
- * (e.g. ~/projects where the orchestrator agent runs):
+ * (e.g. the portfolio directory where the orchestrator agent runs):
  *
  *   claude mcp add --scope user cc-dash -- \
  *     npx tsx \

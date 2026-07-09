@@ -2,7 +2,7 @@
  * Pure assembly for the "Today's Directions" generation prompt.
  *
  * The output is a complete, copy-pasteable prompt the user feeds to a
- * Claude agent running from `~/projects`. The prompt embeds
+ * Claude agent running from the configured orchestrator directory. The prompt embeds
  * current portfolio context (sessions touched today, top QA items,
  * recommended-projects scoring) so the agent does not have to re-derive
  * it, and instructs the agent to produce a single
@@ -24,10 +24,14 @@ export interface AssembleTodayDirectionsInput {
   sessionsToday: ProjectCardData[];
   topQa: TodayQaSummary[];
   recommended: RecommendedPick[];
+  /** Portfolio-level directory the agent runs from. Defaults to `~/projects`. */
+  orchestratorDir?: string;
 }
 
-const ORCHESTRATOR_DIR = "~/projects";
-const OUTPUT_FILE = `${ORCHESTRATOR_DIR}/TODAYS_DIRECTIONS.md`;
+/** Rewrite an absolute home-relative path back to a `~`-prefixed one. */
+function tildify(absolutePath: string): string {
+  return absolutePath.replace(/^\/(?:Users|home)\/[^/]+/, "~");
+}
 
 function isoDate(date: Date): string {
   const year = date.getFullYear();
@@ -80,31 +84,30 @@ function formatRecommended(picks: RecommendedPick[]): string {
  * Assemble the agent prompt for generating TODAYS_DIRECTIONS.md.
  *
  * The output is plain text intended to be copied into an interactive
- * Claude session running from `~/projects`.
+ * Claude session running from the configured orchestrator directory.
  */
 export function assembleTodayDirectionsPrompt(
   input: AssembleTodayDirectionsInput,
 ): string {
   const { now, sessionsToday, topQa, recommended } = input;
+  const orchestratorDir = input.orchestratorDir ?? "~/projects";
+  const outputFile = `${orchestratorDir}/TODAYS_DIRECTIONS.md`;
   const todayDate = isoDate(now);
 
   const recommendedDispatch = recommended
     .map((pick) => {
       const action = pick.project.nextAction?.name ?? "advance the roadmap";
-      const repoPath = pick.project.path.replace(
-        /^\/Users\/[^/]+\/projects/,
-        "~/projects",
-      );
+      const repoPath = tildify(pick.project.path);
       const promptLine = action.replace(/"/g, '\\"');
       return `cd ${repoPath} && claude -p "${promptLine}"`;
     })
     .join("\n");
 
-  return `You are the Today's Directions agent for the project portfolio at \`${ORCHESTRATOR_DIR}\`.
+  return `You are the Today's Directions agent for the project portfolio at \`${orchestratorDir}\`.
 
 Write a single file at:
 
-  ${OUTPUT_FILE}
+  ${outputFile}
 
 It must conform to the \`cc-dash/today-directions@1\` schema. The cc-dash dashboard at \`http://localhost:3000/today\` renders this file directly, so the format is strict.
 
@@ -128,8 +131,8 @@ for_date: ${todayDate}
 ## Concurrent dispatch plan
 \`\`\`bash
 # Run these in parallel from separate terminals.
-cd ~/projects/<repo-a> && claude -p "<terse, concrete prompt>"
-cd ~/projects/<repo-b> && claude -p "<terse, concrete prompt>"
+cd <orchestrator-dir>/<repo-a> && claude -p "<terse, concrete prompt>"
+cd <orchestrator-dir>/<repo-b> && claude -p "<terse, concrete prompt>"
 \`\`\`
 
 ## Notes
@@ -154,7 +157,7 @@ ${recommendedDispatch || "  (no recommendations to dispatch)"}
 
 ## Instructions
 
-1. Use the Bash and Write tools to create \`${OUTPUT_FILE}\`. If a previous version exists, overwrite it.
+1. Use the Bash and Write tools to create \`${outputFile}\`. If a previous version exists, overwrite it.
 2. Set \`generated\` to the actual current ISO 8601 timestamp at write time, with the local timezone offset.
 3. Set \`for_date\` to \`${todayDate}\`.
 4. For each session listed above, write a bullet under "Active sessions to advance" with the project name and current working-on line.

@@ -8,7 +8,7 @@
  */
 
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import type { Config } from "@/lib/schemas/config";
+import { ConfigSchema, type Config } from "@/lib/schemas/config";
 import type { DiscoveredProject } from "@/lib/fs/discovery";
 
 // Mock discoverProjects using vi.hoisted pattern
@@ -25,13 +25,13 @@ import { DiscoveryCache } from "@/lib/fs/discovery-cache";
 
 /** Helper: create a default config */
 function makeConfig(): Config {
-  return {
+  return ConfigSchema.parse({
     scan_dirs: [],
     exclude_dirs: ["node_modules", ".git", "vendor"],
     explicit_projects: [],
     scan_depth: 2,
     port: 3000,
-  };
+  });
 }
 
 /** Fixture: sample discovered projects */

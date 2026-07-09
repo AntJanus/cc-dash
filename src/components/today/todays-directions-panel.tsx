@@ -227,7 +227,7 @@ function EmptyHeader() {
         >
           No directions written yet. Live signal below; click{" "}
           <strong>Generate Today&apos;s Directions</strong> to assemble a prompt
-          for a Claude agent at <code>~/projects</code>.
+          for a Claude agent in your orchestrator directory.
         </p>
       </div>
       <TodayDirectionsPromptButton variant="primary" />

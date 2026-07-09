@@ -30,6 +30,12 @@ export const ConfigSchema = z.object({
   /** Absolute or ~-relative path to PROJECT_IDEAS.md file */
   ideas_file: z.string().optional(),
 
+  /**
+   * Portfolio-level directory the orchestrator agent runs from, and where
+   * TODAYS_DIRECTIONS.md is written. Sits above the individual projects.
+   */
+  orchestrator_dir: z.string().default("~/projects"),
+
   /** Project slugs that have been archived (hidden from dashboard) */
   archived_projects: z.array(z.string()).default([]),
 

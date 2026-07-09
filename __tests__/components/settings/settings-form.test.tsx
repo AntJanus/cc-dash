@@ -26,6 +26,8 @@ const defaultConfig: Config = {
   explicit_projects: [{ path: "/my-app", name: "My App" }],
   scan_depth: 2,
   port: 3000,
+  orchestrator_dir: "~/projects",
+  archived_projects: [],
   display: {
     default_view: "board",
     sort_order: "last_updated",

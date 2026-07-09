@@ -38,7 +38,7 @@ function makePick(overrides: Partial<RecommendedPick> = {}): RecommendedPick {
 }
 
 describe("assembleTodayDirectionsPrompt", () => {
-  it("produces a prompt that names the output file path", () => {
+  it("defaults the output file to the default orchestrator dir", () => {
     const prompt = assembleTodayDirectionsPrompt({
       now: NOW,
       sessionsToday: [],
@@ -46,6 +46,18 @@ describe("assembleTodayDirectionsPrompt", () => {
       recommended: [],
     });
     expect(prompt).toContain("~/projects/TODAYS_DIRECTIONS.md");
+  });
+
+  it("honors a configured orchestrator dir for the output file path", () => {
+    const prompt = assembleTodayDirectionsPrompt({
+      now: NOW,
+      sessionsToday: [],
+      topQa: [],
+      recommended: [],
+      orchestratorDir: "~/portfolio",
+    });
+    expect(prompt).toContain("~/portfolio/TODAYS_DIRECTIONS.md");
+    expect(prompt).not.toContain("~/projects/TODAYS_DIRECTIONS.md");
   });
 
   it("includes the cc-dash/today-directions@1 schema literal", () => {

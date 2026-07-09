@@ -43,3 +43,7 @@ yarn-error.log*
 next-env.d.ts
 .planning/
 .claude/settings.local.json
+SESSION_PROGRESS.md
+ROADMAP.md
+AUDIT.md
+prd-cc-project-dashboard.md

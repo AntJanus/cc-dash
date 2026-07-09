@@ -54,7 +54,7 @@ describe("loadPortfolio", () => {
         schema: "cc-dash/portfolio@1",
         projects: {
           "prd-board": { status: "active", order: 0 },
-          alpha-app: { status: "maintenance" },
+          "alpha-app": { status: "maintenance" },
         },
       }),
     );
@@ -62,7 +62,7 @@ describe("loadPortfolio", () => {
     const result = await loadPortfolio("/projects/portfolio");
     expect(result.schema).toBe("cc-dash/portfolio@1");
     expect(result.projects["prd-board"].order).toBe(0);
-    expect(result.projects.alpha-app.status).toBe("maintenance");
+    expect(result.projects["alpha-app"].status).toBe("maintenance");
   });
 
   it("returns default empty portfolio when file does not exist", async () => {

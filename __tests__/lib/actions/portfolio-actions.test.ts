@@ -86,7 +86,7 @@ describe("setProjectStatus", () => {
     expect(result).toEqual({ success: true });
     expect(mockSavePortfolio).toHaveBeenCalledTimes(1);
     const [, portfolio] = mockSavePortfolio.mock.calls[0]!;
-    expect(portfolio.projects.alpha-app.status).toBe("maintenance");
+    expect(portfolio.projects["alpha-app"].status).toBe("maintenance");
   });
 
   it("revalidates the layout on success", async () => {
@@ -110,7 +110,10 @@ describe("setProjectCanvasPosition", () => {
   it("rejects non-finite coords", async () => {
     const nan = await setProjectCanvasPosition("alpha-app", { x: NaN, y: 0 });
     expect(nan).toEqual({ success: false, error: "Invalid canvas position" });
-    const inf = await setProjectCanvasPosition("alpha-app", { x: 0, y: Infinity });
+    const inf = await setProjectCanvasPosition("alpha-app", {
+      x: 0,
+      y: Infinity,
+    });
     expect(inf).toEqual({ success: false, error: "Invalid canvas position" });
     expect(mockSavePortfolio).not.toHaveBeenCalled();
   });
@@ -124,22 +127,25 @@ describe("setProjectCanvasPosition", () => {
     expect(mockSavePortfolio).toHaveBeenCalledTimes(1);
     const [scanDir, portfolio] = mockSavePortfolio.mock.calls[0]!;
     expect(scanDir).toBe("/home/user/projects");
-    expect(portfolio.projects.alpha-app.status).toBe("active");
+    expect(portfolio.projects["alpha-app"].status).toBe("active");
     // Coordinates are rounded to integers when saved.
-    expect(portfolio.projects.alpha-app.canvas).toEqual({ x: 121, y: -42 });
+    expect(portfolio.projects["alpha-app"].canvas).toEqual({ x: 121, y: -42 });
   });
 
   it("preserves existing status when updating canvas on an existing entry", async () => {
     mockLoadPortfolio.mockResolvedValue({
       schema: "cc-dash/portfolio@1",
       projects: {
-        alpha-app: { status: "maintenance", order: 3 },
+        "alpha-app": { status: "maintenance", order: 3 },
       },
     });
-    const result = await setProjectCanvasPosition("alpha-app", { x: 10, y: 20 });
+    const result = await setProjectCanvasPosition("alpha-app", {
+      x: 10,
+      y: 20,
+    });
     expect(result).toEqual({ success: true });
     const [, portfolio] = mockSavePortfolio.mock.calls[0]!;
-    expect(portfolio.projects.alpha-app).toEqual({
+    expect(portfolio.projects["alpha-app"]).toEqual({
       status: "maintenance",
       order: 3,
       canvas: { x: 10, y: 20 },
@@ -150,14 +156,14 @@ describe("setProjectCanvasPosition", () => {
     mockLoadPortfolio.mockResolvedValue({
       schema: "cc-dash/portfolio@1",
       projects: {
-        alpha-app: { status: "active", canvas: { x: 100, y: 100 } },
+        "alpha-app": { status: "active", canvas: { x: 100, y: 100 } },
       },
     });
     const result = await setProjectCanvasPosition("alpha-app", null);
     expect(result).toEqual({ success: true });
     const [, portfolio] = mockSavePortfolio.mock.calls[0]!;
-    expect(portfolio.projects.alpha-app.canvas).toBeUndefined();
-    expect(portfolio.projects.alpha-app.status).toBe("active");
+    expect(portfolio.projects["alpha-app"].canvas).toBeUndefined();
+    expect(portfolio.projects["alpha-app"].status).toBe("active");
   });
 
   it("does NOT revalidate the layout (avoid mid-drag snap)", async () => {

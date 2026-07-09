@@ -136,7 +136,7 @@ describe("PortfolioFileSchema", () => {
       schema: "cc-dash/portfolio@1",
       projects: {
         "prd-board": { status: "active", order: 0 },
-        alpha-app: { status: "maintenance" },
+        "alpha-app": { status: "maintenance" },
         "old-project": { status: "inactive" },
       },
     });
@@ -144,7 +144,7 @@ describe("PortfolioFileSchema", () => {
     if (result.success) {
       expect(Object.keys(result.data.projects)).toHaveLength(3);
       expect(result.data.projects["prd-board"].order).toBe(0);
-      expect(result.data.projects.alpha-app.status).toBe("maintenance");
+      expect(result.data.projects["alpha-app"].status).toBe("maintenance");
     }
   });
 

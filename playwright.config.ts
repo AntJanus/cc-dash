@@ -1,4 +1,8 @@
 import { defineConfig } from "@playwright/test";
+import { resolvePortSync } from "./src/lib/config";
+
+const port = resolvePortSync();
+const baseURL = `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -9,7 +13,7 @@ export default defineConfig({
   reporter: process.env.CI ? "github" : "list",
   timeout: 30_000,
   use: {
-    baseURL: "http://localhost:3737",
+    baseURL,
     trace: "on-first-retry",
   },
   projects: [
@@ -20,7 +24,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "npm run dev",
-    url: "http://localhost:3737",
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

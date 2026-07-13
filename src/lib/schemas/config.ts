@@ -25,7 +25,7 @@ export const ConfigSchema = z.object({
   scan_depth: z.number().int().min(1).max(10).default(2),
 
   /** Port for the dashboard dev server */
-  port: z.number().int().default(3000),
+  port: z.number().int().default(3737),
 
   /** Absolute or ~-relative path to PROJECT_IDEAS.md file */
   ideas_file: z.string().optional(),

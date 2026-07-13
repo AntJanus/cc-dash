@@ -77,7 +77,7 @@ Create `~/.config/cc-dash/config.json`:
   "exclude_dirs": ["node_modules", ".git", "vendor"],
   "explicit_projects": [],
   "scan_depth": 2,
-  "port": 3000,
+  "port": 3737,
   "orchestrator_dir": "~/projects"
 }
 ```

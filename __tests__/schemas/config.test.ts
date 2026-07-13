@@ -63,11 +63,11 @@ describe("ConfigSchema", () => {
     }
   });
 
-  it("includes port with default value of 3000", () => {
+  it("includes port with default value of 3737", () => {
     const result = ConfigSchema.safeParse({});
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.port).toBe(3000);
+      expect(result.data.port).toBe(3737);
     }
   });
 

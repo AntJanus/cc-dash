@@ -7,9 +7,9 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "next dev -p 3737",
+    "dev": "tsx scripts/run-next.ts dev",
     "build": "next build",
-    "start": "next start -p 3737",
+    "start": "tsx scripts/run-next.ts start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "test": "vitest",

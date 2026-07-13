@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-const { mockReadFile } = vi.hoisted(() => ({
+const { mockReadFile, mockReadFileSync } = vi.hoisted(() => ({
   mockReadFile: vi.fn(),
+  mockReadFileSync: vi.fn(),
 }));
 
 vi.mock("node:fs/promises", async (importOriginal) => {
@@ -13,7 +14,16 @@ vi.mock("node:fs/promises", async (importOriginal) => {
   };
 });
 
-import { loadConfig, CONFIG_PATH } from "@/lib/config";
+vi.mock("node:fs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs")>();
+  return {
+    ...actual,
+    default: { ...actual, readFileSync: mockReadFileSync },
+    readFileSync: mockReadFileSync,
+  };
+});
+
+import { loadConfig, resolvePortSync, CONFIG_PATH } from "@/lib/config";
 
 describe("loadConfig", () => {
   beforeEach(() => {
@@ -27,7 +37,7 @@ describe("loadConfig", () => {
     expect(config.scan_dirs).toEqual([]);
     expect(config.exclude_dirs).toEqual(["node_modules", ".git", "vendor"]);
     expect(config.scan_depth).toBe(2);
-    expect(config.port).toBe(3000);
+    expect(config.port).toBe(3737);
     expect(config.explicit_projects).toEqual([]);
   });
 
@@ -80,7 +90,80 @@ describe("loadConfig", () => {
     expect(config.scan_dirs).toEqual(["/tmp/projects"]);
     expect(config.exclude_dirs).toEqual(["node_modules", ".git", "vendor"]);
     expect(config.scan_depth).toBe(2);
-    expect(config.port).toBe(3000);
+    expect(config.port).toBe(3737);
+  });
+});
+
+describe("resolvePortSync", () => {
+  const originalPort = process.env.PORT;
+
+  beforeEach(() => {
+    mockReadFileSync.mockReset();
+    delete process.env.PORT;
+  });
+
+  afterEach(() => {
+    if (originalPort === undefined) delete process.env.PORT;
+    else process.env.PORT = originalPort;
+  });
+
+  it("returns the schema default when the config file does not exist", () => {
+    mockReadFileSync.mockImplementation(() => {
+      throw new Error("ENOENT");
+    });
+
+    expect(resolvePortSync()).toBe(3737);
+  });
+
+  it("returns port from an existing config.json", () => {
+    mockReadFileSync.mockReturnValue(JSON.stringify({ port: 4000 }));
+
+    expect(resolvePortSync()).toBe(4000);
+  });
+
+  it("reads the config from CONFIG_PATH", () => {
+    mockReadFileSync.mockReturnValue(JSON.stringify({ port: 4000 }));
+
+    resolvePortSync();
+    expect(mockReadFileSync).toHaveBeenCalledWith(CONFIG_PATH, "utf-8");
+  });
+
+  it("lets the PORT env var override config.json", () => {
+    mockReadFileSync.mockReturnValue(JSON.stringify({ port: 4000 }));
+    process.env.PORT = "8080";
+
+    expect(resolvePortSync()).toBe(8080);
+    expect(mockReadFileSync).not.toHaveBeenCalled();
+  });
+
+  it("throws on a non-numeric PORT env var instead of silently falling back", () => {
+    process.env.PORT = "not-a-port";
+
+    expect(() => resolvePortSync()).toThrow(/PORT/);
+  });
+
+  it("throws on a fractional PORT env var", () => {
+    process.env.PORT = "80.5";
+
+    expect(() => resolvePortSync()).toThrow(/PORT/);
+  });
+
+  it("warns and returns the default on schema validation failure", () => {
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({ port: "three thousand" }),
+    );
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(resolvePortSync()).toBe(3737);
+    expect(warnSpy).toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+  });
+
+  it("returns the default on invalid JSON", () => {
+    mockReadFileSync.mockReturnValue("not valid json {{{");
+
+    expect(resolvePortSync()).toBe(3737);
   });
 });
 

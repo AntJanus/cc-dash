@@ -12,7 +12,7 @@
 
 ```bash
 npm install              # Install dependencies
-npm run dev              # Next.js dev server at localhost:3000
+npm run dev              # Next.js dev server at localhost:3737
 npm run build            # Production build
 npm run lint             # ESLint
 npm run test:run         # Run all tests (1247 tests)

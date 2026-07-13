@@ -65,7 +65,7 @@ Requires Node.js 22 or newer.
 
 ```bash
 npm install
-npm run dev     # http://localhost:3000
+npm run dev     # http://localhost:3737
 npm run mcp     # run the MCP server over stdio
 ```
 

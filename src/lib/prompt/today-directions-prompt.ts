@@ -109,7 +109,7 @@ Write a single file at:
 
   ${outputFile}
 
-It must conform to the \`cc-dash/today-directions@1\` schema. The cc-dash dashboard at \`http://localhost:3000/today\` renders this file directly, so the format is strict.
+It must conform to the \`cc-dash/today-directions@1\` schema. The cc-dash dashboard at \`http://localhost:3737/today\` renders this file directly, so the format is strict.
 
 ## Required output format
 

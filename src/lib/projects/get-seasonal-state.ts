@@ -14,8 +14,13 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 /** Touched within this many days — matches the dashboard's stale threshold. */
 export const HOT_DAYS = 7;
 
-/** Touched within this many days — matches the recommendation engine's warm window. */
-export const WARM_DAYS = 14;
+/**
+ * Touched within this many days. Deliberately wider than the recommendation
+ * engine's 14-day warm window: the almanac's "Coming Up" page wants a month of
+ * runway, so a project idle for three weeks is still due round again rather
+ * than dormant. Set by .planning/v3.0-almanac/PLAN.md Phase 0.
+ */
+export const WARM_DAYS = 30;
 
 /** Completion at or above this percent means the roadmap is fully harvested. */
 const HARVEST_PERCENT = 100;

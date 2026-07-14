@@ -53,7 +53,7 @@ describe("getSeasonalState", () => {
     });
 
     it("returns 'dormant' for a project untouched beyond the warm window", () => {
-      expect(stateOf({ lastActivity: daysAgo(45) })).toBe("dormant");
+      expect(stateOf({ lastActivity: daysAgo(60) })).toBe("dormant");
     });
   });
 
@@ -94,7 +94,7 @@ describe("getSeasonalState", () => {
         stateOf({ portfolioStatus: "maintenance", lastActivity: daysAgo(10) }),
       ).toBe("warming-up");
       expect(
-        stateOf({ portfolioStatus: "maintenance", lastActivity: daysAgo(45) }),
+        stateOf({ portfolioStatus: "maintenance", lastActivity: daysAgo(60) }),
       ).toBe("dormant");
     });
   });
@@ -122,9 +122,13 @@ describe("getSeasonalState", () => {
       expect(stateOf({ lastActivity: justPastWarm })).toBe("dormant");
     });
 
-    it("anchors the windows to the thresholds already used across the dashboard", () => {
+    it("uses the windows specified by the almanac plan (Phase 0)", () => {
       expect(HOT_DAYS).toBe(7);
-      expect(WARM_DAYS).toBe(14);
+      expect(WARM_DAYS).toBe(30);
+    });
+
+    it("keeps a project idle for three weeks 'warming-up' rather than dormant", () => {
+      expect(stateOf({ lastActivity: daysAgo(21) })).toBe("warming-up");
     });
 
     it("treats a future-dated timestamp as 'in-season' rather than dormant", () => {

@@ -60,6 +60,8 @@ export async function loadAllPortfolios(scanDirs: string[]): Promise<
       status: string;
       order?: number;
       canvas?: { x: number; y: number };
+      cadence: string | null;
+      dormantUntil: string | null;
     }
   >
 > {
@@ -70,6 +72,8 @@ export async function loadAllPortfolios(scanDirs: string[]): Promise<
       status: string;
       order?: number;
       canvas?: { x: number; y: number };
+      cadence: string | null;
+      dormantUntil: string | null;
     }
   >();
 
@@ -82,6 +86,8 @@ export async function loadAllPortfolios(scanDirs: string[]): Promise<
           status: entry.status,
           order: entry.order,
           canvas: entry.canvas,
+          cadence: entry.cadence,
+          dormantUntil: entry.dormant_until,
         });
       }
     }),

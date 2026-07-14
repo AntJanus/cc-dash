@@ -104,7 +104,12 @@ describe("savePortfolio", () => {
     const portfolio = {
       schema: "cc-dash/portfolio@1" as const,
       projects: {
-        "prd-board": { status: "active" as const, order: 0 },
+        "prd-board": {
+          status: "active" as const,
+          order: 0,
+          cadence: null,
+          dormant_until: null,
+        },
       },
     };
 
@@ -156,5 +161,37 @@ describe("loadAllPortfolios", () => {
 
     const result = await loadAllPortfolios(["/dir1", "/dir2"]);
     expect(result.size).toBe(0);
+  });
+
+  it("carries cadence and dormant_until through the merged map", async () => {
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        schema: "cc-dash/portfolio@1",
+        projects: {
+          "shelved-app": {
+            status: "inactive",
+            cadence: "quarterly",
+            dormant_until: "2026-12-01",
+          },
+        },
+      }),
+    );
+
+    const result = await loadAllPortfolios(["/dir1"]);
+    expect(result.get("shelved-app")?.cadence).toBe("quarterly");
+    expect(result.get("shelved-app")?.dormantUntil).toBe("2026-12-01");
+  });
+
+  it("defaults rhythm fields to null for legacy entries in the merged map", async () => {
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        schema: "cc-dash/portfolio@1",
+        projects: { "prd-board": { status: "active", order: 0 } },
+      }),
+    );
+
+    const result = await loadAllPortfolios(["/dir1"]);
+    expect(result.get("prd-board")?.cadence).toBeNull();
+    expect(result.get("prd-board")?.dormantUntil).toBeNull();
   });
 });

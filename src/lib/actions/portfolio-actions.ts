@@ -54,7 +54,11 @@ export async function setProjectStatus(
 
   const portfolio = await loadPortfolio(scanDir);
   if (!portfolio.projects[slug]) {
-    portfolio.projects[slug] = { status: parsed.data };
+    portfolio.projects[slug] = {
+      status: parsed.data,
+      cadence: null,
+      dormant_until: null,
+    };
   } else {
     portfolio.projects[slug].status = parsed.data;
   }
@@ -94,7 +98,11 @@ export async function setProjectCanvasPosition(
 
   const portfolio = await loadPortfolio(scanDir);
   if (!portfolio.projects[slug]) {
-    portfolio.projects[slug] = { status: "active" };
+    portfolio.projects[slug] = {
+      status: "active",
+      cadence: null,
+      dormant_until: null,
+    };
   }
   if (position === null) {
     delete portfolio.projects[slug].canvas;

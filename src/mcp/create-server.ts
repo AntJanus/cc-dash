@@ -975,7 +975,11 @@ function createServer(): McpServer {
 
       const portfolio = await loadPortfolio(scanDir);
       if (!portfolio.projects[slug]) {
-        portfolio.projects[slug] = { status };
+        portfolio.projects[slug] = {
+          status,
+          cadence: null,
+          dormant_until: null,
+        };
       } else {
         portfolio.projects[slug].status = status;
       }
@@ -1038,7 +1042,12 @@ function createServer(): McpServer {
         const portfolio = await loadPortfolio(scanDir);
         for (const { slug, order } of entries) {
           if (!portfolio.projects[slug]) {
-            portfolio.projects[slug] = { status: "active", order };
+            portfolio.projects[slug] = {
+              status: "active",
+              order,
+              cadence: null,
+              dormant_until: null,
+            };
           } else {
             portfolio.projects[slug].order = order;
           }

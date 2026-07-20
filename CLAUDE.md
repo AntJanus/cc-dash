@@ -1,5 +1,12 @@
 # CLAUDE.md — cc-dash
 
+## Repository Visibility: PUBLIC
+
+**This repo is PUBLIC on GitHub (`AntJanus/cc-dash`).** Everything committed here is world-readable and permanent.
+
+- Before every commit, scrub PII and secrets: no API keys, tokens, `.env` values, real emails (beyond intended author attribution), internal/employer identifiers, or absolute paths containing a username (`/Users/<user>/...`).
+- When in doubt, run the `/publish-check` privacy scan over the diff before pushing.
+
 ## Project Overview
 
 **cc-dash** is a local Next.js web dashboard that aggregates `ROADMAP.md` and `SESSION_PROGRESS.md` files across 20+ projects into a single Kanban/CRUD interface. All project state lives in markdown files; the dashboard is a lens, not a database.

@@ -1,5 +1,7 @@
 # cc-dash
 
+> 🌐 **PUBLIC repository** — hosted publicly on GitHub. Scrub PII and secrets before every commit.
+
 A local dashboard and **Model Context Protocol server** for managing a multi-project
 portfolio whose entire state lives in markdown files.
 

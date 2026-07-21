@@ -126,7 +126,7 @@ describe("ProjectCanvas", () => {
   });
 
   it("each card links to the project roadmap", () => {
-    const projects = [makeProject({ slug: "alpha-app", name: "Vlak" })];
+    const projects = [makeProject({ slug: "alpha-app", name: "Alpha App" })];
     render(<ProjectCanvas projects={projects} />);
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/project/alpha-app/roadmap");

@@ -163,7 +163,7 @@ ${recommendedDispatch || "  (no recommendations to dispatch)"}
 4. For each session listed above, write a bullet under "Active sessions to advance" with the project name and current working-on line.
 5. Under "QA items to run today", include the QA items above using the exact \`<!-- ref:q_xxxxx slug:project -->\` marker format. Add others if you read state that suggests today's bandwidth is larger.
 6. Refine the concurrent dispatch plan: each \`cd ... && claude -p "..."\` line should target the recommended repo with a tight, concrete prompt scoped to that repo's next action — not a vague "make progress" string.
-7. Keep "Notes" to 2-4 lines, focusing on priorities, blockers, or decisions the operator (Antonin) needs to make today.
+7. Keep "Notes" to 2-4 lines, focusing on priorities, blockers, or decisions the operator needs to make today.
 8. After writing, print the file path and a one-line summary; do not dispatch the subagents yourself — the operator runs the bash block manually.
 `;
 }

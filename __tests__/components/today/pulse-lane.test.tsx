@@ -110,7 +110,7 @@ describe("PulseLane", () => {
   });
 
   it("links each row to the project's roadmap by default", () => {
-    const project = makeProject({ slug: "alpha-app", name: "Vlak" });
+    const project = makeProject({ slug: "alpha-app", name: "Alpha App" });
     render(
       <PulseLane
         title="t"
@@ -121,7 +121,7 @@ describe("PulseLane", () => {
         emptyMessage="empty"
       />,
     );
-    const link = screen.getByRole("link", { name: /Vlak/ });
+    const link = screen.getByRole("link", { name: /Alpha App/ });
     expect(link).toHaveAttribute("href", "/project/alpha-app/roadmap");
   });
 });
